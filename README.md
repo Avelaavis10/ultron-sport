@@ -44,3 +44,50 @@ The prototype covers mobile app flows for onboarding, profile setup, home feed, 
 The recommended production direction is a mobile app backed by a web portal and modular backend services. The architecture should support secure media upload, verification, search, ranking, notifications, analytics, and future AI analysis.
 
 The current MVP documentation prioritizes credibility, ranking fairness, privacy, and practical phased delivery over premature complexity.
+
+## Backend MVP Stack
+
+- Language: Java 17+
+- Framework: Spring Boot 3
+- API style: REST with JSON
+- Persistence: Spring Data JPA
+- Default local database: H2 in memory
+- Production database target: PostgreSQL
+- Build tool: Maven
+
+## Run the Backend
+
+Prerequisites:
+
+- JDK 17 or newer
+- Maven 3.9 or newer
+
+Start the API locally with the default H2 database:
+
+```powershell
+mvn spring-boot:run
+```
+
+Run the automated tests:
+
+```powershell
+mvn test
+```
+
+Run with PostgreSQL:
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE="postgres"
+$env:DATABASE_URL="jdbc:postgresql://localhost:5432/ultron_sport"
+$env:DATABASE_USERNAME="ultron"
+$env:DATABASE_PASSWORD="ultron"
+mvn spring-boot:run
+```
+
+The initial API base path is:
+
+```text
+http://localhost:8080/api/v1
+```
+
+The MVP backend is intentionally a modular monolith. It separates domain, repositories, services, controllers, DTOs, security configuration, and error handling so the codebase can later evolve toward microservices.

@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: ultron-sport-backend
+  datasource:
+    url: jdbc:h2:mem:ultronsport;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/ultron_sport}
+    username: ${DATABASE_USERNAME:ultron}
+    password: ${DATABASE_PASSWORD:ultron}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate

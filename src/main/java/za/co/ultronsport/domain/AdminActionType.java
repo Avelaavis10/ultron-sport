@@ -1,0 +1,14 @@
+package za.co.ultronsport.domain;
+
+public enum AdminActionType {
+    USER_APPROVED,
+    USER_SUSPENDED,
+    USER_REINSTATED,
+    EVIDENCE_FLAGGED,
+    EVIDENCE_REMOVED,
+    VERIFIER_APPROVED,
+    VERIFIER_REJECTED,
+    ROLE_CHANGED,
+    PRIVACY_REQUEST_HANDLED,
+    OTHER
+}
