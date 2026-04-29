@@ -4,10 +4,17 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "athlete_profiles")
+@Table(name = "athlete_profiles", indexes = {
+        @Index(name = "idx_athlete_profiles_sport", columnList = "sport"),
+        @Index(name = "idx_athlete_profiles_position", columnList = "position"),
+        @Index(name = "idx_athlete_profiles_location", columnList = "location"),
+        @Index(name = "idx_athlete_profiles_organisation_id", columnList = "organisation_id"),
+        @Index(name = "idx_athlete_profiles_updated_at", columnList = "updated_at")
+})
 public class AthleteProfile extends BaseEntity {
 
     @Column(nullable = false, unique = true)
@@ -25,6 +32,7 @@ public class AthleteProfile extends BaseEntity {
     private String gender;
     private String location;
     private String schoolOrClub;
+    private Long organisationId;
 
     @Column(length = 1200)
     private String bio;
@@ -104,6 +112,10 @@ public class AthleteProfile extends BaseEntity {
 
     public String getSchoolOrClub() {
         return schoolOrClub;
+    }
+
+    public Long getOrganisationId() {
+        return organisationId;
     }
 
     public String getBio() {

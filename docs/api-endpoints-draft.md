@@ -18,6 +18,12 @@ Evidence workflow base path:
 /api/evidence
 ```
 
+Discovery base path:
+
+```text
+/api/discovery
+```
+
 ## Authentication
 
 | Method | Path | Access | Purpose |
@@ -95,6 +101,24 @@ Evidence workflow base path:
 | GET | `/levelplay-scores/athlete/{athleteProfileId}` | Authenticated | Get or create placeholder score |
 | POST | `/levelplay-scores/athlete/{athleteProfileId}/refresh` | Authenticated | Refresh placeholder score from current MVP data |
 
+## Discovery
+
+| Method | Path | Access | Purpose |
+| --- | --- | --- | --- |
+| GET | `/athletes` | Authenticated | Search athlete discovery cards with role-aware evidence visibility |
+| GET | `/athletes/{athleteProfileId}` | Authenticated | View an athlete discovery profile with visible evidence and summaries |
+| GET | `/evidence` | Authenticated | Search evidence discovery cards with pagination and filters |
+
+Supported discovery filters:
+
+```text
+sport, position, location, organisationId, verificationStatus,
+minLevelPlayScore, maxLevelPlayScore, tier, hasVerifiedEvidence,
+keyword, page, size, sortBy, sortDirection
+```
+
+Defaults: `page=0`, `size=20`, `sortBy=updatedAt`, `sortDirection=DESC`. Maximum `size` is `50`.
+
 ## Admin Moderation
 
 | Method | Path | Access | Purpose |
@@ -109,3 +133,4 @@ Evidence workflow base path:
 - Protected endpoints require `Authorization: Bearer <accessToken>`.
 - Evidence currently accepts a `fileUrl` or `externalVideoLink`; binary file upload can be added later behind scanning and storage controls.
 - Evidence AI status defaults to `NOT_STARTED`; no AI service is called in the MVP workflow.
+- Discovery is relational database search for the MVP. Elasticsearch/OpenSearch, caching, vector search, and recommendation ranking are future work.

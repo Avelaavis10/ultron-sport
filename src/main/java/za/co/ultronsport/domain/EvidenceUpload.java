@@ -4,11 +4,20 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "evidence_uploads")
+@Table(name = "evidence_uploads", indexes = {
+        @Index(name = "idx_evidence_athlete_profile", columnList = "athlete_profile_id"),
+        @Index(name = "idx_evidence_status", columnList = "verification_status"),
+        @Index(name = "idx_evidence_sport", columnList = "sport"),
+        @Index(name = "idx_evidence_position", columnList = "position"),
+        @Index(name = "idx_evidence_event_date", columnList = "event_date"),
+        @Index(name = "idx_evidence_created_at", columnList = "created_at"),
+        @Index(name = "idx_evidence_updated_at", columnList = "updated_at")
+})
 public class EvidenceUpload extends BaseEntity {
 
     @Column(nullable = false)

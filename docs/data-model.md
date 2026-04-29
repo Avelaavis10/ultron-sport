@@ -28,6 +28,7 @@ The data model should capture users, profiles, institutions, evidence, verificat
 - gender
 - location
 - school_or_club
+- organisation_id
 - bio
 - achievements
 - privacy_settings
@@ -173,6 +174,7 @@ The data model should capture users, profiles, institutions, evidence, verificat
 
 - Unique indexes on email and phone where provided.
 - B-tree indexes on sport, location, age, gender, position_or_event, school_or_club, and tier.
+- MVP discovery indexes include athlete profile sport, position, location, organisation_id, updated_at, and evidence sport, position, verification_status, event_date, athlete_profile_id, created_at, and updated_at.
 - Foreign-key indexes on user_id, athlete_user_id, evidence_id, institution_id, and verifier_user_id.
 - Search index for athlete names, bios, achievements, sports, schools, and locations.
 - Cache frequently accessed ranking lists and session lookups.

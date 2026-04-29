@@ -37,12 +37,13 @@ za.co.ultronsport
 - Organisation, school, and club records
 - Evidence upload/link submission with structured metadata, draft/submission lifecycle, and AI-ready status
 - Evidence verification workflow for coach approval/rejection and admin flag/archive moderation
-- Athlete search and filtering foundation
+- Athlete search and discovery using verified evidence and basic profile filters
 - LevelPlay credibility score placeholder
 - Admin action log and moderation foundation
 - Global validation and API error handling
 - Service unit tests and JPA repository integration test
 - MockMvc security integration tests for JWT and role-protected endpoints
+- Discovery service tests and MockMvc tests for role-aware search visibility
 
 ## Security Flow
 
@@ -76,6 +77,18 @@ Evidence is implemented as a secured MVP workflow behind `/api/evidence`.
 - Scouts and organisations can read VERIFIED evidence only.
 
 The current media strategy stores `fileUrl` or `externalVideoLink` placeholders. AI readiness is represented by `AiAnalysisStatus`, which defaults to `NOT_STARTED`; no model or AI service is invoked yet.
+
+## Discovery Workflow
+
+Discovery is implemented behind `/api/discovery` with authenticated access only.
+
+- SCOUT_AGENT and ORGANISATION users see athletes and evidence backed by VERIFIED evidence only.
+- ATHLETE users can search public/verified athlete profiles and evidence.
+- COACH users can see VERIFIED evidence and PENDING_VERIFICATION evidence relevant to verification.
+- ADMIN users can search all athlete profiles and filter all evidence statuses.
+- Search uses Spring Data JPA Specifications, pagination, and database indexes for MVP-scale efficiency.
+
+Future discovery work can move high-volume search into OpenSearch/Elasticsearch, add caching, and layer recommendation signals without changing the core domain model.
 
 ## Evolution Path
 

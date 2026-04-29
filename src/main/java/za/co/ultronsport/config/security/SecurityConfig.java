@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/evidence/*/archive").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/evidence/*/verification-history").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/evidence/*").authenticated()
+                        .requestMatchers("/api/discovery/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/athlete-profiles")
                         .hasAnyRole("SCOUT_AGENT", "ADMIN", "COACH", "ORGANISATION")
                         .requestMatchers(HttpMethod.POST, "/api/v1/athlete-profiles").hasRole("ATHLETE")
