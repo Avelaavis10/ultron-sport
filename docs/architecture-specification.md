@@ -55,13 +55,13 @@ Ultron Sport should be implemented as a mobile-first application supported by a 
 ## Evidence Lifecycle
 
 ```text
-Draft -> Submitted -> Pending Verification -> Verified -> Ranked
-                          |                       |
-                          v                       v
-                       Rejected                Archived
-                          |
-                          v
-                        Flagged -> Admin Review -> Verified/Rejected/Archived
+Draft -> Pending Verification -> Verified
+             |                  |
+             v                  v
+          Rejected           Archived
+             |
+             v
+           Flagged -> Admin Review -> Verified/Rejected/Archived
 ```
 
 ## Deployment Direction

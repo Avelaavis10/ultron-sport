@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import za.co.ultronsport.common.error.InvalidStateException;
 import za.co.ultronsport.domain.EvidenceContext;
-import za.co.ultronsport.domain.EvidenceType;
 import za.co.ultronsport.domain.EvidenceUpload;
 import za.co.ultronsport.domain.VerificationRequest;
 import za.co.ultronsport.domain.VerificationStatus;
@@ -37,8 +36,9 @@ class VerificationRequestServiceImplTest {
     @Test
     void createStoresPendingVerificationRequest() {
         CreateVerificationRequest request = new CreateVerificationRequest(10L, 1L, 2L);
-        EvidenceUpload evidence = EvidenceUpload.create(1L, 2L, EvidenceType.VIDEO, "Football", "Striker",
-                "Goal", java.time.LocalDate.now(), EvidenceContext.MATCH, "https://file", null, null);
+        EvidenceUpload evidence = EvidenceUpload.createDraft(1L, 2L, "Goal", "Cup final goal",
+                "Football", "Striker", "Match highlight", EvidenceContext.MATCH, java.time.LocalDate.now(),
+                "https://file", null);
         when(evidenceUploadService.getById(10L)).thenReturn(evidence);
         when(verificationRequestRepository.save(any(VerificationRequest.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));

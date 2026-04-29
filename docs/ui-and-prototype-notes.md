@@ -29,7 +29,7 @@ The current MVP mockups include:
 - Keep onboarding short and role-specific.
 - Show clear progress during profile setup.
 - Make evidence upload simple on mobile.
-- Always show evidence status: draft, pending, verified, rejected, flagged, ranked, or archived.
+- Always show evidence status: draft, pending verification, verified, rejected, flagged, or archived.
 - Make LevelPlay Rank explainable on athlete profiles.
 - Keep recruiter search dense, scannable, and filter-driven.
 - Give coaches fast approve, reject, flag, and comment actions.

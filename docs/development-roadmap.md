@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -18,13 +18,14 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 
 ## Phase 2: Complete Core Workflows
 
-- Implement evidence upload/link submission and verification workflow using secured role gates.
+- Completed: implement evidence upload/link submission and verification workflow using secured role gates.
 - Add profile update endpoints.
 - Add organisation roster relationships.
 - Add coach/institution approval workflows.
 - Add verification queues for coaches and administrators.
 - Add admin moderation queue for flagged evidence.
 - Add audit logging across verification and admin actions.
+- Implement athlete search and discovery using VERIFIED evidence and basic profile filters.
 - Add search pagination and sorting.
 
 ## Phase 3: Evidence Storage

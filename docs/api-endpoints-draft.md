@@ -12,6 +12,12 @@ Authentication base path:
 /api/auth
 ```
 
+Evidence workflow base path:
+
+```text
+/api/evidence
+```
+
 ## Authentication
 
 | Method | Path | Access | Purpose |
@@ -53,9 +59,17 @@ Authentication base path:
 
 | Method | Path | Access | Purpose |
 | --- | --- | --- | --- |
-| POST | `/evidence` | ATHLETE | Submit evidence metadata with file URL or external link |
-| GET | `/evidence/{id}` | Authenticated | Get evidence |
-| GET | `/evidence/athlete/{athleteProfileId}` | Authenticated | List evidence for athlete profile |
+| POST | `/` | ATHLETE | Create DRAFT evidence metadata with `fileUrl` or `externalVideoLink` |
+| GET | `/{id}` | Owner ATHLETE, COACH for pending, ADMIN, SCOUT_AGENT/ORGANISATION for VERIFIED | Get evidence by visibility rules |
+| GET | `/my` | ATHLETE | List evidence owned by the current athlete |
+| PATCH | `/{id}` | ATHLETE | Update own evidence only while DRAFT or REJECTED |
+| POST | `/{id}/submit` | ATHLETE | Move DRAFT or REJECTED evidence to PENDING_VERIFICATION |
+| GET | `/pending-verification` | COACH, ADMIN | List evidence awaiting verification |
+| POST | `/{id}/verify` | COACH | Mark pending evidence as VERIFIED |
+| POST | `/{id}/reject` | COACH | Reject pending evidence with a required reason |
+| POST | `/{id}/flag` | ADMIN | Flag evidence with a required reason |
+| POST | `/{id}/archive` | ADMIN | Archive evidence |
+| GET | `/{id}/verification-history` | ADMIN | View simple verification history |
 
 ## Verification Requests
 
@@ -93,4 +107,5 @@ Authentication base path:
 - Request DTOs use validation annotations.
 - Response DTOs avoid exposing password hashes.
 - Protected endpoints require `Authorization: Bearer <accessToken>`.
-- Evidence currently accepts a file URL or external link; binary file upload can be added later behind scanning and storage controls.
+- Evidence currently accepts a `fileUrl` or `externalVideoLink`; binary file upload can be added later behind scanning and storage controls.
+- Evidence AI status defaults to `NOT_STARTED`; no AI service is called in the MVP workflow.

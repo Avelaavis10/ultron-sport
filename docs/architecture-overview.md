@@ -35,8 +35,8 @@ za.co.ultronsport
 - Athlete profile management
 - Coach profile verification support
 - Organisation, school, and club records
-- Evidence upload/link submission with structured metadata
-- Evidence verification request workflow
+- Evidence upload/link submission with structured metadata, draft/submission lifecycle, and AI-ready status
+- Evidence verification workflow for coach approval/rejection and admin flag/archive moderation
 - Athlete search and filtering foundation
 - LevelPlay credibility score placeholder
 - Admin action log and moderation foundation
@@ -63,6 +63,19 @@ JWT settings are read from `security.jwt.*` configuration. Local defaults exist 
 - Repositories are persistence adapters.
 - Security is enforced at the HTTP boundary, while services remain the place for use-case and workflow rules.
 - Future security work includes refresh tokens, password reset, account lockout, rate limiting, MFA, OAuth/social login, and POPIA privacy controls.
+
+## Evidence Workflow
+
+Evidence is implemented as a secured MVP workflow behind `/api/evidence`.
+
+- Athletes create DRAFT evidence against their own athlete profile.
+- Athletes may update only DRAFT or REJECTED evidence.
+- Submitting evidence moves it to PENDING_VERIFICATION.
+- Coaches can view pending evidence, then verify or reject it.
+- Admins can view all evidence, flag evidence, archive evidence, and inspect simple verification history.
+- Scouts and organisations can read VERIFIED evidence only.
+
+The current media strategy stores `fileUrl` or `externalVideoLink` placeholders. AI readiness is represented by `AiAnalysisStatus`, which defaults to `NOT_STARTED`; no model or AI service is invoked yet.
 
 ## Evolution Path
 

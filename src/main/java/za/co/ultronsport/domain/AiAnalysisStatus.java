@@ -1,8 +1,8 @@
 package za.co.ultronsport.domain;
 
 public enum AiAnalysisStatus {
-    NOT_REQUESTED,
-    PENDING,
+    NOT_STARTED,
+    QUEUED,
     PROCESSING,
     COMPLETED,
     FAILED

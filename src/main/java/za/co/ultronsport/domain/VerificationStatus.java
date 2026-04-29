@@ -7,6 +7,5 @@ public enum VerificationStatus {
     VERIFIED,
     REJECTED,
     FLAGGED,
-    RANKED,
     ARCHIVED
 }

@@ -167,7 +167,6 @@ The data model should capture users, profiles, institutions, evidence, verificat
 - verified
 - rejected
 - flagged
-- ranked
 - archived
 
 ## Indexing Recommendations

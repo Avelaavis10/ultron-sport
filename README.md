@@ -104,10 +104,18 @@ Authentication endpoints are exposed at:
 http://localhost:8080/api/auth
 ```
 
+Evidence workflow endpoints are exposed at:
+
+```text
+http://localhost:8080/api/evidence
+```
+
 Use `POST /api/auth/register` or `POST /api/auth/login` to receive a bearer token, then call protected endpoints with:
 
 ```text
 Authorization: Bearer <accessToken>
 ```
+
+For the MVP, evidence uses `fileUrl` or `externalVideoLink` placeholders. Direct file upload, object storage, CDN delivery, malware scanning, and AI analysis jobs are intentionally deferred.
 
 The MVP backend is intentionally a modular monolith. It separates domain, repositories, services, controllers, DTOs, security configuration, and error handling so the codebase can later evolve toward microservices.

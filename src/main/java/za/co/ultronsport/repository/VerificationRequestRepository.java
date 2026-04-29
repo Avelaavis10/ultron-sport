@@ -8,5 +8,7 @@ import za.co.ultronsport.domain.VerificationStatus;
 public interface VerificationRequestRepository extends JpaRepository<VerificationRequest, Long> {
     List<VerificationRequest> findByVerifierUserIdAndStatus(Long verifierUserId, VerificationStatus status);
 
+    List<VerificationRequest> findByEvidenceUploadIdOrderByCreatedAtDesc(Long evidenceUploadId);
+
     long countByEvidenceUploadIdAndStatus(Long evidenceUploadId, VerificationStatus status);
 }

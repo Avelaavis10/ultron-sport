@@ -8,5 +8,9 @@ import za.co.ultronsport.domain.VerificationStatus;
 public interface EvidenceUploadRepository extends JpaRepository<EvidenceUpload, Long> {
     List<EvidenceUpload> findByAthleteProfileId(Long athleteProfileId);
 
+    List<EvidenceUpload> findByAthleteProfileIdOrderByCreatedAtDesc(Long athleteProfileId);
+
+    List<EvidenceUpload> findByVerificationStatusOrderByCreatedAtDesc(VerificationStatus status);
+
     long countByAthleteProfileIdAndVerificationStatus(Long athleteProfileId, VerificationStatus status);
 }
