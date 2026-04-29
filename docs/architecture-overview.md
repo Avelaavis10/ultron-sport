@@ -6,7 +6,7 @@
 - Spring Boot 3
 - Spring Web for REST APIs
 - Spring Data JPA for persistence
-- Spring Security foundation for future JWT and RBAC
+- Spring Security with BCrypt password hashing, JWT bearer tokens, and RBAC
 - PostgreSQL target database, with H2 for local development and tests
 - Maven for builds and tests
 
@@ -19,7 +19,7 @@ Ultron Sport starts as a modular monolith. This keeps the MVP simple to develop 
 ```text
 za.co.ultronsport
   common/error        Shared API error handling
-  config/security    Security placeholders and password hashing bean
+  config/security    JWT config, token service, request filter, user details service, RBAC rules
   domain             Entities, enums, and domain state transitions
   repository         Spring Data repository interfaces
   service            Service interfaces
@@ -30,7 +30,7 @@ za.co.ultronsport
 
 ## Current MVP Modules
 
-- Authentication and role-ready user registration
+- Authentication with registration, login, JWT validation, and current-user lookup
 - User and role foundation
 - Athlete profile management
 - Coach profile verification support
@@ -42,6 +42,17 @@ za.co.ultronsport
 - Admin action log and moderation foundation
 - Global validation and API error handling
 - Service unit tests and JPA repository integration test
+- MockMvc security integration tests for JWT and role-protected endpoints
+
+## Security Flow
+
+1. Public clients register or log in through `/api/auth/register` and `/api/auth/login`.
+2. Passwords are stored with BCrypt hashes only.
+3. Successful authentication returns a short-lived JWT bearer token.
+4. `JwtAuthenticationFilter` validates bearer tokens before protected requests reach controllers.
+5. `SecurityConfig` applies role rules for ATHLETE, COACH, ORGANISATION, SCOUT_AGENT, and ADMIN endpoints.
+
+JWT settings are read from `security.jwt.*` configuration. Local defaults exist for development, but deployed environments must override `ULTRON_JWT_SECRET`.
 
 ## Design Rules
 
@@ -50,7 +61,8 @@ za.co.ultronsport
 - Domain entities hold simple state transitions.
 - DTOs isolate API contracts from persistence models.
 - Repositories are persistence adapters.
-- Security is permissive for the starter, with TODOs for JWT, RBAC, rate limiting, and privacy controls.
+- Security is enforced at the HTTP boundary, while services remain the place for use-case and workflow rules.
+- Future security work includes refresh tokens, password reset, account lockout, rate limiting, MFA, OAuth/social login, and POPIA privacy controls.
 
 ## Evolution Path
 

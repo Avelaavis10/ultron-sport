@@ -29,6 +29,13 @@ management:
       exposure:
         include: health,info
 
+security:
+  jwt:
+    issuer: ultron-sport-local
+    # Local-development secret only. Override with ULTRON_JWT_SECRET in deployed environments.
+    secret: ${ULTRON_JWT_SECRET:local-dev-secret-change-before-production-32chars}
+    expiration-minutes: ${ULTRON_JWT_EXPIRATION_MINUTES:60}
+
 ---
 spring:
   config:

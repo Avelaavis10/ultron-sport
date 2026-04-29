@@ -1,8 +1,14 @@
 package za.co.ultronsport.service;
 
-import za.co.ultronsport.domain.User;
-import za.co.ultronsport.web.dto.RegisterUserRequest;
+import za.co.ultronsport.web.dto.AuthResponse;
+import za.co.ultronsport.web.dto.CurrentUserResponse;
+import za.co.ultronsport.web.dto.LoginRequest;
+import za.co.ultronsport.web.dto.RegisterRequest;
 
 public interface AuthenticationService {
-    User register(RegisterUserRequest request);
+    AuthResponse register(RegisterRequest request);
+
+    AuthResponse login(LoginRequest request);
+
+    CurrentUserResponse currentUser(String email);
 }

@@ -4,7 +4,7 @@ This file maps MVP requirements to the current code foundation. It should be upd
 
 | Requirement | Current implementation | Primary code areas | Test coverage |
 | --- | --- | --- | --- |
-| Authentication and RBAC foundation | Registration endpoint, password hashing bean, role enum, security config TODOs | `AuthController`, `AuthenticationServiceImpl`, `User`, `SecurityConfig` | `AuthenticationServiceImplTest` |
+| Authentication and RBAC foundation | Registration, login, current-user endpoint, BCrypt password hashing, JWT generation/validation, role-protected routes | `AuthController`, `AuthenticationServiceImpl`, `JwtService`, `JwtAuthenticationFilter`, `UltronUserDetailsService`, `SecurityConfig`, `User` | `AuthenticationServiceImplTest`, `AuthSecurityIntegrationTest` |
 | Athlete profile management | Create, retrieve, and search athlete profiles | `AthleteProfileController`, `AthleteProfileServiceImpl`, `AthleteProfile` | `AthleteProfileServiceImplTest`, `AthleteProfileRepositoryTest` |
 | Coach/profile verification support | Coach profile creation with certification reference and verification status | `CoachProfileController`, `CoachProfileServiceImpl`, `CoachProfile` | `CoachProfileServiceImplTest` |
 | Organisation/school/club records | Organisation creation and retrieval | `OrganisationController`, `OrganisationServiceImpl`, `Organisation` | `OrganisationServiceImplTest` |
@@ -18,8 +18,11 @@ This file maps MVP requirements to the current code foundation. It should be upd
 
 ## Known TODO Traceability
 
-- JWT authentication: `SecurityConfig`
-- Role-based access control: `SecurityConfig`, controller methods
+- Refresh tokens: future auth service work
+- Password reset: future auth service work
+- Email/phone verification: `AuthenticationServiceImpl`
+- Account lockout and MFA: future security service work
+- OAuth/social login: future identity integration
 - Audit logging expansion: `VerificationRequestController`, `AdminModerationController`
 - File upload scanning: `EvidenceUploadController`
 - Rate limiting: `SecurityConfig` or API gateway

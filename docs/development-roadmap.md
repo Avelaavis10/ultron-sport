@@ -2,21 +2,23 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, security placeholders, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
 - Add database migrations with Flyway or Liquibase.
-- Replace permissive security with JWT authentication.
-- Enforce role-based access at controller/service level.
-- Add login endpoint and token refresh flow.
-- Add integration tests for key controllers.
+- Completed: replace permissive security with JWT authentication.
+- Completed: enforce route-level role-based access control.
+- Completed: add registration, login, and current-user endpoints.
+- Completed: add integration tests for authentication and protected endpoints.
+- Add refresh token flow.
 - Add OpenAPI/Swagger documentation.
 - Add Docker Compose for PostgreSQL.
 - Add CI workflow for `mvn test`.
 
 ## Phase 2: Complete Core Workflows
 
+- Implement evidence upload/link submission and verification workflow using secured role gates.
 - Add profile update endpoints.
 - Add organisation roster relationships.
 - Add coach/institution approval workflows.

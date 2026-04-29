@@ -51,6 +51,7 @@ The current MVP documentation prioritizes credibility, ranking fairness, privacy
 - Framework: Spring Boot 3
 - API style: REST with JSON
 - Persistence: Spring Data JPA
+- Security: Spring Security, BCrypt password hashing, JWT bearer tokens
 - Default local database: H2 in memory
 - Production database target: PostgreSQL
 - Build tool: Maven
@@ -66,6 +67,13 @@ Start the API locally with the default H2 database:
 
 ```powershell
 mvn spring-boot:run
+```
+
+Optional local JWT overrides:
+
+```powershell
+$env:ULTRON_JWT_SECRET="replace-with-a-long-local-development-secret"
+$env:ULTRON_JWT_EXPIRATION_MINUTES="60"
 ```
 
 Run the automated tests:
@@ -88,6 +96,18 @@ The initial API base path is:
 
 ```text
 http://localhost:8080/api/v1
+```
+
+Authentication endpoints are exposed at:
+
+```text
+http://localhost:8080/api/auth
+```
+
+Use `POST /api/auth/register` or `POST /api/auth/login` to receive a bearer token, then call protected endpoints with:
+
+```text
+Authorization: Bearer <accessToken>
 ```
 
 The MVP backend is intentionally a modular monolith. It separates domain, repositories, services, controllers, DTOs, security configuration, and error handling so the codebase can later evolve toward microservices.
