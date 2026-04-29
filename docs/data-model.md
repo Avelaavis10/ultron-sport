@@ -145,13 +145,14 @@ The data model should capture users, profiles, institutions, evidence, verificat
 ### Audit Log
 
 - audit_id
-- actor_user_id
-- action
-- entity_type
-- entity_id
-- before_state
-- after_state
-- ip_address
+- admin_user_id
+- admin_email
+- admin_display_name
+- action_type
+- target_type
+- target_id
+- reason
+- details
 - created_at
 
 ## Relationships
@@ -164,6 +165,26 @@ The data model should capture users, profiles, institutions, evidence, verificat
 - Scouts and agents can create shortlists and offers.
 - Notifications belong to users.
 - Audit logs reference sensitive actions across the system.
+
+## Admin Action Values
+
+Current MVP action types include:
+
+- evidence_flagged
+- evidence_archived
+- levelplay_recalculated
+- levelplay_recalculate_all
+- moderation_note_created
+- user_viewed
+- user_status_changed
+
+Current target types include:
+
+- evidence
+- athlete_profile
+- user
+- levelplay_score
+- system
 
 ## Evidence Status Values
 
@@ -209,4 +230,5 @@ The current LevelPlayScore is one current record per athlete profile. It is inte
 - Store large files in object storage, not the relational database.
 - Record model versions for AI metrics.
 - Preserve audit trails for verification, ranking, moderation, and account changes.
+- Treat audit logs as append-only records through the application service/API surface.
 - Support user data export and deletion workflows.

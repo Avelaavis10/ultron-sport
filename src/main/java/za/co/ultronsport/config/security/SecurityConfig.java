@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info", "/h2-console/**").permitAll()
                         .requestMatchers("/api/auth/me").authenticated()
+                        .requestMatchers("/api/admin", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/evidence").hasRole("ATHLETE")
                         .requestMatchers(HttpMethod.GET, "/api/evidence/my").hasRole("ATHLETE")
                         .requestMatchers(HttpMethod.PATCH, "/api/evidence/*").hasRole("ATHLETE")

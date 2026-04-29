@@ -9,11 +9,15 @@ public interface LevelPlayScoreService {
 
     LevelPlayScore recalculateForAthlete(Long athleteProfileId);
 
+    LevelPlayScore recalculateForAthleteAsAdmin(Long athleteProfileId, Long adminUserId);
+
     LevelPlayScore getScoreForAthlete(Long athleteProfileId);
 
     LevelPlayScore getMyScore(Long currentUserId);
 
     List<LevelPlayScore> recalculateAllScores();
+
+    List<LevelPlayScore> recalculateAllScoresAsAdmin(Long adminUserId);
 
     LevelPlayScoreExplanationResponse explainScore(Long athleteProfileId);
 

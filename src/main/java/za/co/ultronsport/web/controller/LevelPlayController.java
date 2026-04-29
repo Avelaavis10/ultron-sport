@@ -34,13 +34,17 @@ public class LevelPlayController {
     }
 
     @PostMapping("/athletes/{athleteProfileId}/recalculate")
-    public LevelPlayScoreResponse recalculateAthleteScore(@PathVariable Long athleteProfileId) {
-        return LevelPlayScoreResponse.from(levelPlayScoreService.recalculateForAthlete(athleteProfileId));
+    public LevelPlayScoreResponse recalculateAthleteScore(@PathVariable Long athleteProfileId,
+                                                          Authentication authentication) {
+        SecurityUser currentUser = (SecurityUser) authentication.getPrincipal();
+        return LevelPlayScoreResponse.from(levelPlayScoreService.recalculateForAthleteAsAdmin(athleteProfileId,
+                currentUser.getId()));
     }
 
     @PostMapping("/recalculate-all")
-    public List<LevelPlayScoreResponse> recalculateAllScores() {
-        return levelPlayScoreService.recalculateAllScores().stream()
+    public List<LevelPlayScoreResponse> recalculateAllScores(Authentication authentication) {
+        SecurityUser currentUser = (SecurityUser) authentication.getPrincipal();
+        return levelPlayScoreService.recalculateAllScoresAsAdmin(currentUser.getId()).stream()
                 .map(LevelPlayScoreResponse::from)
                 .toList();
     }

@@ -4,6 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import za.co.ultronsport.common.error.ResourceNotFoundException;
+import za.co.ultronsport.domain.AdminActionType;
+import za.co.ultronsport.domain.AdminTargetType;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.LevelPlayScore;
 import za.co.ultronsport.domain.User;
@@ -14,6 +16,7 @@ import za.co.ultronsport.repository.EvidenceUploadRepository;
 import za.co.ultronsport.repository.LevelPlayScoreRepository;
 import za.co.ultronsport.repository.UserRepository;
 import za.co.ultronsport.repository.VerificationRequestRepository;
+import za.co.ultronsport.service.AdminActionLogService;
 import za.co.ultronsport.service.LevelPlayScoreService;
 import za.co.ultronsport.web.dto.LevelPlayScoreExplanationResponse;
 
@@ -26,19 +29,22 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
     private final AchievementRepository achievementRepository;
     private final VerificationRequestRepository verificationRequestRepository;
     private final UserRepository userRepository;
+    private final AdminActionLogService adminActionLogService;
 
     public LevelPlayScoreServiceImpl(LevelPlayScoreRepository levelPlayScoreRepository,
                                      AthleteProfileRepository athleteProfileRepository,
                                      EvidenceUploadRepository evidenceUploadRepository,
                                      AchievementRepository achievementRepository,
                                      VerificationRequestRepository verificationRequestRepository,
-                                     UserRepository userRepository) {
+                                     UserRepository userRepository,
+                                     AdminActionLogService adminActionLogService) {
         this.levelPlayScoreRepository = levelPlayScoreRepository;
         this.athleteProfileRepository = athleteProfileRepository;
         this.evidenceUploadRepository = evidenceUploadRepository;
         this.achievementRepository = achievementRepository;
         this.verificationRequestRepository = verificationRequestRepository;
         this.userRepository = userRepository;
+        this.adminActionLogService = adminActionLogService;
     }
 
     @Override
@@ -66,6 +72,17 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
 
     @Override
     @Transactional
+    public LevelPlayScore recalculateForAthleteAsAdmin(Long athleteProfileId, Long adminUserId) {
+        LevelPlayScore score = recalculateForAthlete(athleteProfileId);
+        adminActionLogService.log(adminUserId, AdminActionType.LEVELPLAY_RECALCULATED,
+                AdminTargetType.LEVELPLAY_SCORE, score.getId(), null,
+                "athleteProfileId=" + athleteProfileId + ", finalCredibilityScore="
+                        + score.getFinalCredibilityScore());
+        return score;
+    }
+
+    @Override
+    @Transactional
     public LevelPlayScore getScoreForAthlete(Long athleteProfileId) {
         athleteProfileRepository.findById(athleteProfileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Athlete profile not found: " + athleteProfileId));
@@ -87,6 +104,15 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
         return athleteProfileRepository.findAll().stream()
                 .map(profile -> recalculateForAthlete(profile.getId()))
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<LevelPlayScore> recalculateAllScoresAsAdmin(Long adminUserId) {
+        List<LevelPlayScore> scores = recalculateAllScores();
+        adminActionLogService.log(adminUserId, AdminActionType.LEVELPLAY_RECALCULATE_ALL,
+                AdminTargetType.SYSTEM, 0L, null, "recalculatedAthleteCount=" + scores.size());
+        return scores;
     }
 
     @Override

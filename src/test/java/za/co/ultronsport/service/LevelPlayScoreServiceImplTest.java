@@ -2,17 +2,22 @@ package za.co.ultronsport.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import za.co.ultronsport.domain.AthleteProfile;
+import za.co.ultronsport.domain.AdminActionType;
+import za.co.ultronsport.domain.AdminTargetType;
 import za.co.ultronsport.domain.LevelPlayScore;
 import za.co.ultronsport.domain.LevelPlayTier;
 import za.co.ultronsport.domain.User;
@@ -47,6 +52,9 @@ class LevelPlayScoreServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AdminActionLogService adminActionLogService;
 
     @InjectMocks
     private LevelPlayScoreServiceImpl levelPlayScoreService;
@@ -172,6 +180,31 @@ class LevelPlayScoreServiceImplTest {
         assertThat(explanation.finalCredibilityScore()).isEqualTo(80);
         assertThat(explanation.tier()).isEqualTo(LevelPlayTier.ELITE);
         assertThat(explanation.explanationText()).contains("Popularity");
+    }
+
+    @Test
+    void adminActionLogIsCreatedWhenOneLevelPlayScoreIsRecalculatedByAdmin() {
+        givenScoreInputs(9L, completeProfile(), 1, 0, 0, Optional.empty());
+
+        LevelPlayScore score = levelPlayScoreService.recalculateForAthleteAsAdmin(9L, 99L);
+
+        assertThat(score.getFinalCredibilityScore()).isEqualTo(40);
+        verify(adminActionLogService).log(eq(99L), eq(AdminActionType.LEVELPLAY_RECALCULATED),
+                eq(AdminTargetType.LEVELPLAY_SCORE), any(), any(), any());
+    }
+
+    @Test
+    void adminActionLogIsCreatedWhenAllLevelPlayScoresAreRecalculatedByAdmin() {
+        AthleteProfile profile = completeProfile();
+        ReflectionTestUtils.setField(profile, "id", 1L);
+        when(athleteProfileRepository.findAll()).thenReturn(List.of(profile));
+        givenScoreInputs(1L, profile, 1, 0, 0, Optional.empty());
+
+        List<LevelPlayScore> scores = levelPlayScoreService.recalculateAllScoresAsAdmin(99L);
+
+        assertThat(scores).hasSize(1);
+        verify(adminActionLogService).log(eq(99L), eq(AdminActionType.LEVELPLAY_RECALCULATE_ALL),
+                eq(AdminTargetType.SYSTEM), eq(0L), any(), any());
     }
 
     private LevelPlayScore recalculate(Long athleteProfileId, int evidenceCount, int achievementCount,

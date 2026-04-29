@@ -30,6 +30,12 @@ LevelPlay base path:
 /api/levelplay
 ```
 
+Admin base path:
+
+```text
+/api/admin
+```
+
 ## Authentication
 
 | Method | Path | Access | Purpose |
@@ -134,8 +140,22 @@ Defaults: `page=0`, `size=20`, `sortBy=updatedAt`, `sortDirection=DESC`. Maximum
 
 | Method | Path | Access | Purpose |
 | --- | --- | --- | --- |
-| POST | `/admin/actions` | ADMIN | Log admin/moderation action |
-| GET | `/admin/actions/admin/{adminUserId}` | ADMIN | List actions performed by admin |
+| GET | `/audit-logs` | ADMIN | Search paginated audit logs with filters |
+| GET | `/audit-logs/{id}` | ADMIN | Get one audit log |
+| GET | `/audit-logs/target/{targetType}/{targetId}` | ADMIN | List logs for a specific target |
+| GET | `/moderation/evidence/flagged` | ADMIN | List flagged evidence |
+| GET | `/moderation/evidence/archived` | ADMIN | List archived evidence |
+| POST | `/moderation/evidence/{evidenceId}/note` | ADMIN | Add an append-only moderation note |
+| GET | `/moderation/summary` | ADMIN | Return MVP moderation counts |
+
+Supported audit log filters:
+
+```text
+actionType, targetType, targetId, adminUserId, fromDate, toDate,
+page, size, sortBy, sortDirection
+```
+
+Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum `size` is `50`.
 
 ## API Contract Notes
 
@@ -146,3 +166,4 @@ Defaults: `page=0`, `size=20`, `sortBy=updatedAt`, `sortDirection=DESC`. Maximum
 - Evidence AI status defaults to `NOT_STARTED`; no AI service is called in the MVP workflow.
 - Discovery is relational database search for the MVP. Elasticsearch/OpenSearch, caching, vector search, and recommendation ranking are future work.
 - LevelPlay Rank uses verified evidence, achievements, coach verification count, and profile completeness only. Popularity, fan votes, views, likes, paid boosts, and AI scoring are not part of the MVP formula.
+- Audit logs are append-only through the service/API surface. Delete and edit endpoints are intentionally not provided.

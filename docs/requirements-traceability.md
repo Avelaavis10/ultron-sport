@@ -21,10 +21,13 @@ This file maps MVP requirements to the current code foundation. It should be upd
 | Athlete search and filtering | Search foundation supports sport, location, and position filters | `AthleteProfileController`, `AthleteProfileServiceImpl` | `AthleteProfileServiceImplTest` |
 | UR-05 / FR-05 AI analysis readiness | LevelPlay remains AI-ready through structured evidence metadata and explicit exclusion of AI scoring from the MVP formula | `EvidenceUpload`, `AiAnalysisStatus`, `LevelPlayScoreServiceImpl`, `LevelPlayScoreExplanationResponse` | `EvidenceServiceImplTest`, `LevelPlayScoreServiceImplTest` |
 | FR-06 LevelPlay Rank | Score calculates verified evidence, achievements, coach verification count, profile completeness contribution, final credibility score, and tier | `LevelPlayController`, `LevelPlayScoreController`, `LevelPlayScoreServiceImpl`, `LevelPlayScore`, `LevelPlayScoreResponse` | `LevelPlayScoreServiceImplTest`, `LevelPlayIntegrationTest` |
+| UR-10 / FR-11 Administration & analytics | ADMIN users can search audit logs, view flagged/archived evidence, create moderation notes, and view moderation counts | `AdminModerationController`, `AdminModerationServiceImpl`, `AdminActionLogServiceImpl`, `AdminActionLogRepository` | `AdminActionLogServiceImplTest`, `AdminModerationServiceImplTest`, `AdminModerationIntegrationTest` |
+| UR-12 Compliance & ethics | Admin/moderation actions are recorded as append-only audit logs with typed action/target metadata and no exposed sensitive auth fields | `AdminActionLog`, `AdminActionType`, `AdminTargetType`, `AdminActionLogResponse` | `AdminActionLogServiceImplTest`, `AdminModerationIntegrationTest` |
+| Auditability of evidence moderation | Evidence flag/archive actions create durable AdminActionLog records | `EvidenceServiceImpl`, `AdminActionLogServiceImpl` | `EvidenceServiceImplTest`, `AdminModerationIntegrationTest` |
+| Auditability of LevelPlay admin actions | Admin LevelPlay recalculation actions create durable AdminActionLog records | `LevelPlayController`, `LevelPlayScoreServiceImpl`, `AdminActionLogServiceImpl` | `LevelPlayScoreServiceImplTest`, `AdminModerationIntegrationTest` |
 | Explainability/fairness non-functional requirement | Score explanation exposes the inputs and confirms popularity, fan votes, views, likes, paid boosts, and AI scoring are excluded | `LevelPlayScoreExplanationResponse`, `LevelPlayController` | `LevelPlayScoreServiceImplTest`, `LevelPlayIntegrationTest` |
 | LevelPlay integration with evidence workflow | Coach verification automatically recalculates the athlete score | `EvidenceServiceImpl`, `LevelPlayScoreServiceImpl`, `VerificationRequestRepository` | `EvidenceServiceImplTest`, `LevelPlayIntegrationTest` |
-| Admin moderation foundation | Admin action log endpoint and entity | `AdminModerationController`, `AdminActionLogServiceImpl`, `AdminActionLog` | `AdminActionLogServiceImplTest` |
-| Audit logging foundation | Admin action log exists; verification/admin TODOs remain | `AdminActionLog`, `AdminModerationController` | `AdminActionLogServiceImplTest` |
+| Security/dependability/maintainability non-functional requirements | `/api/admin/**` requires ADMIN role; audit logs use DTOs, pagination, bounded page size, and reusable services | `SecurityConfig`, `AdminActionLogSearchCriteria`, `PageResponse`, `AdminModerationController` | `AdminActionLogServiceImplTest`, `AdminModerationIntegrationTest` |
 | Testing structure | Maven test setup with unit and repository integration tests | `src/test/java` | `mvn test` |
 
 ## Known TODO Traceability
@@ -34,7 +37,7 @@ This file maps MVP requirements to the current code foundation. It should be upd
 - Email/phone verification: `AuthenticationServiceImpl`
 - Account lockout and MFA: future security service work
 - OAuth/social login: future identity integration
-- Audit logging expansion: `VerificationRequestController`, `AdminModerationController`
+- Audit logging expansion: add richer user moderation events, verification history view policy, request IP/user agent, and immutable database constraints
 - File upload scanning: `EvidenceController`
 - Object storage/CDN integration: future evidence storage service
 - AI analysis job dispatch: future AI analysis service

@@ -39,12 +39,13 @@ za.co.ultronsport
 - Evidence verification workflow for coach approval/rejection and admin flag/archive moderation
 - Athlete search and discovery using verified evidence and basic profile filters
 - LevelPlay credibility score calculation with transparent MVP score explanation
-- Admin action log and moderation foundation
+- Admin moderation and append-only audit logging foundation
 - Global validation and API error handling
 - Service unit tests and JPA repository integration test
 - MockMvc security integration tests for JWT and role-protected endpoints
 - Discovery service tests and MockMvc tests for role-aware search visibility
 - LevelPlay service and MockMvc tests for scoring, recalculation, explanation, and endpoint access control
+- Admin moderation/audit service and MockMvc tests for audit visibility, flagged/archived evidence, notes, and role access
 
 ## Security Flow
 
@@ -103,6 +104,19 @@ LevelPlay is implemented behind `/api/levelplay` as a simple, explainable credib
 - The explanation endpoint returns the stored input counts, component scores, final score, tier, and a fairness note.
 
 The MVP formula uses verified evidence count, achievement count, coach verification count, and profile completeness. It does not use likes, views, fan votes, popularity, paid boosts, or AI scoring. Future work can add score history, formula versioning, category leaderboards, and AI-assisted analysis after fairness review.
+
+## Admin Moderation And Audit Workflow
+
+Admin moderation is implemented behind `/api/admin` with ADMIN-only access.
+
+- Evidence flag and archive actions create AdminActionLog records.
+- Admin LevelPlay recalculation creates AdminActionLog records.
+- Moderation notes are stored as AdminActionLog records and do not change evidence status.
+- Audit logs can be searched by action type, target type, target ID, admin user ID, and date range.
+- Audit logs are append-only through the service/API surface: no edit or delete methods are exposed.
+- Viewing verification history is not logged in the MVP to avoid noisy audit trails; state-changing moderation actions are logged first.
+
+The MVP deliberately avoids SIEM integration, Kafka/event streaming, Redis, external logging platforms, automated fraud detection, and AI moderation. Those can be added later behind the same audit boundaries if needed.
 
 ## Evolution Path
 

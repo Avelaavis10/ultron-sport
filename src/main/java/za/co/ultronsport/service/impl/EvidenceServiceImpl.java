@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import za.co.ultronsport.common.error.InvalidStateException;
 import za.co.ultronsport.common.error.ResourceNotFoundException;
+import za.co.ultronsport.domain.AdminActionType;
+import za.co.ultronsport.domain.AdminTargetType;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.EvidenceUpload;
 import za.co.ultronsport.domain.UserRole;
@@ -14,6 +16,7 @@ import za.co.ultronsport.domain.VerificationStatus;
 import za.co.ultronsport.repository.AthleteProfileRepository;
 import za.co.ultronsport.repository.EvidenceUploadRepository;
 import za.co.ultronsport.repository.VerificationRequestRepository;
+import za.co.ultronsport.service.AdminActionLogService;
 import za.co.ultronsport.service.EvidenceService;
 import za.co.ultronsport.service.LevelPlayScoreService;
 import za.co.ultronsport.web.dto.CreateEvidenceRequest;
@@ -28,15 +31,18 @@ public class EvidenceServiceImpl implements EvidenceService {
     private final AthleteProfileRepository athleteProfileRepository;
     private final VerificationRequestRepository verificationRequestRepository;
     private final LevelPlayScoreService levelPlayScoreService;
+    private final AdminActionLogService adminActionLogService;
 
     public EvidenceServiceImpl(EvidenceUploadRepository evidenceUploadRepository,
                                AthleteProfileRepository athleteProfileRepository,
                                VerificationRequestRepository verificationRequestRepository,
-                               LevelPlayScoreService levelPlayScoreService) {
+                               LevelPlayScoreService levelPlayScoreService,
+                               AdminActionLogService adminActionLogService) {
         this.evidenceUploadRepository = evidenceUploadRepository;
         this.athleteProfileRepository = athleteProfileRepository;
         this.verificationRequestRepository = verificationRequestRepository;
         this.levelPlayScoreService = levelPlayScoreService;
+        this.adminActionLogService = adminActionLogService;
     }
 
     @Override
@@ -122,6 +128,8 @@ public class EvidenceServiceImpl implements EvidenceService {
         applyTransition(evidence::flag);
         EvidenceUpload saved = evidenceUploadRepository.save(evidence);
         recordVerificationAction(saved, adminUserId, VerificationStatus.FLAGGED, reason);
+        adminActionLogService.log(adminUserId, AdminActionType.EVIDENCE_FLAGGED, AdminTargetType.EVIDENCE,
+                saved.getId(), reason, "Evidence flagged for moderation.");
         return saved;
     }
 
@@ -130,7 +138,10 @@ public class EvidenceServiceImpl implements EvidenceService {
     public EvidenceUpload archiveEvidence(Long adminUserId, Long evidenceId) {
         EvidenceUpload evidence = getById(evidenceId);
         applyTransition(evidence::archive);
-        return evidenceUploadRepository.save(evidence);
+        EvidenceUpload saved = evidenceUploadRepository.save(evidence);
+        adminActionLogService.log(adminUserId, AdminActionType.EVIDENCE_ARCHIVED, AdminTargetType.EVIDENCE,
+                saved.getId(), null, "Evidence archived by admin.");
+        return saved;
     }
 
     @Override

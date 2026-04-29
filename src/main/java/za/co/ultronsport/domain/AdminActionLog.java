@@ -13,53 +13,78 @@ public class AdminActionLog extends BaseEntity {
     @Column(nullable = false)
     private Long adminUserId;
 
+    private String adminEmail;
+    private String adminDisplayName;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AdminActionType actionType;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String targetEntityType;
+    private AdminTargetType targetType;
 
     @Column(nullable = false)
-    private Long targetEntityId;
+    private Long targetId;
 
     @Column(length = 1200)
     private String reason;
 
+    @Column(length = 2000)
+    private String details;
+
     protected AdminActionLog() {
     }
 
-    private AdminActionLog(Long adminUserId, AdminActionType actionType, String targetEntityType,
-                           Long targetEntityId, String reason) {
+    private AdminActionLog(Long adminUserId, String adminEmail, String adminDisplayName,
+                           AdminActionType actionType, AdminTargetType targetType,
+                           Long targetId, String reason, String details) {
         this.adminUserId = adminUserId;
+        this.adminEmail = adminEmail;
+        this.adminDisplayName = adminDisplayName;
         this.actionType = actionType;
-        this.targetEntityType = targetEntityType;
-        this.targetEntityId = targetEntityId;
+        this.targetType = targetType;
+        this.targetId = targetId;
         this.reason = reason;
+        this.details = details;
     }
 
-    public static AdminActionLog create(Long adminUserId, AdminActionType actionType, String targetEntityType,
-                                        Long targetEntityId, String reason) {
-        return new AdminActionLog(adminUserId, actionType, targetEntityType, targetEntityId, reason);
+    public static AdminActionLog create(Long adminUserId, String adminEmail, String adminDisplayName,
+                                        AdminActionType actionType, AdminTargetType targetType,
+                                        Long targetId, String reason, String details) {
+        return new AdminActionLog(adminUserId, adminEmail, adminDisplayName, actionType, targetType,
+                targetId, reason, details);
     }
 
     public Long getAdminUserId() {
         return adminUserId;
     }
 
+    public String getAdminEmail() {
+        return adminEmail;
+    }
+
+    public String getAdminDisplayName() {
+        return adminDisplayName;
+    }
+
     public AdminActionType getActionType() {
         return actionType;
     }
 
-    public String getTargetEntityType() {
-        return targetEntityType;
+    public AdminTargetType getTargetType() {
+        return targetType;
     }
 
-    public Long getTargetEntityId() {
-        return targetEntityId;
+    public Long getTargetId() {
+        return targetId;
     }
 
     public String getReason() {
         return reason;
+    }
+
+    public String getDetails() {
+        return details;
     }
 }

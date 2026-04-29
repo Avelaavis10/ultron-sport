@@ -22,4 +22,6 @@ public interface EvidenceUploadRepository extends JpaRepository<EvidenceUpload, 
             Long athleteProfileId, Collection<VerificationStatus> statuses);
 
     long countByAthleteProfileIdAndVerificationStatus(Long athleteProfileId, VerificationStatus status);
+
+    long countByVerificationStatus(VerificationStatus status);
 }

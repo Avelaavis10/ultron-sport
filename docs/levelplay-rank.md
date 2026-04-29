@@ -74,7 +74,7 @@ Each athlete profile should show simple rank factors:
 - Unverified evidence cannot affect ranking.
 - Duplicate or tampered files should be detected through file hashes and metadata checks.
 - Sudden abnormal engagement should be flagged.
-- Verification actions must be audited.
+- Verification and admin LevelPlay recalculation actions must be audited.
 - Administrators must review flagged evidence and suspicious ranking changes.
 
 ## Future Algorithm Direction

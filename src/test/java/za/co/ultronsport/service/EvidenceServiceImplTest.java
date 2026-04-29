@@ -3,6 +3,7 @@ package za.co.ultronsport.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import za.co.ultronsport.common.error.InvalidStateException;
+import za.co.ultronsport.domain.AdminActionType;
+import za.co.ultronsport.domain.AdminTargetType;
 import za.co.ultronsport.domain.AiAnalysisStatus;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.EvidenceContext;
@@ -43,6 +46,9 @@ class EvidenceServiceImplTest {
 
     @Mock
     private LevelPlayScoreService levelPlayScoreService;
+
+    @Mock
+    private AdminActionLogService adminActionLogService;
 
     @InjectMocks
     private EvidenceServiceImpl evidenceService;
@@ -140,6 +146,8 @@ class EvidenceServiceImplTest {
                 new FlagEvidenceRequest("Possible duplicate evidence."));
 
         assertThat(flagged.getVerificationStatus()).isEqualTo(VerificationStatus.FLAGGED);
+        verify(adminActionLogService).log(eq(99L), eq(AdminActionType.EVIDENCE_FLAGGED),
+                eq(AdminTargetType.EVIDENCE), any(), eq("Possible duplicate evidence."), any());
     }
 
     @Test
@@ -151,6 +159,8 @@ class EvidenceServiceImplTest {
         EvidenceUpload archived = evidenceService.archiveEvidence(99L, 7L);
 
         assertThat(archived.getVerificationStatus()).isEqualTo(VerificationStatus.ARCHIVED);
+        verify(adminActionLogService).log(eq(99L), eq(AdminActionType.EVIDENCE_ARCHIVED),
+                eq(AdminTargetType.EVIDENCE), any(), any(), any());
     }
 
     @Test

@@ -31,6 +31,7 @@ The platform helps athletes upload sporting evidence, coaches and institutions v
 - [LevelPlay Rank](docs/levelplay-rank.md)
 - [Data Model](docs/data-model.md)
 - [Security and Privacy](docs/security-and-privacy.md)
+- [Admin Moderation and Audit](docs/admin-moderation-and-audit.md)
 - [UI and Prototype Notes](docs/ui-and-prototype-notes.md)
 
 ## Source Materials
@@ -122,6 +123,12 @@ LevelPlay score endpoints are exposed at:
 http://localhost:8080/api/levelplay
 ```
 
+Admin moderation and audit endpoints are exposed at:
+
+```text
+http://localhost:8080/api/admin
+```
+
 Use `POST /api/auth/register` or `POST /api/auth/login` to receive a bearer token, then call protected endpoints with:
 
 ```text
@@ -133,5 +140,7 @@ For the MVP, evidence uses `fileUrl` or `externalVideoLink` placeholders. Direct
 Discovery search is database-backed with pagination and role-aware evidence visibility. Scouts and organisations see verified evidence only; admins can filter all evidence statuses.
 
 LevelPlay Rank currently uses a transparent MVP formula only. It scores verified evidence count, achievement count, coach verification count, and profile completeness, then maps the final credibility score to BRONZE, SILVER, GOLD, or ELITE. It does not use popularity, likes, views, fan votes, paid boosts, or AI scoring.
+
+Admin moderation now records append-only audit logs for evidence flag/archive actions, moderation notes, and admin LevelPlay recalculations. The MVP intentionally avoids enterprise SIEM, Kafka, Redis, external logging platforms, automated fraud detection, and AI moderation.
 
 The MVP backend is intentionally a modular monolith. It separates domain, repositories, services, controllers, DTOs, security configuration, and error handling so the codebase can later evolve toward microservices.
