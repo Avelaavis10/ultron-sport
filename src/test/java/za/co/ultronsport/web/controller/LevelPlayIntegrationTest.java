@@ -81,7 +81,7 @@ class LevelPlayIntegrationTest {
                         .header("Authorization", "Bearer " + athlete.token()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.athleteProfileId").value(profile.getId()))
-                .andExpect(jsonPath("$.finalCredibilityScore").value(20))
+                .andExpect(jsonPath("$.finalCredibilityScore").value(16))
                 .andExpect(jsonPath("$.tier").value("BRONZE"));
     }
 
@@ -102,9 +102,9 @@ class LevelPlayIntegrationTest {
         AthleteProfile profile = athleteProfile("Organisation Visible Athlete");
 
         mockMvc.perform(get("/api/levelplay/athletes/{athleteProfileId}", profile.getId())
-                        .header("Authorization", "Bearer " + organisation.token()))
+                .header("Authorization", "Bearer " + organisation.token()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.profileCompletenessScore").value(100));
+                .andExpect(jsonPath("$.profileCompletenessScore").value(78));
     }
 
     @Test
@@ -129,7 +129,7 @@ class LevelPlayIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.verifiedEvidenceCount").value(1))
                 .andExpect(jsonPath("$.evidenceScore").value(20))
-                .andExpect(jsonPath("$.finalCredibilityScore").value(40));
+                .andExpect(jsonPath("$.finalCredibilityScore").value(38));
     }
 
     @Test
@@ -166,7 +166,7 @@ class LevelPlayIntegrationTest {
         LevelPlayScore score = levelPlayScoreRepository.findByAthleteProfileId(profile.getId()).orElseThrow();
         org.assertj.core.api.Assertions.assertThat(score.getVerifiedEvidenceCount()).isEqualTo(1);
         org.assertj.core.api.Assertions.assertThat(score.getCoachVerificationCount()).isEqualTo(1);
-        org.assertj.core.api.Assertions.assertThat(score.getFinalCredibilityScore()).isEqualTo(50);
+        org.assertj.core.api.Assertions.assertThat(score.getFinalCredibilityScore()).isEqualTo(48);
     }
 
     @Test
@@ -177,9 +177,9 @@ class LevelPlayIntegrationTest {
         levelPlayScoreService.recalculateForAthlete(profile.getId());
 
         mockMvc.perform(get("/api/discovery/athletes")
-                        .header("Authorization", "Bearer " + scout.token()))
+                .header("Authorization", "Bearer " + scout.token()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].levelPlayScore").value(40))
+                .andExpect(jsonPath("$.content[0].levelPlayScore").value(38))
                 .andExpect(jsonPath("$.content[0].levelPlayTier").value("SILVER"));
     }
 
@@ -195,8 +195,8 @@ class LevelPlayIntegrationTest {
                 .andExpect(jsonPath("$.athleteProfileId").value(profile.getId()))
                 .andExpect(jsonPath("$.verifiedEvidenceCount").value(1))
                 .andExpect(jsonPath("$.verifiedEvidenceCountScore").value(20))
-                .andExpect(jsonPath("$.profileCompletenessContribution").value(20))
-                .andExpect(jsonPath("$.finalCredibilityScore").value(40))
+                .andExpect(jsonPath("$.profileCompletenessContribution").value(18))
+                .andExpect(jsonPath("$.finalCredibilityScore").value(38))
                 .andExpect(jsonPath("$.tier").value("SILVER"));
     }
 

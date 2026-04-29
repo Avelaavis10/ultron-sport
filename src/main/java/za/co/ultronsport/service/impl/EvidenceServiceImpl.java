@@ -57,7 +57,9 @@ public class EvidenceServiceImpl implements EvidenceService {
         EvidenceUpload evidence = EvidenceUpload.createDraft(currentUserId, request.athleteProfileId(),
                 request.title(), request.description(), request.sport(), request.position(), request.eventType(),
                 request.matchOrTraining(), request.eventDate(), request.fileUrl(), request.externalVideoLink());
-        return evidenceUploadRepository.save(evidence);
+        EvidenceUpload saved = evidenceUploadRepository.save(evidence);
+        levelPlayScoreService.recalculateForAthlete(saved.getAthleteProfileId());
+        return saved;
     }
 
     @Override

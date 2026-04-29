@@ -61,9 +61,12 @@ Media base path:
 
 | Method | Path | Access | Purpose |
 | --- | --- | --- | --- |
-| POST | `/athlete-profiles` | ATHLETE | Create athlete profile |
-| GET | `/athlete-profiles/{id}` | Authenticated | Get athlete profile |
-| GET | `/athlete-profiles?sport=&location=&position=` | COACH, ORGANISATION, SCOUT_AGENT, ADMIN | Search/filter athlete profiles |
+| POST | `/api/athlete-profiles` | ATHLETE | Create the current user's athlete profile |
+| GET | `/api/athlete-profiles/me` | ATHLETE | Get the current athlete's full profile |
+| PATCH | `/api/athlete-profiles/me` | ATHLETE | Update the current athlete's profile and recalculate LevelPlay |
+| GET | `/api/athlete-profiles/{athleteProfileId}` | ADMIN, COACH, owning ATHLETE | Get full internal profile view |
+| GET | `/api/athlete-profiles` | ADMIN | Paginated list of athlete profiles |
+| GET | `/api/v1/athlete-profiles?sport=&location=&position=` | Legacy authenticated roles | Legacy profile search/filter path |
 
 ## Coach Profiles
 
@@ -110,8 +113,12 @@ Media base path:
 
 | Method | Path | Access | Purpose |
 | --- | --- | --- | --- |
-| POST | `/achievements` | ATHLETE | Add athlete achievement |
-| GET | `/achievements/athlete/{athleteProfileId}` | Authenticated | List achievements for athlete profile |
+| POST | `/api/achievements` | ATHLETE | Add achievement for own athlete profile and recalculate LevelPlay |
+| GET | `/api/achievements/my` | ATHLETE | List current athlete's achievements |
+| PATCH | `/api/achievements/{achievementId}` | Owning ATHLETE | Update own unverified achievement and recalculate LevelPlay |
+| GET | `/api/achievements` | ADMIN | Paginated list of achievements |
+| GET | `/api/athlete-profiles/{athleteProfileId}/achievements` | ADMIN, COACH, owning ATHLETE | List achievements for a profile |
+| GET | `/api/v1/achievements/athlete/{athleteProfileId}` | Legacy authenticated roles | Legacy achievement list path |
 
 ## LevelPlay Scores
 
@@ -181,6 +188,8 @@ Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum
 - Evidence accepts URL-only mode through `fileUrl` or `externalVideoLink`, and can attach an uploaded `MediaAsset` while evidence is editable.
 - Media upload responses expose `mediaId` and `publicUrl`, not local filesystem paths or storage internals.
 - Evidence AI status defaults to `NOT_STARTED`; no AI service is called in the MVP workflow.
+- Profile completeness uses linked display name, sport, position, location, organisation or school/club, bio, age, at least one achievement, and at least one evidence item.
+- Achievement delete/archive is deferred because the MVP model does not yet include a soft-delete or achievement moderation status.
 - Discovery is relational database search for the MVP. Elasticsearch/OpenSearch, caching, vector search, and recommendation ranking are future work.
 - LevelPlay Rank uses verified evidence, achievements, coach verification count, and profile completeness only. Popularity, fan votes, views, likes, paid boosts, and AI scoring are not part of the MVP formula.
 - Audit logs are append-only through the service/API surface. Delete and edit endpoints are intentionally not provided.

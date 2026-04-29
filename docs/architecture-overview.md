@@ -33,13 +33,14 @@ za.co.ultronsport
 
 - Authentication with registration, login, JWT validation, and current-user lookup
 - User and role foundation
-- Athlete profile management
+- Athlete profile management with current-user ownership, `/me` update flow, and completeness recalculation
 - Coach profile verification support
 - Organisation, school, and club records
 - Evidence upload/link submission with structured metadata, draft/submission lifecycle, and AI-ready status
 - Local/mock media upload abstraction with metadata, checksum storage, and evidence attachment
 - Evidence verification workflow for coach approval/rejection and admin flag/archive moderation
 - Athlete search and discovery using verified evidence and basic profile filters
+- Achievement creation/update with athlete ownership and LevelPlay recalculation
 - LevelPlay credibility score calculation with transparent MVP score explanation
 - Admin moderation and append-only audit logging foundation
 - Global validation and API error handling
@@ -49,6 +50,7 @@ za.co.ultronsport
 - LevelPlay service and MockMvc tests for scoring, recalculation, explanation, and endpoint access control
 - Admin moderation/audit service and MockMvc tests for audit visibility, flagged/archived evidence, notes, and role access
 - Media storage service and MockMvc tests for upload, metadata visibility, and evidence attachment
+- Athlete profile and achievement service/MockMvc tests for ownership, duplicate prevention, updates, and LevelPlay integration
 
 ## Security Flow
 
@@ -104,11 +106,11 @@ LevelPlay is implemented behind `/api/levelplay` as a simple, explainable credib
 - One athlete profile has one current LevelPlayScore record.
 - Scores are created when missing and updated on recalculation.
 - Coach verification of evidence automatically recalculates the linked athlete's score.
-- Achievement creation and athlete profile creation trigger recalculation where the workflow exists.
+- Athlete profile creation/update, achievement creation/update, and coach evidence verification trigger recalculation.
 - Admin users can recalculate one score or all scores for MVP maintenance.
 - The explanation endpoint returns the stored input counts, component scores, final score, tier, and a fairness note.
 
-The MVP formula uses verified evidence count, achievement count, coach verification count, and profile completeness. It does not use likes, views, fan votes, popularity, paid boosts, or AI scoring. Future work can add score history, formula versioning, category leaderboards, and AI-assisted analysis after fairness review.
+The MVP formula uses verified evidence count, achievement count, coach verification count, and profile completeness. Profile completeness is calculated from linked display name, sport, position, location, organisation or school/club, bio, age, at least one achievement, and at least one evidence item. It does not use likes, views, fan votes, popularity, paid boosts, or AI scoring. Future work can add score history, formula versioning, category leaderboards, and AI-assisted analysis after fairness review.
 
 ## Admin Moderation And Audit Workflow
 

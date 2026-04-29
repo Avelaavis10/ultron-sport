@@ -40,6 +40,15 @@ public class Achievement extends BaseEntity {
         verified = true;
     }
 
+    public void updateDetails(String title, String description, LocalDate achievedAt) {
+        if (verified) {
+            throw new IllegalStateException("Verified achievements cannot be edited in the MVP workflow.");
+        }
+        this.title = title;
+        this.description = description;
+        this.achievedAt = achievedAt;
+    }
+
     public Long getAthleteProfileId() {
         return athleteProfileId;
     }

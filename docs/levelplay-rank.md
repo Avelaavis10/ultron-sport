@@ -34,6 +34,18 @@ The current score is deliberately simple and explainable:
 - Profile completeness contribution: profile completeness scaled to a maximum of 20 points
 - Final credibility score: component sum clamped between 0 and 100
 
+Current profile completeness is deterministic and uses nine factors:
+
+- Linked user display name
+- Sport
+- Position
+- Location
+- Organisation or school/club
+- Bio
+- Age
+- At least one achievement
+- At least one evidence item
+
 ## Tiers
 
 Initial tiers make the score easier to understand:

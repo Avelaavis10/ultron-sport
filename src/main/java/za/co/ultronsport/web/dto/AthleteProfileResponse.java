@@ -12,12 +12,15 @@ public record AthleteProfileResponse(
         String gender,
         String location,
         String schoolOrClub,
+        Long organisationId,
+        String bio,
         Integer profileCompletenessScore,
         VerificationStatus verificationStatus
 ) {
     public static AthleteProfileResponse from(AthleteProfile profile) {
         return new AthleteProfileResponse(profile.getId(), profile.getUserId(), profile.getSport(),
                 profile.getPosition(), profile.getAge(), profile.getGender(), profile.getLocation(),
-                profile.getSchoolOrClub(), profile.getProfileCompletenessScore(), profile.getVerificationStatus());
+                profile.getSchoolOrClub(), profile.getOrganisationId(), profile.getBio(),
+                profile.getProfileCompletenessScore(), profile.getVerificationStatus());
     }
 }

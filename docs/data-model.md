@@ -22,6 +22,7 @@ The data model should capture users, profiles, institutions, evidence, verificat
 
 - profile_id
 - user_id
+- linked_user_display_name
 - sport
 - position_or_event
 - age
@@ -33,6 +34,18 @@ The data model should capture users, profiles, institutions, evidence, verificat
 - achievements
 - privacy_settings
 - verification_status
+- profile_completeness_score
+
+### Achievement
+
+- achievement_id
+- athlete_profile_id
+- title
+- description
+- achieved_at
+- verified
+- created_at
+- updated_at
 
 ### Institution
 
@@ -182,6 +195,7 @@ The data model should capture users, profiles, institutions, evidence, verificat
 
 - A user has one or more role-specific profiles.
 - An athlete profile has many evidence records.
+- An athlete profile has many achievement records.
 - An athlete profile has many media assets.
 - Evidence can reference one attached media asset for the current MVP upload flow.
 - Evidence has zero or more verification records.
@@ -259,6 +273,7 @@ The current LevelPlayScore is one current record per athlete profile. It is inte
 - Achievements contribute up to 20 points.
 - Coach verifications contribute up to 20 points.
 - Profile completeness is scaled to a maximum 20 point contribution.
+- Profile completeness uses nine factors: linked display name, sport, position, location, organisation or school/club, bio, age, at least one achievement, and at least one evidence item.
 - The final credibility score is clamped between 0 and 100.
 - Tiers map to BRONZE for 0-24, SILVER for 25-49, GOLD for 50-74, and ELITE for 75-100.
 

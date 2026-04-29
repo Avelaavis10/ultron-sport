@@ -33,6 +33,7 @@ The platform helps athletes upload sporting evidence, coaches and institutions v
 - [Security and Privacy](docs/security-and-privacy.md)
 - [Admin Moderation and Audit](docs/admin-moderation-and-audit.md)
 - [Media Storage](docs/media-storage.md)
+- [Athlete Profiles and Achievements](docs/athlete-profile-and-achievements.md)
 - [UI and Prototype Notes](docs/ui-and-prototype-notes.md)
 
 ## Source Materials
@@ -124,6 +125,13 @@ Evidence workflow endpoints are exposed at:
 http://localhost:8080/api/evidence
 ```
 
+Athlete profile and achievement endpoints are exposed at:
+
+```text
+http://localhost:8080/api/athlete-profiles
+http://localhost:8080/api/achievements
+```
+
 Discovery endpoints are exposed at:
 
 ```text
@@ -159,6 +167,8 @@ For the MVP, evidence still supports URL-only mode through `fileUrl` or `externa
 Discovery search is database-backed with pagination and role-aware evidence visibility. Scouts and organisations see verified evidence only; admins can filter all evidence statuses.
 
 LevelPlay Rank currently uses a transparent MVP formula only. It scores verified evidence count, achievement count, coach verification count, and profile completeness, then maps the final credibility score to BRONZE, SILVER, GOLD, or ELITE. It does not use popularity, likes, views, fan votes, paid boosts, or AI scoring.
+
+Profile completeness uses nine deterministic factors: linked display name, sport, position, location, organisation or school/club, bio, age, at least one achievement, and at least one evidence item. Athlete profile updates and achievement changes trigger LevelPlay recalculation.
 
 Admin moderation now records append-only audit logs for evidence flag/archive actions, moderation notes, and admin LevelPlay recalculations. The MVP intentionally avoids enterprise SIEM, Kafka, Redis, external logging platforms, automated fraud detection, and AI moderation.
 

@@ -47,7 +47,7 @@ public class AthleteProfile extends BaseEntity {
     }
 
     private AthleteProfile(Long userId, String sport, String position, Integer age, String gender,
-                           String location, String schoolOrClub, String bio) {
+                           String location, String schoolOrClub, Long organisationId, String bio) {
         this.userId = userId;
         this.sport = sport;
         this.position = position;
@@ -55,6 +55,7 @@ public class AthleteProfile extends BaseEntity {
         this.gender = gender;
         this.location = location;
         this.schoolOrClub = schoolOrClub;
+        this.organisationId = organisationId;
         this.bio = bio;
         this.profileCompletenessScore = calculateProfileCompleteness();
         this.verificationStatus = VerificationStatus.PENDING_VERIFICATION;
@@ -62,7 +63,29 @@ public class AthleteProfile extends BaseEntity {
 
     public static AthleteProfile create(Long userId, String sport, String position, Integer age, String gender,
                                         String location, String schoolOrClub, String bio) {
-        return new AthleteProfile(userId, sport, position, age, gender, location, schoolOrClub, bio);
+        return create(userId, sport, position, age, gender, location, schoolOrClub, null, bio);
+    }
+
+    public static AthleteProfile create(Long userId, String sport, String position, Integer age, String gender,
+                                        String location, String schoolOrClub, Long organisationId, String bio) {
+        return new AthleteProfile(userId, sport, position, age, gender, location, schoolOrClub, organisationId, bio);
+    }
+
+    public void updateDetails(String sport, String position, Integer age, String gender, String location,
+                              String schoolOrClub, Long organisationId, String bio) {
+        this.sport = sport;
+        this.position = position;
+        this.age = age;
+        this.gender = gender;
+        this.location = location;
+        this.schoolOrClub = schoolOrClub;
+        this.organisationId = organisationId;
+        this.bio = bio;
+        this.profileCompletenessScore = calculateProfileCompleteness();
+    }
+
+    public void updateProfileCompletenessScore(Integer profileCompletenessScore) {
+        this.profileCompletenessScore = profileCompletenessScore;
     }
 
     public void markVerified() {

@@ -65,7 +65,7 @@ class LevelPlayScoreServiceImplTest {
 
         LevelPlayScore score = levelPlayScoreService.recalculateForAthlete(9L);
 
-        assertThat(score.getFinalCredibilityScore()).isEqualTo(20);
+        assertThat(score.getFinalCredibilityScore()).isEqualTo(16);
         assertThat(score.getTier()).isEqualTo(LevelPlayTier.BRONZE);
     }
 
@@ -117,8 +117,18 @@ class LevelPlayScoreServiceImplTest {
 
         LevelPlayScore score = levelPlayScoreService.recalculateForAthlete(9L);
 
-        assertThat(score.getProfileCompletenessScore()).isEqualTo(57);
-        assertThat(score.getProfileCompletenessContribution()).isEqualTo(11);
+        assertThat(score.getProfileCompletenessScore()).isEqualTo(44);
+        assertThat(score.getProfileCompletenessContribution()).isEqualTo(9);
+    }
+
+    @Test
+    void profileCompletenessScoreWorksWithCompleteProfile() {
+        givenScoreInputs(9L, completeProfile(), 1, 1, 0, Optional.empty());
+
+        LevelPlayScore score = levelPlayScoreService.recalculateForAthlete(9L);
+
+        assertThat(score.getProfileCompletenessScore()).isEqualTo(100);
+        assertThat(score.getProfileCompletenessContribution()).isEqualTo(20);
     }
 
     @Test
@@ -188,7 +198,7 @@ class LevelPlayScoreServiceImplTest {
 
         LevelPlayScore score = levelPlayScoreService.recalculateForAthleteAsAdmin(9L, 99L);
 
-        assertThat(score.getFinalCredibilityScore()).isEqualTo(40);
+        assertThat(score.getFinalCredibilityScore()).isEqualTo(38);
         verify(adminActionLogService).log(eq(99L), eq(AdminActionType.LEVELPLAY_RECALCULATED),
                 eq(AdminTargetType.LEVELPLAY_SCORE), any(), any(), any());
     }
@@ -221,6 +231,7 @@ class LevelPlayScoreServiceImplTest {
         when(levelPlayScoreRepository.findByAthleteProfileId(athleteProfileId)).thenReturn(existingScore);
         when(evidenceUploadRepository.countByAthleteProfileIdAndVerificationStatus(athleteProfileId,
                 VerificationStatus.VERIFIED)).thenReturn(verifiedEvidenceCount);
+        when(evidenceUploadRepository.countByAthleteProfileId(athleteProfileId)).thenReturn(verifiedEvidenceCount);
         when(achievementRepository.countByAthleteProfileId(athleteProfileId)).thenReturn(achievementCount);
         when(verificationRequestRepository.countByAthleteProfileIdAndStatus(athleteProfileId,
                 VerificationStatus.VERIFIED)).thenReturn(coachVerificationCount);

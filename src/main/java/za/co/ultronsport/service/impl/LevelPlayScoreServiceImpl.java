@@ -63,9 +63,12 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
         int verifiedEvidenceCount = safeInt(evidenceUploadRepository.countByAthleteProfileIdAndVerificationStatus(
                 athleteProfileId, VerificationStatus.VERIFIED));
         int achievementCount = safeInt(achievementRepository.countByAthleteProfileId(athleteProfileId));
+        int evidenceItemCount = safeInt(evidenceUploadRepository.countByAthleteProfileId(athleteProfileId));
         int coachVerificationCount = safeInt(verificationRequestRepository.countByAthleteProfileIdAndStatus(
                 athleteProfileId, VerificationStatus.VERIFIED));
-        int profileCompletenessScore = calculateProfileCompletenessScore(profile);
+        int profileCompletenessScore = calculateProfileCompletenessScore(profile, achievementCount, evidenceItemCount);
+        profile.updateProfileCompletenessScore(profileCompletenessScore);
+        athleteProfileRepository.save(profile);
         score.updateMvpScore(verifiedEvidenceCount, coachVerificationCount, achievementCount, profileCompletenessScore);
         return levelPlayScoreRepository.save(score);
     }
@@ -135,9 +138,9 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
         return recalculateForAthlete(athleteProfileId);
     }
 
-    int calculateProfileCompletenessScore(AthleteProfile profile) {
+    int calculateProfileCompletenessScore(AthleteProfile profile, int achievementCount, int evidenceItemCount) {
         int completed = 0;
-        int total = 7;
+        int total = 9;
         completed += hasDisplayName(profile.getUserId()) ? 1 : 0;
         completed += hasText(profile.getSport()) ? 1 : 0;
         completed += hasText(profile.getPosition()) ? 1 : 0;
@@ -145,6 +148,8 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
         completed += hasOrganisation(profile) ? 1 : 0;
         completed += hasText(profile.getBio()) ? 1 : 0;
         completed += profile.getAge() != null ? 1 : 0;
+        completed += achievementCount > 0 ? 1 : 0;
+        completed += evidenceItemCount > 0 ? 1 : 0;
         return Math.round((completed * 100f) / total);
     }
 

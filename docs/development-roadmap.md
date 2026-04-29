@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -20,7 +20,9 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 
 - Completed: implement evidence upload/link submission and verification workflow using secured role gates.
 - Completed: implement athlete search and discovery using VERIFIED evidence and basic profile filters.
-- Add profile update endpoints.
+- Completed: add athlete profile `/me` create/view/update workflow with ownership checks.
+- Completed: add achievement create/list/update workflow with ownership checks.
+- Completed: make profile and achievement changes recalculate LevelPlay.
 - Add organisation roster relationships.
 - Add coach/institution approval workflows.
 - Add verification queues for coaches and administrators.

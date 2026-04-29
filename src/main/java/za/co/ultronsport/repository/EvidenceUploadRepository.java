@@ -21,6 +21,8 @@ public interface EvidenceUploadRepository extends JpaRepository<EvidenceUpload, 
     List<EvidenceUpload> findByAthleteProfileIdAndVerificationStatusInOrderByCreatedAtDesc(
             Long athleteProfileId, Collection<VerificationStatus> statuses);
 
+    long countByAthleteProfileId(Long athleteProfileId);
+
     long countByAthleteProfileIdAndVerificationStatus(Long athleteProfileId, VerificationStatus status);
 
     long countByVerificationStatus(VerificationStatus status);

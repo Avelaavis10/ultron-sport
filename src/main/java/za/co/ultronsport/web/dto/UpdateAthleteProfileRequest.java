@@ -6,8 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record CreateAthleteProfileRequest(
-        Long userId,
+public record UpdateAthleteProfileRequest(
         @NotBlank String sport,
         @NotBlank String position,
         @NotNull @Min(5) @Max(80) Integer age,
