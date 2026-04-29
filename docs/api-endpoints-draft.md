@@ -24,6 +24,12 @@ Discovery base path:
 /api/discovery
 ```
 
+LevelPlay base path:
+
+```text
+/api/levelplay
+```
+
 ## Authentication
 
 | Method | Path | Access | Purpose |
@@ -98,8 +104,13 @@ Discovery base path:
 
 | Method | Path | Access | Purpose |
 | --- | --- | --- | --- |
-| GET | `/levelplay-scores/athlete/{athleteProfileId}` | Authenticated | Get or create placeholder score |
-| POST | `/levelplay-scores/athlete/{athleteProfileId}/refresh` | Authenticated | Refresh placeholder score from current MVP data |
+| GET | `/me` | ATHLETE | Get the current athlete's LevelPlay score |
+| GET | `/athletes/{athleteProfileId}` | Authenticated | Get an athlete's current LevelPlay score |
+| GET | `/athletes/{athleteProfileId}/explain` | Authenticated | Get a transparent score breakdown |
+| POST | `/athletes/{athleteProfileId}/recalculate` | ADMIN | Recalculate one athlete's score |
+| POST | `/recalculate-all` | ADMIN | Recalculate all athlete scores with a simple MVP loop |
+
+Legacy `/api/v1/levelplay-scores/...` endpoints remain for compatibility, but new clients should use `/api/levelplay`.
 
 ## Discovery
 
@@ -134,3 +145,4 @@ Defaults: `page=0`, `size=20`, `sortBy=updatedAt`, `sortDirection=DESC`. Maximum
 - Evidence currently accepts a `fileUrl` or `externalVideoLink`; binary file upload can be added later behind scanning and storage controls.
 - Evidence AI status defaults to `NOT_STARTED`; no AI service is called in the MVP workflow.
 - Discovery is relational database search for the MVP. Elasticsearch/OpenSearch, caching, vector search, and recommendation ranking are future work.
+- LevelPlay Rank uses verified evidence, achievements, coach verification count, and profile completeness only. Popularity, fan votes, views, likes, paid boosts, and AI scoring are not part of the MVP formula.

@@ -41,6 +41,9 @@ class EvidenceServiceImplTest {
     @Mock
     private VerificationRequestRepository verificationRequestRepository;
 
+    @Mock
+    private LevelPlayScoreService levelPlayScoreService;
+
     @InjectMocks
     private EvidenceServiceImpl evidenceService;
 
@@ -91,6 +94,7 @@ class EvidenceServiceImplTest {
 
         assertThat(verified.getVerificationStatus()).isEqualTo(VerificationStatus.VERIFIED);
         verify(verificationRequestRepository).save(any(VerificationRequest.class));
+        verify(levelPlayScoreService).recalculateForAthlete(11L);
     }
 
     @Test

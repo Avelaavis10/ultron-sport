@@ -2,6 +2,7 @@ package za.co.ultronsport.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -21,6 +22,9 @@ class AchievementServiceImplTest {
     @Mock
     private AchievementRepository achievementRepository;
 
+    @Mock
+    private LevelPlayScoreService levelPlayScoreService;
+
     @InjectMocks
     private AchievementServiceImpl achievementService;
 
@@ -33,5 +37,6 @@ class AchievementServiceImplTest {
         Achievement achievement = achievementService.create(request);
 
         assertThat(achievement.getTitle()).isEqualTo("Top Scorer");
+        verify(levelPlayScoreService).recalculateForAthlete(1L);
     }
 }

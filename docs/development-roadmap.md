@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -39,8 +39,8 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 
 ## Phase 4: LevelPlay Refinement
 
-- Implement basic LevelPlayScore calculation using verified evidence count, achievement count, coach verification count, and profile completeness score.
-- Define transparent MVP scoring rules with stakeholders.
+- Completed: implement basic LevelPlayScore calculation using verified evidence count, achievement count, coach verification count, and profile completeness score.
+- Completed: define transparent MVP scoring rules and expose score explanations.
 - Version scoring formulas.
 - Add score history.
 - Separate leaderboards by sport, age group, region, and position/event.

@@ -20,11 +20,11 @@ public class LevelPlayScoreController {
 
     @GetMapping("/athlete/{athleteProfileId}")
     public LevelPlayScoreResponse getForAthlete(@PathVariable Long athleteProfileId) {
-        return LevelPlayScoreResponse.from(levelPlayScoreService.getOrCreateForAthlete(athleteProfileId));
+        return LevelPlayScoreResponse.from(levelPlayScoreService.getScoreForAthlete(athleteProfileId));
     }
 
     @PostMapping("/athlete/{athleteProfileId}/refresh")
     public LevelPlayScoreResponse refreshForAthlete(@PathVariable Long athleteProfileId) {
-        return LevelPlayScoreResponse.from(levelPlayScoreService.refreshPlaceholderScore(athleteProfileId));
+        return LevelPlayScoreResponse.from(levelPlayScoreService.recalculateForAthlete(athleteProfileId));
     }
 }

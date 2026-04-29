@@ -38,12 +38,13 @@ za.co.ultronsport
 - Evidence upload/link submission with structured metadata, draft/submission lifecycle, and AI-ready status
 - Evidence verification workflow for coach approval/rejection and admin flag/archive moderation
 - Athlete search and discovery using verified evidence and basic profile filters
-- LevelPlay credibility score placeholder
+- LevelPlay credibility score calculation with transparent MVP score explanation
 - Admin action log and moderation foundation
 - Global validation and API error handling
 - Service unit tests and JPA repository integration test
 - MockMvc security integration tests for JWT and role-protected endpoints
 - Discovery service tests and MockMvc tests for role-aware search visibility
+- LevelPlay service and MockMvc tests for scoring, recalculation, explanation, and endpoint access control
 
 ## Security Flow
 
@@ -89,6 +90,19 @@ Discovery is implemented behind `/api/discovery` with authenticated access only.
 - Search uses Spring Data JPA Specifications, pagination, and database indexes for MVP-scale efficiency.
 
 Future discovery work can move high-volume search into OpenSearch/Elasticsearch, add caching, and layer recommendation signals without changing the core domain model.
+
+## LevelPlay Workflow
+
+LevelPlay is implemented behind `/api/levelplay` as a simple, explainable credibility score.
+
+- One athlete profile has one current LevelPlayScore record.
+- Scores are created when missing and updated on recalculation.
+- Coach verification of evidence automatically recalculates the linked athlete's score.
+- Achievement creation and athlete profile creation trigger recalculation where the workflow exists.
+- Admin users can recalculate one score or all scores for MVP maintenance.
+- The explanation endpoint returns the stored input counts, component scores, final score, tier, and a fairness note.
+
+The MVP formula uses verified evidence count, achievement count, coach verification count, and profile completeness. It does not use likes, views, fan votes, popularity, paid boosts, or AI scoring. Future work can add score history, formula versioning, category leaderboards, and AI-assisted analysis after fairness review.
 
 ## Evolution Path
 

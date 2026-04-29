@@ -15,6 +15,7 @@ import za.co.ultronsport.repository.AthleteProfileRepository;
 import za.co.ultronsport.repository.EvidenceUploadRepository;
 import za.co.ultronsport.repository.VerificationRequestRepository;
 import za.co.ultronsport.service.EvidenceService;
+import za.co.ultronsport.service.LevelPlayScoreService;
 import za.co.ultronsport.web.dto.CreateEvidenceRequest;
 import za.co.ultronsport.web.dto.FlagEvidenceRequest;
 import za.co.ultronsport.web.dto.RejectEvidenceRequest;
@@ -26,13 +27,16 @@ public class EvidenceServiceImpl implements EvidenceService {
     private final EvidenceUploadRepository evidenceUploadRepository;
     private final AthleteProfileRepository athleteProfileRepository;
     private final VerificationRequestRepository verificationRequestRepository;
+    private final LevelPlayScoreService levelPlayScoreService;
 
     public EvidenceServiceImpl(EvidenceUploadRepository evidenceUploadRepository,
                                AthleteProfileRepository athleteProfileRepository,
-                               VerificationRequestRepository verificationRequestRepository) {
+                               VerificationRequestRepository verificationRequestRepository,
+                               LevelPlayScoreService levelPlayScoreService) {
         this.evidenceUploadRepository = evidenceUploadRepository;
         this.athleteProfileRepository = athleteProfileRepository;
         this.verificationRequestRepository = verificationRequestRepository;
+        this.levelPlayScoreService = levelPlayScoreService;
     }
 
     @Override
@@ -95,6 +99,7 @@ public class EvidenceServiceImpl implements EvidenceService {
         applyTransition(evidence::verify);
         EvidenceUpload saved = evidenceUploadRepository.save(evidence);
         recordVerificationAction(saved, coachUserId, VerificationStatus.VERIFIED, "Verified by coach.");
+        levelPlayScoreService.recalculateForAthlete(saved.getAthleteProfileId());
         return saved;
     }
 

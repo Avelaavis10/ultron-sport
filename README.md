@@ -116,6 +116,12 @@ Discovery endpoints are exposed at:
 http://localhost:8080/api/discovery
 ```
 
+LevelPlay score endpoints are exposed at:
+
+```text
+http://localhost:8080/api/levelplay
+```
+
 Use `POST /api/auth/register` or `POST /api/auth/login` to receive a bearer token, then call protected endpoints with:
 
 ```text
@@ -125,5 +131,7 @@ Authorization: Bearer <accessToken>
 For the MVP, evidence uses `fileUrl` or `externalVideoLink` placeholders. Direct file upload, object storage, CDN delivery, malware scanning, and AI analysis jobs are intentionally deferred.
 
 Discovery search is database-backed with pagination and role-aware evidence visibility. Scouts and organisations see verified evidence only; admins can filter all evidence statuses.
+
+LevelPlay Rank currently uses a transparent MVP formula only. It scores verified evidence count, achievement count, coach verification count, and profile completeness, then maps the final credibility score to BRONZE, SILVER, GOLD, or ELITE. It does not use popularity, likes, views, fan votes, paid boosts, or AI scoring.
 
 The MVP backend is intentionally a modular monolith. It separates domain, repositories, services, controllers, DTOs, security configuration, and error handling so the codebase can later evolve toward microservices.

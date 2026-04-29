@@ -2,6 +2,7 @@ package za.co.ultronsport.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -22,6 +23,9 @@ class AthleteProfileServiceImplTest {
     @Mock
     private AthleteProfileRepository athleteProfileRepository;
 
+    @Mock
+    private LevelPlayScoreService levelPlayScoreService;
+
     @InjectMocks
     private AthleteProfileServiceImpl athleteProfileService;
 
@@ -36,6 +40,7 @@ class AthleteProfileServiceImplTest {
 
         assertThat(profile.getSport()).isEqualTo("Football");
         assertThat(profile.getProfileCompletenessScore()).isGreaterThan(80);
+        verify(levelPlayScoreService).recalculateForAthlete(profile.getId());
     }
 
     @Test

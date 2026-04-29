@@ -18,30 +18,30 @@ LevelPlay Rank is Ultron Sport's credibility and ranking system. Its goal is to 
 Recommended MVP ranking inputs:
 
 - Verified evidence: approved videos, statistics, certificates, and competition results
-- Endorsements: coach and institution validations from approved verifiers
-- Recency: recent verified activity and active profile maintenance
-- Performance metadata: sport-specific metrics captured during upload or verification
-- Engagement: views or saves may be shown separately and should have little or no direct ranking effect in the MVP
+- Achievements: athlete achievements already recorded in the platform
+- Coach verification count: evidence approvals from approved coach users
+- Profile completeness: enough profile context for scouts and organisations to evaluate fit
 
-## Recommended Starting Weighting
+The MVP formula intentionally excludes popularity, likes, views, fan votes, paid boosts, and AI-generated scoring.
 
-The exact formula should be tested during pilot use, but the MVP can start with:
+## Current MVP Formula
 
-- 60 percent verified evidence quality and quantity
-- 25 percent approved coach or institution validation
-- 10 percent recency and consistency of verified activity
-- 5 percent limited engagement or recruiter interest signals
+The current score is deliberately simple and explainable:
 
-Engagement should never overpower verified evidence.
+- Verified evidence score: 0 evidence = 0, 1 = 20, 2 = 35, 3 to 5 = 50, more than 5 = 60
+- Achievement score: 0 achievements = 0, 1 = 10, 2 = 15, 3 or more = 20
+- Coach verification score: 0 verifications = 0, 1 = 10, 2 = 15, 3 or more = 20
+- Profile completeness contribution: profile completeness scaled to a maximum of 20 points
+- Final credibility score: component sum clamped between 0 and 100
 
 ## Tiers
 
-Initial tiers can be used to make ranking easier to understand:
+Initial tiers make the score easier to understand:
 
-- Bronze: credible starting profile with some verified evidence
-- Silver: consistent verified performance and active profile
-- Gold: strong verified evidence and endorsements
-- Elite: top verified performance within a sport/category/region
+- Bronze: 0 to 24
+- Silver: 25 to 49
+- Gold: 50 to 74
+- Elite: 75 to 100
 
 Tier names and thresholds should be adjusted after pilot data is available.
 

@@ -9,22 +9,28 @@ import za.co.ultronsport.common.error.ResourceNotFoundException;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.repository.AthleteProfileRepository;
 import za.co.ultronsport.service.AthleteProfileService;
+import za.co.ultronsport.service.LevelPlayScoreService;
 import za.co.ultronsport.web.dto.CreateAthleteProfileRequest;
 
 @Service
 public class AthleteProfileServiceImpl implements AthleteProfileService {
 
     private final AthleteProfileRepository athleteProfileRepository;
+    private final LevelPlayScoreService levelPlayScoreService;
 
-    public AthleteProfileServiceImpl(AthleteProfileRepository athleteProfileRepository) {
+    public AthleteProfileServiceImpl(AthleteProfileRepository athleteProfileRepository,
+                                     LevelPlayScoreService levelPlayScoreService) {
         this.athleteProfileRepository = athleteProfileRepository;
+        this.levelPlayScoreService = levelPlayScoreService;
     }
 
     @Override
     public AthleteProfile create(CreateAthleteProfileRequest request) {
         AthleteProfile profile = AthleteProfile.create(request.userId(), request.sport(), request.position(),
                 request.age(), request.gender(), request.location(), request.schoolOrClub(), request.bio());
-        return athleteProfileRepository.save(profile);
+        AthleteProfile saved = athleteProfileRepository.save(profile);
+        levelPlayScoreService.recalculateForAthlete(saved.getId());
+        return saved;
     }
 
     @Override
