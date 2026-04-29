@@ -36,6 +36,12 @@ Admin base path:
 /api/admin
 ```
 
+Media base path:
+
+```text
+/api/media
+```
+
 ## Authentication
 
 | Method | Path | Access | Purpose |
@@ -81,6 +87,7 @@ Admin base path:
 | GET | `/{id}` | Owner ATHLETE, COACH for pending, ADMIN, SCOUT_AGENT/ORGANISATION for VERIFIED | Get evidence by visibility rules |
 | GET | `/my` | ATHLETE | List evidence owned by the current athlete |
 | PATCH | `/{id}` | ATHLETE | Update own evidence only while DRAFT or REJECTED |
+| POST | `/{id}/media/{mediaId}` | ATHLETE | Attach own uploaded media to own DRAFT or REJECTED evidence |
 | POST | `/{id}/submit` | ATHLETE | Move DRAFT or REJECTED evidence to PENDING_VERIFICATION |
 | GET | `/pending-verification` | COACH, ADMIN | List evidence awaiting verification |
 | POST | `/{id}/verify` | COACH | Mark pending evidence as VERIFIED |
@@ -117,6 +124,15 @@ Admin base path:
 | POST | `/recalculate-all` | ADMIN | Recalculate all athlete scores with a simple MVP loop |
 
 Legacy `/api/v1/levelplay-scores/...` endpoints remain for compatibility, but new clients should use `/api/levelplay`.
+
+## Media
+
+| Method | Path | Access | Purpose |
+| --- | --- | --- | --- |
+| POST | `/upload` | ATHLETE | Upload supported media to local/mock storage and return `mediaId` plus `publicUrl` |
+| GET | `/{mediaId}` | Owner ATHLETE, ADMIN | Return media metadata without exposing internal storage paths |
+
+Supported MVP upload content types are `video/mp4`, `video/quicktime`, `image/jpeg`, and `image/png`. The default max upload size is 50MB. Media scan status defaults to `SKIPPED_FOR_MVP`; malware scanning, object storage, CDN URLs, thumbnails, transcoding, chunked upload, and AI analysis are future work.
 
 ## Discovery
 
@@ -162,7 +178,8 @@ Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum
 - Request DTOs use validation annotations.
 - Response DTOs avoid exposing password hashes.
 - Protected endpoints require `Authorization: Bearer <accessToken>`.
-- Evidence currently accepts a `fileUrl` or `externalVideoLink`; binary file upload can be added later behind scanning and storage controls.
+- Evidence accepts URL-only mode through `fileUrl` or `externalVideoLink`, and can attach an uploaded `MediaAsset` while evidence is editable.
+- Media upload responses expose `mediaId` and `publicUrl`, not local filesystem paths or storage internals.
 - Evidence AI status defaults to `NOT_STARTED`; no AI service is called in the MVP workflow.
 - Discovery is relational database search for the MVP. Elasticsearch/OpenSearch, caching, vector search, and recommendation ranking are future work.
 - LevelPlay Rank uses verified evidence, achievements, coach verification count, and profile completeness only. Popularity, fan votes, views, likes, paid boosts, and AI scoring are not part of the MVP formula.

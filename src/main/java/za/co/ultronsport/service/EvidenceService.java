@@ -18,6 +18,8 @@ public interface EvidenceService {
 
     EvidenceUpload updateEvidence(Long currentUserId, Long evidenceId, UpdateEvidenceRequest request);
 
+    EvidenceUpload attachMedia(Long currentUserId, Long evidenceId, Long mediaId);
+
     EvidenceUpload submitEvidence(Long currentUserId, Long evidenceId);
 
     List<EvidenceUpload> getPendingVerificationEvidence();

@@ -32,6 +32,7 @@ The platform helps athletes upload sporting evidence, coaches and institutions v
 - [Data Model](docs/data-model.md)
 - [Security and Privacy](docs/security-and-privacy.md)
 - [Admin Moderation and Audit](docs/admin-moderation-and-audit.md)
+- [Media Storage](docs/media-storage.md)
 - [UI and Prototype Notes](docs/ui-and-prototype-notes.md)
 
 ## Source Materials
@@ -53,6 +54,7 @@ The current MVP documentation prioritizes credibility, ranking fairness, privacy
 - API style: REST with JSON
 - Persistence: Spring Data JPA
 - Security: Spring Security, BCrypt password hashing, JWT bearer tokens
+- Media storage: configurable LOCAL or MOCK MVP adapter, object-storage-ready interface
 - Default local database: H2 in memory
 - Production database target: PostgreSQL
 - Build tool: Maven
@@ -75,6 +77,17 @@ Optional local JWT overrides:
 ```powershell
 $env:ULTRON_JWT_SECRET="replace-with-a-long-local-development-secret"
 $env:ULTRON_JWT_EXPIRATION_MINUTES="60"
+```
+
+Optional local media storage overrides:
+
+```powershell
+$env:ULTRON_STORAGE_MODE="LOCAL"
+$env:ULTRON_STORAGE_LOCAL_BASE_PATH="./uploads/ultron-sport"
+$env:ULTRON_STORAGE_PUBLIC_BASE_URL="http://localhost:8080/media"
+$env:ULTRON_STORAGE_MAX_FILE_SIZE_BYTES="52428800"
+$env:ULTRON_MULTIPART_MAX_FILE_SIZE="50MB"
+$env:ULTRON_MULTIPART_MAX_REQUEST_SIZE="50MB"
 ```
 
 Run the automated tests:
@@ -129,13 +142,19 @@ Admin moderation and audit endpoints are exposed at:
 http://localhost:8080/api/admin
 ```
 
+Media upload endpoints are exposed at:
+
+```text
+http://localhost:8080/api/media
+```
+
 Use `POST /api/auth/register` or `POST /api/auth/login` to receive a bearer token, then call protected endpoints with:
 
 ```text
 Authorization: Bearer <accessToken>
 ```
 
-For the MVP, evidence uses `fileUrl` or `externalVideoLink` placeholders. Direct file upload, object storage, CDN delivery, malware scanning, and AI analysis jobs are intentionally deferred.
+For the MVP, evidence still supports URL-only mode through `fileUrl` or `externalVideoLink`. Athletes can also upload supported media through the local/mock `MediaStorageService` and attach it to DRAFT or REJECTED evidence. Production object storage, CDN delivery, malware scanning, transcoding, thumbnails, chunked upload, and AI analysis jobs are intentionally deferred.
 
 Discovery search is database-backed with pagination and role-aware evidence visibility. Scouts and organisations see verified evidence only; admins can filter all evidence statuses.
 

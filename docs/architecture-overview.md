@@ -20,6 +20,7 @@ Ultron Sport starts as a modular monolith. This keeps the MVP simple to develop 
 za.co.ultronsport
   common/error        Shared API error handling
   config/security    JWT config, token service, request filter, user details service, RBAC rules
+  config/storage     Media storage mode, local path, public URL, and size/type settings
   domain             Entities, enums, and domain state transitions
   repository         Spring Data repository interfaces
   service            Service interfaces
@@ -36,6 +37,7 @@ za.co.ultronsport
 - Coach profile verification support
 - Organisation, school, and club records
 - Evidence upload/link submission with structured metadata, draft/submission lifecycle, and AI-ready status
+- Local/mock media upload abstraction with metadata, checksum storage, and evidence attachment
 - Evidence verification workflow for coach approval/rejection and admin flag/archive moderation
 - Athlete search and discovery using verified evidence and basic profile filters
 - LevelPlay credibility score calculation with transparent MVP score explanation
@@ -46,6 +48,7 @@ za.co.ultronsport
 - Discovery service tests and MockMvc tests for role-aware search visibility
 - LevelPlay service and MockMvc tests for scoring, recalculation, explanation, and endpoint access control
 - Admin moderation/audit service and MockMvc tests for audit visibility, flagged/archived evidence, notes, and role access
+- Media storage service and MockMvc tests for upload, metadata visibility, and evidence attachment
 
 ## Security Flow
 
@@ -78,7 +81,9 @@ Evidence is implemented as a secured MVP workflow behind `/api/evidence`.
 - Admins can view all evidence, flag evidence, archive evidence, and inspect simple verification history.
 - Scouts and organisations can read VERIFIED evidence only.
 
-The current media strategy stores `fileUrl` or `externalVideoLink` placeholders. AI readiness is represented by `AiAnalysisStatus`, which defaults to `NOT_STARTED`; no model or AI service is invoked yet.
+The current media strategy supports URL-only evidence through `fileUrl` or `externalVideoLink`, plus a local/mock `MediaStorageService` for MVP uploads. Uploaded media creates a `MediaAsset` with owner, athlete profile, content type, checksum, public URL, upload status, and scan status. Athletes can attach their own media to their own DRAFT or REJECTED evidence, which updates the evidence `fileUrl`.
+
+Production object storage, signed URLs, CDN delivery, malware scanning, thumbnails, transcoding, chunked uploads, background processing, and AI analysis dispatch are intentionally deferred. AI readiness is represented by `AiAnalysisStatus`, which defaults to `NOT_STARTED`; no model or AI service is invoked yet.
 
 ## Discovery Workflow
 

@@ -61,6 +61,13 @@ public class EvidenceController {
         return EvidenceResponse.from(evidenceService.updateEvidence(currentUser.getId(), id, request));
     }
 
+    @PostMapping("/{id}/media/{mediaId}")
+    public EvidenceResponse attachMedia(@PathVariable Long id, @PathVariable Long mediaId,
+                                        Authentication authentication) {
+        SecurityUser currentUser = currentUser(authentication);
+        return EvidenceResponse.from(evidenceService.attachMedia(currentUser.getId(), id, mediaId));
+    }
+
     @PostMapping("/{id}/submit")
     public VerificationActionResponse submit(@PathVariable Long id, Authentication authentication) {
         SecurityUser currentUser = currentUser(authentication);

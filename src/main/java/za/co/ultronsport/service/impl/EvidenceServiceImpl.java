@@ -10,6 +10,7 @@ import za.co.ultronsport.domain.AdminActionType;
 import za.co.ultronsport.domain.AdminTargetType;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.EvidenceUpload;
+import za.co.ultronsport.domain.MediaAsset;
 import za.co.ultronsport.domain.UserRole;
 import za.co.ultronsport.domain.VerificationRequest;
 import za.co.ultronsport.domain.VerificationStatus;
@@ -19,6 +20,7 @@ import za.co.ultronsport.repository.VerificationRequestRepository;
 import za.co.ultronsport.service.AdminActionLogService;
 import za.co.ultronsport.service.EvidenceService;
 import za.co.ultronsport.service.LevelPlayScoreService;
+import za.co.ultronsport.service.MediaStorageService;
 import za.co.ultronsport.web.dto.CreateEvidenceRequest;
 import za.co.ultronsport.web.dto.FlagEvidenceRequest;
 import za.co.ultronsport.web.dto.RejectEvidenceRequest;
@@ -32,17 +34,20 @@ public class EvidenceServiceImpl implements EvidenceService {
     private final VerificationRequestRepository verificationRequestRepository;
     private final LevelPlayScoreService levelPlayScoreService;
     private final AdminActionLogService adminActionLogService;
+    private final MediaStorageService mediaStorageService;
 
     public EvidenceServiceImpl(EvidenceUploadRepository evidenceUploadRepository,
                                AthleteProfileRepository athleteProfileRepository,
                                VerificationRequestRepository verificationRequestRepository,
                                LevelPlayScoreService levelPlayScoreService,
-                               AdminActionLogService adminActionLogService) {
+                               AdminActionLogService adminActionLogService,
+                               MediaStorageService mediaStorageService) {
         this.evidenceUploadRepository = evidenceUploadRepository;
         this.athleteProfileRepository = athleteProfileRepository;
         this.verificationRequestRepository = verificationRequestRepository;
         this.levelPlayScoreService = levelPlayScoreService;
         this.adminActionLogService = adminActionLogService;
+        this.mediaStorageService = mediaStorageService;
     }
 
     @Override
@@ -80,6 +85,24 @@ public class EvidenceServiceImpl implements EvidenceService {
                 request.position(), request.eventType(), request.matchOrTraining(), request.eventDate(),
                 request.fileUrl(), request.externalVideoLink()));
         return evidenceUploadRepository.save(evidence);
+    }
+
+    @Override
+    @Transactional
+    public EvidenceUpload attachMedia(Long currentUserId, Long evidenceId, Long mediaId) {
+        EvidenceUpload evidence = getById(evidenceId);
+        assertEvidenceOwner(currentUserId, evidence);
+        MediaAsset media = mediaStorageService.getMetadata(mediaId);
+        if (!media.getOwnerUserId().equals(currentUserId)) {
+            throw new AccessDeniedException("You can only attach your own media.");
+        }
+        if (!media.getAthleteProfileId().equals(evidence.getAthleteProfileId())) {
+            throw new AccessDeniedException("Media can only be attached to evidence for the same athlete profile.");
+        }
+        applyTransition(() -> evidence.attachMedia(media.getId(), media.getPublicUrl()));
+        EvidenceUpload saved = evidenceUploadRepository.save(evidence);
+        mediaStorageService.attachToEvidence(media.getId(), saved.getId());
+        return saved;
     }
 
     @Override

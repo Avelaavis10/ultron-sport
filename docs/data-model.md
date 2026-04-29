@@ -57,10 +57,14 @@ The data model should capture users, profiles, institutions, evidence, verificat
 
 - evidence_id
 - athlete_user_id
+- athlete_profile_id
+- uploaded_by_user_id
 - type
 - title
 - description
+- media_asset_id
 - file_url
+- external_video_link
 - file_hash
 - file_size
 - duration
@@ -72,6 +76,25 @@ The data model should capture users, profiles, institutions, evidence, verificat
 - uploaded_at
 - status
 - metrics_id
+
+### MediaAsset
+
+- media_asset_id
+- owner_user_id
+- athlete_profile_id
+- evidence_upload_id
+- original_filename
+- stored_filename
+- content_type
+- file_size_bytes
+- checksum_sha256
+- storage_provider
+- storage_key
+- public_url
+- upload_status
+- scan_status
+- created_at
+- updated_at
 
 ### Verification
 
@@ -159,6 +182,8 @@ The data model should capture users, profiles, institutions, evidence, verificat
 
 - A user has one or more role-specific profiles.
 - An athlete profile has many evidence records.
+- An athlete profile has many media assets.
+- Evidence can reference one attached media asset for the current MVP upload flow.
 - Evidence has zero or more verification records.
 - Verified evidence may produce LevelPlay score updates.
 - Institutions can own rosters and assign coaches.
@@ -196,6 +221,29 @@ Current target types include:
 - flagged
 - archived
 
+## Media Values
+
+Storage providers:
+
+- local
+- mock
+- s3_todo
+- azure_blob_todo
+
+Upload statuses:
+
+- uploaded
+- failed
+- link_only
+
+Scan statuses:
+
+- not_scanned
+- pending
+- passed
+- failed
+- skipped_for_mvp
+
 ## LevelPlay Tier Values
 
 - bronze
@@ -219,6 +267,7 @@ The current LevelPlayScore is one current record per athlete profile. It is inte
 - Unique indexes on email and phone where provided.
 - B-tree indexes on sport, location, age, gender, position_or_event, school_or_club, and tier.
 - MVP discovery indexes include athlete profile sport, position, location, organisation_id, updated_at, and evidence sport, position, verification_status, event_date, athlete_profile_id, created_at, and updated_at.
+- MediaAsset MVP indexes include owner_user_id, athlete_profile_id, evidence_upload_id, and created_at.
 - LevelPlayScore should keep a unique index on athlete_profile_id for the current score record.
 - Foreign-key indexes on user_id, athlete_user_id, evidence_id, institution_id, and verifier_user_id.
 - Search index for athlete names, bios, achievements, sports, schools, and locations.
@@ -228,6 +277,8 @@ The current LevelPlayScore is one current record per athlete profile. It is inte
 
 - Keep personal data minimal and purpose-bound.
 - Store large files in object storage, not the relational database.
+- The MVP stores media bytes locally only for development; production storage should move behind the same media storage interface.
+- Do not expose local filesystem paths in API responses.
 - Record model versions for AI metrics.
 - Preserve audit trails for verification, ranking, moderation, and account changes.
 - Treat audit logs as append-only records through the application service/API surface.

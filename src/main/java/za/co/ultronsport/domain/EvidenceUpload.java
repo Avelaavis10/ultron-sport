@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "evidence_uploads", indexes = {
@@ -50,6 +51,7 @@ public class EvidenceUpload extends BaseEntity {
 
     private String fileUrl;
     private String externalVideoLink;
+    private Long mediaAssetId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -94,6 +96,8 @@ public class EvidenceUpload extends BaseEntity {
         if (!isEditableByAthlete()) {
             throw new IllegalStateException("Evidence can only be edited while DRAFT or REJECTED.");
         }
+        boolean replacingAttachedMedia = mediaAssetId != null
+                && (hasText(externalVideoLink) || !Objects.equals(this.fileUrl, fileUrl));
         this.title = title;
         this.description = description;
         this.sport = sport;
@@ -103,6 +107,18 @@ public class EvidenceUpload extends BaseEntity {
         this.eventDate = eventDate;
         this.fileUrl = fileUrl;
         this.externalVideoLink = externalVideoLink;
+        if (replacingAttachedMedia) {
+            this.mediaAssetId = null;
+        }
+    }
+
+    public void attachMedia(Long mediaAssetId, String publicUrl) {
+        if (!isEditableByAthlete()) {
+            throw new IllegalStateException("Evidence can only attach media while DRAFT or REJECTED.");
+        }
+        this.mediaAssetId = mediaAssetId;
+        this.fileUrl = publicUrl;
+        this.externalVideoLink = null;
     }
 
     public void submit() {
@@ -208,11 +224,19 @@ public class EvidenceUpload extends BaseEntity {
         return externalVideoLink;
     }
 
+    public Long getMediaAssetId() {
+        return mediaAssetId;
+    }
+
     public VerificationStatus getVerificationStatus() {
         return verificationStatus;
     }
 
     public AiAnalysisStatus getAiAnalysisStatus() {
         return aiAnalysisStatus;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

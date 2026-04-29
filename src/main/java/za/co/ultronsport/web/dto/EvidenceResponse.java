@@ -20,6 +20,7 @@ public record EvidenceResponse(
         LocalDate eventDate,
         String fileUrl,
         String externalVideoLink,
+        Long mediaAssetId,
         VerificationStatus verificationStatus,
         AiAnalysisStatus aiAnalysisStatus,
         Instant createdAt,
@@ -29,7 +30,8 @@ public record EvidenceResponse(
         return new EvidenceResponse(evidence.getId(), evidence.getAthleteProfileId(), evidence.getUploadedByUserId(),
                 evidence.getTitle(), evidence.getDescription(), evidence.getSport(), evidence.getPosition(),
                 evidence.getEventType(), evidence.getMatchOrTraining(), evidence.getEventDate(),
-                evidence.getFileUrl(), evidence.getExternalVideoLink(), evidence.getVerificationStatus(),
-                evidence.getAiAnalysisStatus(), evidence.getCreatedAt(), evidence.getUpdatedAt());
+                evidence.getFileUrl(), evidence.getExternalVideoLink(), evidence.getMediaAssetId(),
+                evidence.getVerificationStatus(), evidence.getAiAnalysisStatus(), evidence.getCreatedAt(),
+                evidence.getUpdatedAt());
     }
 }

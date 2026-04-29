@@ -14,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.test.util.ReflectionTestUtils;
 import za.co.ultronsport.common.error.InvalidStateException;
 import za.co.ultronsport.domain.AdminActionType;
 import za.co.ultronsport.domain.AdminTargetType;
@@ -21,6 +23,8 @@ import za.co.ultronsport.domain.AiAnalysisStatus;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.EvidenceContext;
 import za.co.ultronsport.domain.EvidenceUpload;
+import za.co.ultronsport.domain.MediaAsset;
+import za.co.ultronsport.domain.MediaStorageProvider;
 import za.co.ultronsport.domain.VerificationRequest;
 import za.co.ultronsport.domain.VerificationStatus;
 import za.co.ultronsport.repository.AthleteProfileRepository;
@@ -50,6 +54,9 @@ class EvidenceServiceImplTest {
     @Mock
     private AdminActionLogService adminActionLogService;
 
+    @Mock
+    private MediaStorageService mediaStorageService;
+
     @InjectMocks
     private EvidenceServiceImpl evidenceService;
 
@@ -65,6 +72,8 @@ class EvidenceServiceImplTest {
         assertThat(evidence.getVerificationStatus()).isEqualTo(VerificationStatus.DRAFT);
         assertThat(evidence.getAiAnalysisStatus()).isEqualTo(AiAnalysisStatus.NOT_STARTED);
         assertThat(evidence.getUploadedByUserId()).isEqualTo(1L);
+        assertThat(evidence.getExternalVideoLink()).isEqualTo("https://video.example/highlight");
+        assertThat(evidence.getFileUrl()).isNull();
     }
 
     @Test
@@ -111,6 +120,47 @@ class EvidenceServiceImplTest {
 
         assertThatThrownBy(() -> evidenceService.updateEvidence(1L, 7L, updateRequest()))
                 .isInstanceOf(InvalidStateException.class);
+    }
+
+    @Test
+    void athleteCanAttachOwnMediaToOwnDraftEvidence() {
+        EvidenceUpload evidence = draftEvidence(1L, 11L);
+        setId(evidence, 7L);
+        MediaAsset media = mediaAsset(1L, 11L);
+        when(evidenceUploadRepository.findById(7L)).thenReturn(Optional.of(evidence));
+        when(mediaStorageService.getMetadata(5L)).thenReturn(media);
+        when(evidenceUploadRepository.save(evidence)).thenReturn(evidence);
+
+        EvidenceUpload attached = evidenceService.attachMedia(1L, 7L, 5L);
+
+        assertThat(attached.getMediaAssetId()).isEqualTo(5L);
+        assertThat(attached.getFileUrl()).isEqualTo("http://localhost:8080/media/test.mp4");
+        assertThat(attached.getExternalVideoLink()).isNull();
+        verify(mediaStorageService).attachToEvidence(5L, 7L);
+    }
+
+    @Test
+    void athleteCannotAttachMediaToVerifiedEvidence() {
+        EvidenceUpload evidence = pendingEvidence(1L, 11L);
+        evidence.verify();
+        MediaAsset media = mediaAsset(1L, 11L);
+        when(evidenceUploadRepository.findById(7L)).thenReturn(Optional.of(evidence));
+        when(mediaStorageService.getMetadata(5L)).thenReturn(media);
+
+        assertThatThrownBy(() -> evidenceService.attachMedia(1L, 7L, 5L))
+                .isInstanceOf(InvalidStateException.class)
+                .hasMessage("Evidence can only attach media while DRAFT or REJECTED.");
+    }
+
+    @Test
+    void athleteCannotAttachAnotherAthletesMedia() {
+        EvidenceUpload evidence = draftEvidence(1L, 11L);
+        MediaAsset media = mediaAsset(2L, 12L);
+        when(evidenceUploadRepository.findById(7L)).thenReturn(Optional.of(evidence));
+        when(mediaStorageService.getMetadata(5L)).thenReturn(media);
+
+        assertThatThrownBy(() -> evidenceService.attachMedia(1L, 7L, 5L))
+                .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
@@ -199,5 +249,16 @@ class EvidenceServiceImplTest {
     private AthleteProfile athleteProfile(Long userId) {
         return AthleteProfile.create(userId, "Football", "Striker", 18, "Male", "Cape Town",
                 "CPUT FC", "Bio");
+    }
+
+    private MediaAsset mediaAsset(Long ownerUserId, Long athleteProfileId) {
+        MediaAsset media = MediaAsset.uploaded(ownerUserId, athleteProfileId, "test.mp4", "test.mp4", "video/mp4",
+                12L, "checksum", MediaStorageProvider.LOCAL, "test.mp4", "http://localhost:8080/media/test.mp4");
+        setId(media, 5L);
+        return media;
+    }
+
+    private void setId(Object entity, Long id) {
+        ReflectionTestUtils.setField(entity, "id", id);
     }
 }

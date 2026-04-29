@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -31,11 +31,14 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 
 ## Phase 3: Evidence Storage
 
-- Add managed file upload flow.
-- Store files in local dev storage and object storage in production.
+- Completed: add managed MVP media upload flow for ATHLETE users.
+- Completed: store files in local dev storage or mock storage behind `MediaStorageService`.
+- Completed: attach uploaded media to editable evidence without duplicating the evidence workflow.
+- Add production object storage adapter.
 - Add file type, size, and malware scanning controls.
 - Add signed URL access.
 - Add upload retry/resume support.
+- Add thumbnails and transcoding.
 - Add metadata validation for sport-specific evidence.
 
 ## Phase 4: LevelPlay Refinement
