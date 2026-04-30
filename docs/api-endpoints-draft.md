@@ -64,6 +64,7 @@ Media base path:
 | POST | `/api/athlete-profiles` | ATHLETE | Create the current user's athlete profile |
 | GET | `/api/athlete-profiles/me` | ATHLETE | Get the current athlete's full profile |
 | PATCH | `/api/athlete-profiles/me` | ATHLETE | Update the current athlete's profile and recalculate LevelPlay |
+| PATCH | `/api/athlete-profiles/me/organisation` | ATHLETE | Link current athlete profile to an existing organisation or update school/club fallback text |
 | GET | `/api/athlete-profiles/{athleteProfileId}` | ADMIN, COACH, owning ATHLETE | Get full internal profile view |
 | GET | `/api/athlete-profiles` | ADMIN | Paginated list of athlete profiles |
 | GET | `/api/v1/athlete-profiles?sport=&location=&position=` | Legacy authenticated roles | Legacy profile search/filter path |
@@ -72,15 +73,19 @@ Media base path:
 
 | Method | Path | Access | Purpose |
 | --- | --- | --- | --- |
-| POST | `/coach-profiles` | COACH | Create coach profile |
-| GET | `/coach-profiles/{id}` | COACH, ADMIN | Get coach profile |
+| POST | `/api/coach-profiles` | COACH | Create current coach user's profile; duplicate coach profiles are rejected |
+| GET | `/api/coach-profiles/me` | COACH | Get current coach profile |
+| PATCH | `/api/coach-profiles/me` | COACH | Update current coach profile and organisation link |
+| GET | `/api/coach-profiles/{id}` | Owning COACH, ADMIN | Get coach profile |
 
 ## Organisations
 
 | Method | Path | Access | Purpose |
 | --- | --- | --- | --- |
-| POST | `/organisations` | ORGANISATION, ADMIN | Create school, club, or organisation record |
-| GET | `/organisations/{id}` | ORGANISATION, ADMIN | Get organisation record |
+| POST | `/api/organisations` | ORGANISATION, ADMIN | Create school, club, academy, university, team, or organisation record |
+| GET | `/api/organisations` | Authenticated | Search organisations by name, type, location, or verification status |
+| GET | `/api/organisations/{id}` | Authenticated | Get organisation record |
+| PATCH | `/api/organisations/{id}` | ADMIN | Update organisation details or verification status |
 
 ## Evidence
 
@@ -98,6 +103,7 @@ Media base path:
 | POST | `/{id}/flag` | ADMIN | Flag evidence with a required reason |
 | POST | `/{id}/archive` | ADMIN | Archive evidence |
 | GET | `/{id}/verification-history` | ADMIN | View simple verification history |
+| GET | `/{id}/verification-context` | COACH, ADMIN | View athlete, coach, organisation, and shared-context details for an evidence item |
 
 ## Verification Requests
 
@@ -189,6 +195,8 @@ Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum
 - Media upload responses expose `mediaId` and `publicUrl`, not local filesystem paths or storage internals.
 - Evidence AI status defaults to `NOT_STARTED`; no AI service is called in the MVP workflow.
 - Profile completeness uses linked display name, sport, position, location, organisation or school/club, bio, age, at least one achievement, and at least one evidence item.
+- Coach evidence verification requires a CoachProfile and records coach profile, coach organisation, athlete profile, and shared-organisation context where available.
+- Organisation names in discovery resolve from `organisationId` first and fall back to `schoolOrClub` text.
 - Achievement delete/archive is deferred because the MVP model does not yet include a soft-delete or achievement moderation status.
 - Discovery is relational database search for the MVP. Elasticsearch/OpenSearch, caching, vector search, and recommendation ranking are future work.
 - LevelPlay Rank uses verified evidence, achievements, coach verification count, and profile completeness only. Popularity, fan votes, views, likes, paid boosts, and AI scoring are not part of the MVP formula.

@@ -25,8 +25,10 @@ import za.co.ultronsport.domain.UserRole;
 import za.co.ultronsport.domain.VerificationStatus;
 import za.co.ultronsport.repository.AchievementRepository;
 import za.co.ultronsport.repository.AthleteProfileRepository;
+import za.co.ultronsport.repository.CoachProfileRepository;
 import za.co.ultronsport.repository.EvidenceUploadRepository;
 import za.co.ultronsport.repository.LevelPlayScoreRepository;
+import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.repository.UserRepository;
 import za.co.ultronsport.repository.VerificationRequestRepository;
 import za.co.ultronsport.service.LevelPlayScoreService;
@@ -60,6 +62,12 @@ class LevelPlayIntegrationTest {
     private LevelPlayScoreRepository levelPlayScoreRepository;
 
     @Autowired
+    private CoachProfileRepository coachProfileRepository;
+
+    @Autowired
+    private OrganisationRepository organisationRepository;
+
+    @Autowired
     private LevelPlayScoreService levelPlayScoreService;
 
     @BeforeEach
@@ -68,7 +76,9 @@ class LevelPlayIntegrationTest {
         evidenceUploadRepository.deleteAll();
         levelPlayScoreRepository.deleteAll();
         achievementRepository.deleteAll();
+        coachProfileRepository.deleteAll();
         athleteProfileRepository.deleteAll();
+        organisationRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -157,6 +167,7 @@ class LevelPlayIntegrationTest {
         AthleteProfile profile = createAthleteProfile(athlete, "Workflow Scored Athlete");
         Long evidenceId = createEvidence(athlete, profile.getId());
         submitEvidence(athlete, evidenceId);
+        createCoachProfile(coach);
 
         mockMvc.perform(post("/api/evidence/{id}/verify", evidenceId)
                         .header("Authorization", "Bearer " + coach.token()))
@@ -227,6 +238,23 @@ class LevelPlayIntegrationTest {
             evidence.verify();
         }
         return evidenceUploadRepository.save(evidence);
+    }
+
+    private void createCoachProfile(RegisteredUser coach) throws Exception {
+        mockMvc.perform(post("/api/coach-profiles")
+                        .header("Authorization", "Bearer " + coach.token())
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "certificationReference": "SAFA-123",
+                                  "organisationId": null,
+                                  "organisationName": "Ultron Academy",
+                                  "sport": "Football",
+                                  "qualificationSummary": "Qualified coach",
+                                  "yearsExperience": 4
+                                }
+                                """))
+                .andExpect(status().isCreated());
     }
 
     private AthleteProfile athleteProfile(String displayName) {

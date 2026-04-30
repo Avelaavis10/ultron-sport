@@ -26,6 +26,7 @@ import za.co.ultronsport.service.AthleteProfileService;
 import za.co.ultronsport.web.dto.AchievementResponse;
 import za.co.ultronsport.web.dto.AthleteProfileResponse;
 import za.co.ultronsport.web.dto.CreateAthleteProfileRequest;
+import za.co.ultronsport.web.dto.LinkAthleteOrganisationRequest;
 import za.co.ultronsport.web.dto.PageResponse;
 import za.co.ultronsport.web.dto.UpdateAthleteProfileRequest;
 
@@ -64,6 +65,13 @@ public class AthleteProfileController {
                                            Authentication authentication) {
         SecurityUser currentUser = currentUser(authentication);
         return AthleteProfileResponse.from(athleteProfileService.updateMyProfile(currentUser.getId(), request));
+    }
+
+    @PatchMapping("/me/organisation")
+    public AthleteProfileResponse linkOrganisation(@Valid @RequestBody LinkAthleteOrganisationRequest request,
+                                                   Authentication authentication) {
+        SecurityUser currentUser = currentUser(authentication);
+        return AthleteProfileResponse.from(athleteProfileService.linkOrganisation(currentUser.getId(), request));
     }
 
     @GetMapping("/{id}")

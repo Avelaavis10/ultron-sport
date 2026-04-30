@@ -20,6 +20,7 @@ import za.co.ultronsport.web.dto.FlagEvidenceRequest;
 import za.co.ultronsport.web.dto.RejectEvidenceRequest;
 import za.co.ultronsport.web.dto.UpdateEvidenceRequest;
 import za.co.ultronsport.web.dto.VerificationActionResponse;
+import za.co.ultronsport.web.dto.VerificationContextResponse;
 import za.co.ultronsport.web.dto.VerificationRequestResponse;
 
 @RestController
@@ -44,6 +45,12 @@ public class EvidenceController {
     public EvidenceResponse getById(@PathVariable Long id, Authentication authentication) {
         SecurityUser currentUser = currentUser(authentication);
         return EvidenceResponse.from(evidenceService.getEvidenceById(currentUser.getId(), currentUser.getRole(), id));
+    }
+
+    @GetMapping("/{id}/verification-context")
+    public VerificationContextResponse verificationContext(@PathVariable Long id, Authentication authentication) {
+        SecurityUser currentUser = currentUser(authentication);
+        return evidenceService.getVerificationContext(currentUser.getId(), currentUser.getRole(), id);
     }
 
     @GetMapping("/my")

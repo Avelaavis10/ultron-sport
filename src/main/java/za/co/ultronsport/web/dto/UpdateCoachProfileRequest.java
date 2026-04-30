@@ -1,11 +1,10 @@
 package za.co.ultronsport.web.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
-public record CreateCoachProfileRequest(
-        @NotBlank @Size(max = 120) String certificationReference,
+public record UpdateCoachProfileRequest(
+        @Size(max = 120) String certificationReference,
         Long organisationId,
         String organisationName,
         String sport,

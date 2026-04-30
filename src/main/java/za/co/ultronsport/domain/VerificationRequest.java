@@ -14,11 +14,17 @@ public class VerificationRequest extends BaseEntity {
     @Column(nullable = false)
     private Long evidenceUploadId;
 
+    private Long athleteProfileId;
+
     @Column(nullable = false)
     private Long requestedByUserId;
 
     @Column(nullable = false)
     private Long verifierUserId;
+
+    private Long coachProfileId;
+    private Long organisationId;
+    private Boolean sharedOrganisationContext;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -41,6 +47,14 @@ public class VerificationRequest extends BaseEntity {
 
     public static VerificationRequest create(Long evidenceUploadId, Long requestedByUserId, Long verifierUserId) {
         return new VerificationRequest(evidenceUploadId, requestedByUserId, verifierUserId);
+    }
+
+    public void attachContext(Long athleteProfileId, Long coachProfileId, Long organisationId,
+                              Boolean sharedOrganisationContext) {
+        this.athleteProfileId = athleteProfileId;
+        this.coachProfileId = coachProfileId;
+        this.organisationId = organisationId;
+        this.sharedOrganisationContext = sharedOrganisationContext;
     }
 
     public void approve(String comments) {
@@ -68,12 +82,28 @@ public class VerificationRequest extends BaseEntity {
         return evidenceUploadId;
     }
 
+    public Long getAthleteProfileId() {
+        return athleteProfileId;
+    }
+
     public Long getRequestedByUserId() {
         return requestedByUserId;
     }
 
     public Long getVerifierUserId() {
         return verifierUserId;
+    }
+
+    public Long getCoachProfileId() {
+        return coachProfileId;
+    }
+
+    public Long getOrganisationId() {
+        return organisationId;
+    }
+
+    public Boolean getSharedOrganisationContext() {
+        return sharedOrganisationContext;
     }
 
     public VerificationStatus getStatus() {

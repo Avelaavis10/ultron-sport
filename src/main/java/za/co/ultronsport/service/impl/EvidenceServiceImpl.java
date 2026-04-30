@@ -9,13 +9,17 @@ import za.co.ultronsport.common.error.ResourceNotFoundException;
 import za.co.ultronsport.domain.AdminActionType;
 import za.co.ultronsport.domain.AdminTargetType;
 import za.co.ultronsport.domain.AthleteProfile;
+import za.co.ultronsport.domain.CoachProfile;
 import za.co.ultronsport.domain.EvidenceUpload;
 import za.co.ultronsport.domain.MediaAsset;
+import za.co.ultronsport.domain.Organisation;
 import za.co.ultronsport.domain.UserRole;
 import za.co.ultronsport.domain.VerificationRequest;
 import za.co.ultronsport.domain.VerificationStatus;
 import za.co.ultronsport.repository.AthleteProfileRepository;
+import za.co.ultronsport.repository.CoachProfileRepository;
 import za.co.ultronsport.repository.EvidenceUploadRepository;
+import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.repository.VerificationRequestRepository;
 import za.co.ultronsport.service.AdminActionLogService;
 import za.co.ultronsport.service.EvidenceService;
@@ -25,12 +29,15 @@ import za.co.ultronsport.web.dto.CreateEvidenceRequest;
 import za.co.ultronsport.web.dto.FlagEvidenceRequest;
 import za.co.ultronsport.web.dto.RejectEvidenceRequest;
 import za.co.ultronsport.web.dto.UpdateEvidenceRequest;
+import za.co.ultronsport.web.dto.VerificationContextResponse;
 
 @Service
 public class EvidenceServiceImpl implements EvidenceService {
 
     private final EvidenceUploadRepository evidenceUploadRepository;
     private final AthleteProfileRepository athleteProfileRepository;
+    private final CoachProfileRepository coachProfileRepository;
+    private final OrganisationRepository organisationRepository;
     private final VerificationRequestRepository verificationRequestRepository;
     private final LevelPlayScoreService levelPlayScoreService;
     private final AdminActionLogService adminActionLogService;
@@ -38,12 +45,16 @@ public class EvidenceServiceImpl implements EvidenceService {
 
     public EvidenceServiceImpl(EvidenceUploadRepository evidenceUploadRepository,
                                AthleteProfileRepository athleteProfileRepository,
+                               CoachProfileRepository coachProfileRepository,
+                               OrganisationRepository organisationRepository,
                                VerificationRequestRepository verificationRequestRepository,
                                LevelPlayScoreService levelPlayScoreService,
                                AdminActionLogService adminActionLogService,
                                MediaStorageService mediaStorageService) {
         this.evidenceUploadRepository = evidenceUploadRepository;
         this.athleteProfileRepository = athleteProfileRepository;
+        this.coachProfileRepository = coachProfileRepository;
+        this.organisationRepository = organisationRepository;
         this.verificationRequestRepository = verificationRequestRepository;
         this.levelPlayScoreService = levelPlayScoreService;
         this.adminActionLogService = adminActionLogService;
@@ -127,9 +138,13 @@ public class EvidenceServiceImpl implements EvidenceService {
     @Transactional
     public EvidenceUpload verifyEvidence(Long coachUserId, Long evidenceId) {
         EvidenceUpload evidence = getById(evidenceId);
+        if (!evidence.isPendingVerification()) {
+            applyTransition(evidence::verify);
+        }
+        CoachVerificationContext context = coachVerificationContext(coachUserId, evidence);
         applyTransition(evidence::verify);
         EvidenceUpload saved = evidenceUploadRepository.save(evidence);
-        recordVerificationAction(saved, coachUserId, VerificationStatus.VERIFIED, "Verified by coach.");
+        recordVerificationAction(saved, coachUserId, VerificationStatus.VERIFIED, "Verified by coach.", context);
         levelPlayScoreService.recalculateForAthlete(saved.getAthleteProfileId());
         return saved;
     }
@@ -139,9 +154,13 @@ public class EvidenceServiceImpl implements EvidenceService {
     public EvidenceUpload rejectEvidence(Long coachUserId, Long evidenceId, RejectEvidenceRequest request) {
         String reason = requireReason(request.reason(), "Rejection reason is required.");
         EvidenceUpload evidence = getById(evidenceId);
+        if (!evidence.isPendingVerification()) {
+            applyTransition(evidence::reject);
+        }
+        CoachVerificationContext context = coachVerificationContext(coachUserId, evidence);
         applyTransition(evidence::reject);
         EvidenceUpload saved = evidenceUploadRepository.save(evidence);
-        recordVerificationAction(saved, coachUserId, VerificationStatus.REJECTED, reason);
+        recordVerificationAction(saved, coachUserId, VerificationStatus.REJECTED, reason, context);
         return saved;
     }
 
@@ -152,7 +171,7 @@ public class EvidenceServiceImpl implements EvidenceService {
         EvidenceUpload evidence = getById(evidenceId);
         applyTransition(evidence::flag);
         EvidenceUpload saved = evidenceUploadRepository.save(evidence);
-        recordVerificationAction(saved, adminUserId, VerificationStatus.FLAGGED, reason);
+        recordVerificationAction(saved, adminUserId, VerificationStatus.FLAGGED, reason, null);
         adminActionLogService.log(adminUserId, AdminActionType.EVIDENCE_FLAGGED, AdminTargetType.EVIDENCE,
                 saved.getId(), reason, "Evidence flagged for moderation.");
         return saved;
@@ -174,6 +193,31 @@ public class EvidenceServiceImpl implements EvidenceService {
     public List<VerificationRequest> getVerificationHistory(Long evidenceId) {
         getById(evidenceId);
         return verificationRequestRepository.findByEvidenceUploadIdOrderByCreatedAtDesc(evidenceId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public VerificationContextResponse getVerificationContext(Long currentUserId, UserRole currentUserRole,
+                                                              Long evidenceId) {
+        if (currentUserRole != UserRole.ADMIN && currentUserRole != UserRole.COACH) {
+            throw new AccessDeniedException("You are not allowed to view verification context.");
+        }
+        EvidenceUpload evidence = getById(evidenceId);
+        AthleteProfile athlete = athleteProfileRepository.findById(evidence.getAthleteProfileId())
+                .orElseThrow(() -> new ResourceNotFoundException("Athlete profile not found: "
+                        + evidence.getAthleteProfileId()));
+        Organisation athleteOrganisation = getOrganisation(athlete.getOrganisationId());
+        VerificationRequest latestVerification = verificationRequestRepository
+                .findFirstByEvidenceUploadIdOrderByCreatedAtDesc(evidenceId)
+                .orElse(null);
+        CoachProfile coachProfile = resolveContextCoachProfile(currentUserId, currentUserRole, latestVerification);
+        Organisation coachOrganisation = coachProfile == null ? null : getOrganisation(coachProfile.getOrganisationId());
+        Boolean shared = sharedOrganisationContext(athlete, coachProfile);
+        String warning = coachProfile == null
+                ? "Coach profile context is missing for this evidence decision."
+                : null;
+        return VerificationContextResponse.from(evidence, athlete, athleteOrganisation, latestVerification,
+                coachProfile, coachOrganisation, shared, warning);
     }
 
     private EvidenceUpload getById(Long evidenceId) {
@@ -213,9 +257,13 @@ public class EvidenceServiceImpl implements EvidenceService {
     }
 
     private void recordVerificationAction(EvidenceUpload evidence, Long actorUserId, VerificationStatus status,
-                                          String comments) {
+                                          String comments, CoachVerificationContext context) {
         VerificationRequest request = VerificationRequest.create(evidence.getId(), evidence.getUploadedByUserId(),
                 actorUserId);
+        request.attachContext(evidence.getAthleteProfileId(),
+                context == null ? null : context.coachProfile().getId(),
+                context == null ? null : context.coachProfile().getOrganisationId(),
+                context == null ? null : context.sharedOrganisationContext());
         switch (status) {
             case VERIFIED -> request.approve(comments);
             case REJECTED -> request.reject(comments);
@@ -223,6 +271,43 @@ public class EvidenceServiceImpl implements EvidenceService {
             default -> throw new InvalidStateException("Unsupported verification history status.");
         }
         verificationRequestRepository.save(request);
+    }
+
+    private CoachVerificationContext coachVerificationContext(Long coachUserId, EvidenceUpload evidence) {
+        CoachProfile coachProfile = coachProfileRepository.findByUserId(coachUserId)
+                .orElseThrow(() -> new InvalidStateException("Coach profile is required before verifying evidence."));
+        AthleteProfile athlete = athleteProfileRepository.findById(evidence.getAthleteProfileId())
+                .orElseThrow(() -> new ResourceNotFoundException("Athlete profile not found: "
+                        + evidence.getAthleteProfileId()));
+        return new CoachVerificationContext(coachProfile, sharedOrganisationContext(athlete, coachProfile));
+    }
+
+    private CoachProfile resolveContextCoachProfile(Long currentUserId, UserRole currentUserRole,
+                                                    VerificationRequest latestVerification) {
+        if (latestVerification != null && latestVerification.getCoachProfileId() != null) {
+            return coachProfileRepository.findById(latestVerification.getCoachProfileId()).orElse(null);
+        }
+        if (latestVerification != null) {
+            return coachProfileRepository.findByUserId(latestVerification.getVerifierUserId()).orElse(null);
+        }
+        if (currentUserRole == UserRole.COACH) {
+            return coachProfileRepository.findByUserId(currentUserId).orElse(null);
+        }
+        return null;
+    }
+
+    private Organisation getOrganisation(Long organisationId) {
+        if (organisationId == null) {
+            return null;
+        }
+        return organisationRepository.findById(organisationId).orElse(null);
+    }
+
+    private Boolean sharedOrganisationContext(AthleteProfile athlete, CoachProfile coachProfile) {
+        if (athlete.getOrganisationId() == null || coachProfile == null || coachProfile.getOrganisationId() == null) {
+            return null;
+        }
+        return athlete.getOrganisationId().equals(coachProfile.getOrganisationId());
     }
 
     private String requireReason(String reason, String message) {
@@ -238,5 +323,8 @@ public class EvidenceServiceImpl implements EvidenceService {
         } catch (IllegalStateException ex) {
             throw new InvalidStateException(ex.getMessage());
         }
+    }
+
+    private record CoachVerificationContext(CoachProfile coachProfile, Boolean sharedOrganisationContext) {
     }
 }

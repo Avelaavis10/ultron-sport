@@ -7,15 +7,20 @@ import za.co.ultronsport.domain.VerificationStatus;
 public record VerificationRequestResponse(
         Long id,
         Long evidenceUploadId,
+        Long athleteProfileId,
         Long requestedByUserId,
         Long verifierUserId,
+        Long coachProfileId,
+        Long organisationId,
+        Boolean sharedOrganisationContext,
         VerificationStatus status,
         String comments,
         Instant decidedAt
 ) {
     public static VerificationRequestResponse from(VerificationRequest request) {
         return new VerificationRequestResponse(request.getId(), request.getEvidenceUploadId(),
-                request.getRequestedByUserId(), request.getVerifierUserId(), request.getStatus(),
-                request.getComments(), request.getDecidedAt());
+                request.getAthleteProfileId(), request.getRequestedByUserId(), request.getVerifierUserId(),
+                request.getCoachProfileId(), request.getOrganisationId(), request.getSharedOrganisationContext(),
+                request.getStatus(), request.getComments(), request.getDecidedAt());
     }
 }

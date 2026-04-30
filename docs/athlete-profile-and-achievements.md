@@ -9,11 +9,14 @@ This MVP slice keeps athlete profile data and achievement data clean enough for 
 - ATHLETE users create one athlete profile at `POST /api/athlete-profiles`.
 - ATHLETE users view their own profile at `GET /api/athlete-profiles/me`.
 - ATHLETE users update their own profile at `PATCH /api/athlete-profiles/me`.
+- ATHLETE users link their profile to an organisation at `PATCH /api/athlete-profiles/me/organisation`.
 - ADMIN users list profiles at `GET /api/athlete-profiles`.
 - ADMIN and COACH users can view a specific full profile for internal workflows.
 - SCOUT_AGENT and ORGANISATION users should use discovery endpoints for discovery-safe profile data.
 
 Profile create/update requires sport, position, and location. Bio is capped for MVP data quality. Duplicate athlete profiles for the same user are rejected.
+
+Athletes can link `organisationId` when a school, club, academy, or team record exists. The older `schoolOrClub` text remains supported as a fallback so athletes are not blocked when an organisation record has not been created yet. Linking an organisation triggers LevelPlay recalculation.
 
 ## Achievement Workflow
 
@@ -52,4 +55,4 @@ LevelPlay recalculates when:
 - An achievement is updated.
 - Evidence is created or verified.
 
-Future work can add profile visibility controls, achievement status values, achievement moderation, soft archive/delete, and richer organisation relationships.
+Future work can add profile visibility controls, achievement status values, achievement moderation, soft archive/delete, roster membership, and stricter organisation approval workflows.

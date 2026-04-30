@@ -19,12 +19,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.EvidenceContext;
 import za.co.ultronsport.domain.EvidenceUpload;
+import za.co.ultronsport.domain.Organisation;
 import za.co.ultronsport.domain.User;
 import za.co.ultronsport.domain.VerificationStatus;
 import za.co.ultronsport.repository.AchievementRepository;
 import za.co.ultronsport.repository.AthleteProfileRepository;
 import za.co.ultronsport.repository.EvidenceUploadRepository;
 import za.co.ultronsport.repository.LevelPlayScoreRepository;
+import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.repository.UserRepository;
 import za.co.ultronsport.repository.VerificationRequestRepository;
 
@@ -56,6 +58,9 @@ class DiscoveryIntegrationTest {
     @Autowired
     private LevelPlayScoreRepository levelPlayScoreRepository;
 
+    @Autowired
+    private OrganisationRepository organisationRepository;
+
     @BeforeEach
     void setUp() {
         verificationRequestRepository.deleteAll();
@@ -63,6 +68,7 @@ class DiscoveryIntegrationTest {
         levelPlayScoreRepository.deleteAll();
         achievementRepository.deleteAll();
         athleteProfileRepository.deleteAll();
+        organisationRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -196,6 +202,21 @@ class DiscoveryIntegrationTest {
                 .andExpect(jsonPath("$.totalPages").value(2));
     }
 
+    @Test
+    void discoveryProfileIncludesOrganisationNameFromOrganisationId() throws Exception {
+        RegisteredUser scout = register("scout-organisation-name@example.com", "SCOUT_AGENT");
+        Organisation organisation = organisationRepository.save(Organisation.create("Cape Talent Club",
+                "Club", "Cape Town", null, null));
+        AthleteProfile profile = athleteProfile("Organisation Named Athlete", "Football", "Striker",
+                "Cape Town", organisation.getId(), "Legacy Club Name");
+        saveEvidence(profile, VerificationStatus.VERIFIED, "Organisation named clip", "Football", "Striker");
+
+        mockMvc.perform(get("/api/discovery/athletes/{athleteProfileId}", profile.getId())
+                        .header("Authorization", "Bearer " + scout.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.organisationName").value("Cape Talent Club"));
+    }
+
     private void assertAdminCanFilterStatus(RegisteredUser admin, String statusValue) throws Exception {
         mockMvc.perform(get("/api/discovery/evidence")
                         .param("verificationStatus", statusValue)
@@ -216,12 +237,17 @@ class DiscoveryIntegrationTest {
     }
 
     private AthleteProfile athleteProfile(String displayName, String sport, String position, String location) {
+        return athleteProfile(displayName, sport, position, location, null, "Ultron Academy");
+    }
+
+    private AthleteProfile athleteProfile(String displayName, String sport, String position, String location,
+                                          Long organisationId, String schoolOrClub) {
         User user = User.create(displayName, displayName.toLowerCase().replace(" ", "-") + "@example.com",
                 null, "hashed-password", za.co.ultronsport.domain.UserRole.ATHLETE);
         user.activate();
         User savedUser = userRepository.save(user);
         return athleteProfileRepository.save(AthleteProfile.create(savedUser.getId(), sport, position, 18,
-                "Unspecified", location, "Ultron Academy", "Bio"));
+                "Unspecified", location, schoolOrClub, organisationId, "Bio"));
     }
 
     private EvidenceUpload saveEvidence(AthleteProfile profile, VerificationStatus status, String title, String sport,

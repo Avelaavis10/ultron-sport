@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.UserRole;
 import za.co.ultronsport.web.dto.CreateAthleteProfileRequest;
+import za.co.ultronsport.web.dto.LinkAthleteOrganisationRequest;
 import za.co.ultronsport.web.dto.UpdateAthleteProfileRequest;
 
 public interface AthleteProfileService {
@@ -14,6 +15,8 @@ public interface AthleteProfileService {
     AthleteProfile getMyProfile(Long currentUserId);
 
     AthleteProfile updateMyProfile(Long currentUserId, UpdateAthleteProfileRequest request);
+
+    AthleteProfile linkOrganisation(Long currentUserId, LinkAthleteOrganisationRequest request);
 
     AthleteProfile getById(Long id);
 

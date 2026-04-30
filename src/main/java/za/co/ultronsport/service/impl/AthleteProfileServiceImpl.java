@@ -10,24 +10,30 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import za.co.ultronsport.common.error.DuplicateResourceException;
+import za.co.ultronsport.common.error.InvalidStateException;
 import za.co.ultronsport.common.error.ResourceNotFoundException;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.UserRole;
 import za.co.ultronsport.repository.AthleteProfileRepository;
+import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.service.AthleteProfileService;
 import za.co.ultronsport.service.LevelPlayScoreService;
 import za.co.ultronsport.web.dto.CreateAthleteProfileRequest;
+import za.co.ultronsport.web.dto.LinkAthleteOrganisationRequest;
 import za.co.ultronsport.web.dto.UpdateAthleteProfileRequest;
 
 @Service
 public class AthleteProfileServiceImpl implements AthleteProfileService {
 
     private final AthleteProfileRepository athleteProfileRepository;
+    private final OrganisationRepository organisationRepository;
     private final LevelPlayScoreService levelPlayScoreService;
 
     public AthleteProfileServiceImpl(AthleteProfileRepository athleteProfileRepository,
+                                     OrganisationRepository organisationRepository,
                                      LevelPlayScoreService levelPlayScoreService) {
         this.athleteProfileRepository = athleteProfileRepository;
+        this.organisationRepository = organisationRepository;
         this.levelPlayScoreService = levelPlayScoreService;
     }
 
@@ -37,6 +43,7 @@ public class AthleteProfileServiceImpl implements AthleteProfileService {
         if (athleteProfileRepository.findByUserId(currentUserId).isPresent()) {
             throw new DuplicateResourceException("Athlete profile already exists for current user.");
         }
+        assertOrganisationExists(request.organisationId());
         AthleteProfile profile = AthleteProfile.create(currentUserId, request.sport(), request.position(),
                 request.age(), request.gender(), request.location(), request.schoolOrClub(), request.organisationId(),
                 request.bio());
@@ -56,8 +63,23 @@ public class AthleteProfileServiceImpl implements AthleteProfileService {
     @Transactional
     public AthleteProfile updateMyProfile(Long currentUserId, UpdateAthleteProfileRequest request) {
         AthleteProfile profile = getMyProfile(currentUserId);
+        assertOrganisationExists(request.organisationId());
         profile.updateDetails(request.sport(), request.position(), request.age(), request.gender(), request.location(),
                 request.schoolOrClub(), request.organisationId(), request.bio());
+        AthleteProfile saved = athleteProfileRepository.save(profile);
+        levelPlayScoreService.recalculateForAthlete(saved.getId());
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public AthleteProfile linkOrganisation(Long currentUserId, LinkAthleteOrganisationRequest request) {
+        if (request.organisationId() == null && !hasText(request.schoolOrClub())) {
+            throw new InvalidStateException("Organisation ID or school/club name is required.");
+        }
+        assertOrganisationExists(request.organisationId());
+        AthleteProfile profile = getMyProfile(currentUserId);
+        profile.linkOrganisation(request.organisationId(), clean(request.schoolOrClub()));
         AthleteProfile saved = athleteProfileRepository.save(profile);
         levelPlayScoreService.recalculateForAthlete(saved.getId());
         return saved;
@@ -116,5 +138,18 @@ public class AthleteProfileServiceImpl implements AthleteProfileService {
 
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private void assertOrganisationExists(Long organisationId) {
+        if (organisationId == null) {
+            return;
+        }
+        if (!organisationRepository.existsById(organisationId)) {
+            throw new ResourceNotFoundException("Organisation not found: " + organisationId);
+        }
+    }
+
+    private String clean(String value) {
+        return hasText(value) ? value.trim() : null;
     }
 }

@@ -16,7 +16,10 @@ public class Organisation extends BaseEntity {
     @Column(nullable = false)
     private String type;
 
+    @Column(nullable = false)
     private String location;
+
+    private String contactEmail;
     private Long primaryAdminUserId;
 
     @Enumerated(EnumType.STRING)
@@ -26,16 +29,31 @@ public class Organisation extends BaseEntity {
     protected Organisation() {
     }
 
-    private Organisation(String name, String type, String location, Long primaryAdminUserId) {
+    private Organisation(String name, String type, String location, String contactEmail, Long primaryAdminUserId) {
         this.name = name;
         this.type = type;
         this.location = location;
+        this.contactEmail = contactEmail;
         this.primaryAdminUserId = primaryAdminUserId;
         this.verificationStatus = VerificationStatus.PENDING_VERIFICATION;
     }
 
     public static Organisation create(String name, String type, String location, Long primaryAdminUserId) {
-        return new Organisation(name, type, location, primaryAdminUserId);
+        return create(name, type, location, null, primaryAdminUserId);
+    }
+
+    public static Organisation create(String name, String type, String location, String contactEmail,
+                                      Long primaryAdminUserId) {
+        return new Organisation(name, type, location, contactEmail, primaryAdminUserId);
+    }
+
+    public void updateDetails(String name, String type, String location, String contactEmail,
+                              VerificationStatus verificationStatus) {
+        this.name = name;
+        this.type = type;
+        this.location = location;
+        this.contactEmail = contactEmail;
+        this.verificationStatus = verificationStatus;
     }
 
     public void markVerified() {
@@ -52,6 +70,10 @@ public class Organisation extends BaseEntity {
 
     public String getLocation() {
         return location;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
     }
 
     public Long getPrimaryAdminUserId() {

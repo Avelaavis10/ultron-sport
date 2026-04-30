@@ -20,8 +20,10 @@ import org.springframework.data.jpa.domain.Specification;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.UserRole;
 import za.co.ultronsport.repository.AthleteProfileRepository;
+import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.service.impl.AthleteProfileServiceImpl;
 import za.co.ultronsport.web.dto.CreateAthleteProfileRequest;
+import za.co.ultronsport.web.dto.LinkAthleteOrganisationRequest;
 import za.co.ultronsport.web.dto.UpdateAthleteProfileRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +31,9 @@ class AthleteProfileServiceImplTest {
 
     @Mock
     private AthleteProfileRepository athleteProfileRepository;
+
+    @Mock
+    private OrganisationRepository organisationRepository;
 
     @Mock
     private LevelPlayScoreService levelPlayScoreService;
@@ -71,6 +76,30 @@ class AthleteProfileServiceImplTest {
         assertThat(updated.getPosition()).isEqualTo("Winger");
         assertThat(updated.getLocation()).isEqualTo("Johannesburg");
         verify(levelPlayScoreService).recalculateForAthlete(11L);
+    }
+
+    @Test
+    void athleteCanLinkOwnProfileToOrganisation() {
+        AthleteProfile profile = profile(1L);
+        ReflectionTestUtils.setField(profile, "id", 11L);
+        when(organisationRepository.existsById(30L)).thenReturn(true);
+        when(athleteProfileRepository.findByUserId(1L)).thenReturn(Optional.of(profile));
+        when(athleteProfileRepository.save(profile)).thenReturn(profile);
+
+        AthleteProfile linked = athleteProfileService.linkOrganisation(1L,
+                new LinkAthleteOrganisationRequest(30L, "CPUT FC"));
+
+        assertThat(linked.getOrganisationId()).isEqualTo(30L);
+        assertThat(linked.getSchoolOrClub()).isEqualTo("CPUT FC");
+        verify(levelPlayScoreService).recalculateForAthlete(11L);
+    }
+
+    @Test
+    void athleteOrganisationLinkRequiresOrganisationOrSchoolClub() {
+        assertThatThrownBy(() -> athleteProfileService.linkOrganisation(1L,
+                new LinkAthleteOrganisationRequest(null, " ")))
+                .isInstanceOf(za.co.ultronsport.common.error.InvalidStateException.class)
+                .hasMessage("Organisation ID or school/club name is required.");
     }
 
     @Test

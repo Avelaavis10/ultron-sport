@@ -1,6 +1,7 @@
 package za.co.ultronsport.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,8 @@ public interface VerificationRequestRepository extends JpaRepository<Verificatio
     List<VerificationRequest> findByVerifierUserIdAndStatus(Long verifierUserId, VerificationStatus status);
 
     List<VerificationRequest> findByEvidenceUploadIdOrderByCreatedAtDesc(Long evidenceUploadId);
+
+    Optional<VerificationRequest> findFirstByEvidenceUploadIdOrderByCreatedAtDesc(Long evidenceUploadId);
 
     long countByEvidenceUploadIdAndStatus(Long evidenceUploadId, VerificationStatus status);
 

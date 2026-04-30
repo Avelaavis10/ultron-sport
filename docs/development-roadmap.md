@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -23,6 +23,7 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 - Completed: add athlete profile `/me` create/view/update workflow with ownership checks.
 - Completed: add achievement create/list/update workflow with ownership checks.
 - Completed: make profile and achievement changes recalculate LevelPlay.
+- Completed: add coach-to-athlete organisation context for evidence verification.
 - Add organisation roster relationships.
 - Add coach/institution approval workflows.
 - Add verification queues for coaches and administrators.
@@ -60,6 +61,14 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 - Add key-moment labels for video evidence.
 - Add AI status transitions and retry handling.
 - Keep AI outputs advisory until validated for fairness and accuracy.
+
+## Phase 6: Notification Readiness
+
+- Next: add a simple in-app notification model for key MVP actions.
+- Notify athletes when evidence is submitted, verified, rejected, flagged, or archived.
+- Notify coaches/admins when evidence awaits review where appropriate.
+- Notify athletes when profile, achievement, or LevelPlay changes occur.
+- Defer email, SMS, push notifications, background delivery queues, and external notification providers until the in-app model is stable.
 
 ## Guardrails
 

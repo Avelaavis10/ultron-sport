@@ -53,8 +53,23 @@ The data model should capture users, profiles, institutions, evidence, verificat
 - name
 - type
 - location
+- contact_email
 - verification_status
 - admin_user_id
+
+Current MVP organisation records use this institution shape for schools, clubs, academies, universities, teams, and other grassroots organisations.
+
+### CoachProfile
+
+- coach_profile_id
+- user_id
+- organisation_id
+- organisation_name fallback
+- certification_reference
+- qualification_summary
+- sport
+- years_experience
+- verification_status
 
 ### Team or Roster
 
@@ -113,7 +128,11 @@ The data model should capture users, profiles, institutions, evidence, verificat
 
 - verification_id
 - evidence_id
+- athlete_profile_id
 - verifier_user_id
+- coach_profile_id
+- organisation_id
+- shared_organisation_context
 - verifier_role
 - status
 - comments
@@ -197,8 +216,11 @@ The data model should capture users, profiles, institutions, evidence, verificat
 - An athlete profile has many evidence records.
 - An athlete profile has many achievement records.
 - An athlete profile has many media assets.
+- An athlete profile may link to one organisation and may retain school_or_club text as a fallback.
+- A coach profile may link to one organisation and stores qualification/context fields for MVP verification trust.
 - Evidence can reference one attached media asset for the current MVP upload flow.
 - Evidence has zero or more verification records.
+- Verification records can store coach profile, organisation, athlete profile, and shared-organisation context for later admin review.
 - Verified evidence may produce LevelPlay score updates.
 - Institutions can own rosters and assign coaches.
 - Scouts and agents can create shortlists and offers.

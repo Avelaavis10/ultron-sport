@@ -8,12 +8,13 @@ public record OrganisationResponse(
         String name,
         String type,
         String location,
+        String contactEmail,
         Long primaryAdminUserId,
         VerificationStatus verificationStatus
 ) {
     public static OrganisationResponse from(Organisation organisation) {
         return new OrganisationResponse(organisation.getId(), organisation.getName(), organisation.getType(),
-                organisation.getLocation(), organisation.getPrimaryAdminUserId(),
+                organisation.getLocation(), organisation.getContactEmail(), organisation.getPrimaryAdminUserId(),
                 organisation.getVerificationStatus());
     }
 }

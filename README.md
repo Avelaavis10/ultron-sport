@@ -34,6 +34,7 @@ The platform helps athletes upload sporting evidence, coaches and institutions v
 - [Admin Moderation and Audit](docs/admin-moderation-and-audit.md)
 - [Media Storage](docs/media-storage.md)
 - [Athlete Profiles and Achievements](docs/athlete-profile-and-achievements.md)
+- [Coach Organisation Verification Context](docs/coach-organisation-verification-context.md)
 - [UI and Prototype Notes](docs/ui-and-prototype-notes.md)
 
 ## Source Materials
@@ -132,6 +133,13 @@ http://localhost:8080/api/athlete-profiles
 http://localhost:8080/api/achievements
 ```
 
+Organisation and coach profile endpoints are exposed at:
+
+```text
+http://localhost:8080/api/organisations
+http://localhost:8080/api/coach-profiles
+```
+
 Discovery endpoints are exposed at:
 
 ```text
@@ -169,6 +177,8 @@ Discovery search is database-backed with pagination and role-aware evidence visi
 LevelPlay Rank currently uses a transparent MVP formula only. It scores verified evidence count, achievement count, coach verification count, and profile completeness, then maps the final credibility score to BRONZE, SILVER, GOLD, or ELITE. It does not use popularity, likes, views, fan votes, paid boosts, or AI scoring.
 
 Profile completeness uses nine deterministic factors: linked display name, sport, position, location, organisation or school/club, bio, age, at least one achievement, and at least one evidence item. Athlete profile updates and achievement changes trigger LevelPlay recalculation.
+
+Coach verification now requires a coach profile before evidence can be approved or rejected. Verification history records the coach profile, coach organisation, athlete profile, and whether the coach and athlete share an organisation context. Athletes can link their profile to an organisation record while retaining `schoolOrClub` text as a fallback.
 
 Admin moderation now records append-only audit logs for evidence flag/archive actions, moderation notes, and admin LevelPlay recalculations. The MVP intentionally avoids enterprise SIEM, Kafka, Redis, external logging platforms, automated fraud detection, and AI moderation.
 

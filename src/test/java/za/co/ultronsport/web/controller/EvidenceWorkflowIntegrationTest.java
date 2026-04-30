@@ -2,6 +2,7 @@ package za.co.ultronsport.web.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,7 +20,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.User;
 import za.co.ultronsport.repository.AthleteProfileRepository;
+import za.co.ultronsport.repository.CoachProfileRepository;
 import za.co.ultronsport.repository.EvidenceUploadRepository;
+import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.repository.UserRepository;
 import za.co.ultronsport.repository.VerificationRequestRepository;
 
@@ -43,13 +46,21 @@ class EvidenceWorkflowIntegrationTest {
     private EvidenceUploadRepository evidenceUploadRepository;
 
     @Autowired
+    private CoachProfileRepository coachProfileRepository;
+
+    @Autowired
+    private OrganisationRepository organisationRepository;
+
+    @Autowired
     private VerificationRequestRepository verificationRequestRepository;
 
     @BeforeEach
     void setUp() {
         verificationRequestRepository.deleteAll();
         evidenceUploadRepository.deleteAll();
+        coachProfileRepository.deleteAll();
         athleteProfileRepository.deleteAll();
+        organisationRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -117,6 +128,7 @@ class EvidenceWorkflowIntegrationTest {
         AthleteProfile profile = createAthleteProfile(athlete);
         Long evidenceId = createEvidence(athlete, profile.getId());
         submitEvidence(athlete, evidenceId);
+        createCoachProfile(coach, null);
 
         mockMvc.perform(post("/api/evidence/{id}/verify", evidenceId)
                         .header("Authorization", "Bearer " + coach.token()))
@@ -133,6 +145,59 @@ class EvidenceWorkflowIntegrationTest {
 
         mockMvc.perform(post("/api/evidence/{id}/verify", evidenceId)
                         .header("Authorization", "Bearer " + athlete.token()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void coachWithoutCoachProfileReceivesCleanErrorWhenVerifying() throws Exception {
+        RegisteredUser athlete = register("athlete-no-coach-profile@example.com", "ATHLETE");
+        RegisteredUser coach = register("coach-no-profile@example.com", "COACH");
+        AthleteProfile profile = createAthleteProfile(athlete);
+        Long evidenceId = createEvidence(athlete, profile.getId());
+        submitEvidence(athlete, evidenceId);
+
+        mockMvc.perform(post("/api/evidence/{id}/verify", evidenceId)
+                        .header("Authorization", "Bearer " + coach.token()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Coach profile is required before verifying evidence."));
+    }
+
+    @Test
+    void verificationContextReturnsAthleteCoachAndOrganisationContext() throws Exception {
+        RegisteredUser admin = register("admin-context@example.com", "ADMIN");
+        RegisteredUser athlete = register("athlete-context@example.com", "ATHLETE");
+        RegisteredUser coach = register("coach-context@example.com", "COACH");
+        AthleteProfile profile = createAthleteProfile(athlete);
+        Long organisationId = createOrganisation(admin);
+        linkAthleteOrganisation(athlete, organisationId);
+        createCoachProfile(coach, organisationId);
+        Long evidenceId = createEvidence(athlete, profile.getId());
+        submitEvidence(athlete, evidenceId);
+        verifyEvidence(coach, evidenceId);
+
+        mockMvc.perform(get("/api/evidence/{id}/verification-context", evidenceId)
+                        .header("Authorization", "Bearer " + coach.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.athleteProfileId").value(profile.getId()))
+                .andExpect(jsonPath("$.athleteOrganisationName").value("CPUT FC"))
+                .andExpect(jsonPath("$.coachOrganisationName").value("CPUT FC"))
+                .andExpect(jsonPath("$.sharedOrganisationContext").value(true));
+
+        mockMvc.perform(get("/api/evidence/{id}/verification-context", evidenceId)
+                        .header("Authorization", "Bearer " + admin.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.latestVerificationStatus").value("VERIFIED"));
+    }
+
+    @Test
+    void scoutAgentCannotViewInternalVerificationContext() throws Exception {
+        RegisteredUser athlete = register("athlete-context-block@example.com", "ATHLETE");
+        RegisteredUser scout = register("scout-context-block@example.com", "SCOUT_AGENT");
+        AthleteProfile profile = createAthleteProfile(athlete);
+        Long evidenceId = createEvidence(athlete, profile.getId());
+
+        mockMvc.perform(get("/api/evidence/{id}/verification-context", evidenceId)
+                        .header("Authorization", "Bearer " + scout.token()))
                 .andExpect(status().isForbidden());
     }
 
@@ -163,6 +228,7 @@ class EvidenceWorkflowIntegrationTest {
         AthleteProfile profile = createAthleteProfile(athlete);
         Long evidenceId = createEvidence(athlete, profile.getId());
         submitEvidence(athlete, evidenceId);
+        createCoachProfile(coach, null);
         verifyEvidence(coach, evidenceId);
 
         mockMvc.perform(get("/api/evidence/{id}", evidenceId)
@@ -214,6 +280,48 @@ class EvidenceWorkflowIntegrationTest {
                 .andExpect(jsonPath("$.verificationStatus").value("VERIFIED"));
     }
 
+    private Long createOrganisation(RegisteredUser admin) throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/organisations")
+                        .header("Authorization", "Bearer " + admin.token())
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "CPUT FC",
+                                  "type": "Club",
+                                  "location": "Cape Town",
+                                  "contactEmail": "club@example.com"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("CPUT FC"))
+                .andReturn();
+        JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
+        return response.get("id").asLong();
+    }
+
+    private void createCoachProfile(RegisteredUser coach, Long organisationId) throws Exception {
+        mockMvc.perform(post("/api/coach-profiles")
+                        .header("Authorization", "Bearer " + coach.token())
+                        .contentType(APPLICATION_JSON)
+                        .content(coachProfileJson(organisationId)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.certificationReference").value("SAFA-123"));
+    }
+
+    private void linkAthleteOrganisation(RegisteredUser athlete, Long organisationId) throws Exception {
+        mockMvc.perform(patch("/api/athlete-profiles/me/organisation")
+                        .header("Authorization", "Bearer " + athlete.token())
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "organisationId": %d,
+                                  "schoolOrClub": "CPUT FC"
+                                }
+                                """.formatted(organisationId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.organisationId").value(organisationId));
+    }
+
     private AthleteProfile createAthleteProfile(RegisteredUser athlete) {
         return athleteProfileRepository.save(AthleteProfile.create(athlete.userId(), "Football", "Striker", 18,
                 "Male", "Cape Town", "CPUT FC", "Bio"));
@@ -245,6 +353,20 @@ class EvidenceWorkflowIntegrationTest {
                   "externalVideoLink": "https://video.example/highlight"
                 }
                 """.formatted(athleteProfileId, LocalDate.now());
+    }
+
+    private String coachProfileJson(Long organisationId) {
+        String organisationValue = organisationId == null ? "null" : organisationId.toString();
+        return """
+                {
+                  "certificationReference": "SAFA-123",
+                  "organisationId": %s,
+                  "organisationName": "CPUT FC",
+                  "sport": "Football",
+                  "qualificationSummary": "Qualified grassroots coach",
+                  "yearsExperience": 5
+                }
+                """.formatted(organisationValue);
     }
 
     private String registerJson(String email, String role) {

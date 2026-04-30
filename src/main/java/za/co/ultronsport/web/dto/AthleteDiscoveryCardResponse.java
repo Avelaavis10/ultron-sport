@@ -21,8 +21,17 @@ public record AthleteDiscoveryCardResponse(
                                                     long verifiedEvidenceCount,
                                                     String latestVerifiedEvidenceTitle,
                                                     LevelPlayScore levelPlayScore) {
+        return from(profile, displayName, profile.getSchoolOrClub(), verifiedEvidenceCount,
+                latestVerifiedEvidenceTitle, levelPlayScore);
+    }
+
+    public static AthleteDiscoveryCardResponse from(AthleteProfile profile, String displayName,
+                                                    String organisationName,
+                                                    long verifiedEvidenceCount,
+                                                    String latestVerifiedEvidenceTitle,
+                                                    LevelPlayScore levelPlayScore) {
         return new AthleteDiscoveryCardResponse(profile.getId(), displayName, profile.getSport(),
-                profile.getPosition(), profile.getLocation(), profile.getSchoolOrClub(), verifiedEvidenceCount,
+                profile.getPosition(), profile.getLocation(), organisationName, verifiedEvidenceCount,
                 levelPlayScore == null ? 0 : levelPlayScore.getAchievementCount(), latestVerifiedEvidenceTitle,
                 levelPlayScore == null ? null : levelPlayScore.getFinalCredibilityScore(),
                 levelPlayScore == null ? null : levelPlayScore.getTier().name(),

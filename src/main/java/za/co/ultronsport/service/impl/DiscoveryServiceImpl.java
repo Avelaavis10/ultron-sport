@@ -29,6 +29,7 @@ import za.co.ultronsport.domain.Achievement;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.EvidenceUpload;
 import za.co.ultronsport.domain.LevelPlayScore;
+import za.co.ultronsport.domain.Organisation;
 import za.co.ultronsport.domain.User;
 import za.co.ultronsport.domain.UserRole;
 import za.co.ultronsport.domain.VerificationStatus;
@@ -36,6 +37,7 @@ import za.co.ultronsport.repository.AchievementRepository;
 import za.co.ultronsport.repository.AthleteProfileRepository;
 import za.co.ultronsport.repository.EvidenceUploadRepository;
 import za.co.ultronsport.repository.LevelPlayScoreRepository;
+import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.repository.UserRepository;
 import za.co.ultronsport.service.DiscoveryService;
 import za.co.ultronsport.web.dto.AchievementSummaryResponse;
@@ -60,17 +62,20 @@ public class DiscoveryServiceImpl implements DiscoveryService {
     private final LevelPlayScoreRepository levelPlayScoreRepository;
     private final AchievementRepository achievementRepository;
     private final UserRepository userRepository;
+    private final OrganisationRepository organisationRepository;
 
     public DiscoveryServiceImpl(AthleteProfileRepository athleteProfileRepository,
                                 EvidenceUploadRepository evidenceUploadRepository,
                                 LevelPlayScoreRepository levelPlayScoreRepository,
                                 AchievementRepository achievementRepository,
-                                UserRepository userRepository) {
+                                UserRepository userRepository,
+                                OrganisationRepository organisationRepository) {
         this.athleteProfileRepository = athleteProfileRepository;
         this.evidenceUploadRepository = evidenceUploadRepository;
         this.levelPlayScoreRepository = levelPlayScoreRepository;
         this.achievementRepository = achievementRepository;
         this.userRepository = userRepository;
+        this.organisationRepository = organisationRepository;
     }
 
     @Override
@@ -107,6 +112,7 @@ public class DiscoveryServiceImpl implements DiscoveryService {
 
         String displayName = displayNamesByUserId(List.of(profile.getUserId())).getOrDefault(profile.getUserId(),
                 "Unknown Athlete");
+        String organisationName = organisationDisplayName(profile, organisationNamesByIdForProfile(profile));
         List<AchievementSummaryResponse> achievements = achievementRepository.findByAthleteProfileId(athleteProfileId)
                 .stream()
                 .map(AchievementSummaryResponse::from)
@@ -117,7 +123,7 @@ public class DiscoveryServiceImpl implements DiscoveryService {
         LevelPlayScore score = levelPlayScoreRepository.findByAthleteProfileId(athleteProfileId).orElse(null);
         VerificationSummaryResponse verificationSummary = verificationSummary(visibleEvidence);
 
-        return AthleteDiscoveryProfileResponse.from(profile, displayName, achievements, evidence,
+        return AthleteDiscoveryProfileResponse.from(profile, displayName, organisationName, achievements, evidence,
                 LevelPlayScoreSummaryResponse.from(score), verificationSummary);
     }
 
@@ -246,6 +252,9 @@ public class DiscoveryServiceImpl implements DiscoveryService {
         Map<Long, String> displayNames = displayNamesByUserId(profiles.stream()
                 .map(AthleteProfile::getUserId)
                 .collect(Collectors.toSet()));
+        Map<Long, String> organisationNames = organisationNamesById(profiles.stream()
+                .map(AthleteProfile::getOrganisationId)
+                .collect(Collectors.toSet()));
         Map<Long, LevelPlayScore> scores = levelPlayScoreRepository.findByAthleteProfileIdIn(athleteProfileIds)
                 .stream()
                 .collect(Collectors.toMap(LevelPlayScore::getAthleteProfileId, Function.identity()));
@@ -262,6 +271,7 @@ public class DiscoveryServiceImpl implements DiscoveryService {
         return profiles.stream()
                 .map(profile -> AthleteDiscoveryCardResponse.from(profile,
                         displayNames.getOrDefault(profile.getUserId(), "Unknown Athlete"),
+                        organisationDisplayName(profile, organisationNames),
                         verifiedCounts.getOrDefault(profile.getId(), 0L),
                         latestVerifiedTitles.get(profile.getId()),
                         scores.get(profile.getId())))
@@ -361,6 +371,7 @@ public class DiscoveryServiceImpl implements DiscoveryService {
         keywordPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("sport")), "%" + keyword + "%"));
         keywordPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("position")), "%" + keyword + "%"));
         keywordPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("schoolOrClub")), "%" + keyword + "%"));
+        keywordPredicates.add(existsOrganisationKeyword(root, query, criteriaBuilder, keyword));
         keywordPredicates.add(existsUserDisplayName(root, query, criteriaBuilder, keyword));
         keywordPredicates.add(existsEvidenceKeyword(root, query, criteriaBuilder, keyword));
         predicates.add(criteriaBuilder.or(keywordPredicates.toArray(Predicate[]::new)));
@@ -423,6 +434,7 @@ public class DiscoveryServiceImpl implements DiscoveryService {
         keywordPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("sport")), "%" + keyword + "%"));
         keywordPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("position")), "%" + keyword + "%"));
         keywordPredicates.add(existsEvidenceAthleteKeyword(root, query, criteriaBuilder, keyword));
+        keywordPredicates.add(existsEvidenceAthleteOrganisationKeyword(root, query, criteriaBuilder, keyword));
         predicates.add(criteriaBuilder.or(keywordPredicates.toArray(Predicate[]::new)));
     }
 
@@ -439,6 +451,30 @@ public class DiscoveryServiceImpl implements DiscoveryService {
                                         "%" + keyword + "%"),
                                 criteriaBuilder.like(criteriaBuilder.lower(profile.get("schoolOrClub")),
                                         "%" + keyword + "%")));
+        return criteriaBuilder.exists(subquery);
+    }
+
+    private Predicate existsEvidenceAthleteOrganisationKeyword(Root<EvidenceUpload> root, CriteriaQuery<?> query,
+                                                              CriteriaBuilder criteriaBuilder, String keyword) {
+        Subquery<Long> subquery = query.subquery(Long.class);
+        Root<AthleteProfile> profile = subquery.from(AthleteProfile.class);
+        Root<Organisation> organisation = subquery.from(Organisation.class);
+        subquery.select(profile.get("id"))
+                .where(criteriaBuilder.equal(profile.get("id"), root.get("athleteProfileId")),
+                        criteriaBuilder.equal(organisation.get("id"), profile.get("organisationId")),
+                        criteriaBuilder.like(criteriaBuilder.lower(organisation.get("name")),
+                                "%" + keyword + "%"));
+        return criteriaBuilder.exists(subquery);
+    }
+
+    private Predicate existsOrganisationKeyword(Root<AthleteProfile> root, CriteriaQuery<?> query,
+                                                CriteriaBuilder criteriaBuilder, String keyword) {
+        Subquery<Long> subquery = query.subquery(Long.class);
+        Root<Organisation> organisation = subquery.from(Organisation.class);
+        subquery.select(organisation.get("id"))
+                .where(criteriaBuilder.equal(organisation.get("id"), root.get("organisationId")),
+                        criteriaBuilder.like(criteriaBuilder.lower(organisation.get("name")),
+                                "%" + keyword + "%"));
         return criteriaBuilder.exists(subquery);
     }
 
@@ -461,6 +497,31 @@ public class DiscoveryServiceImpl implements DiscoveryService {
         }
         return toList(userRepository.findAllById(userIds)).stream()
                 .collect(Collectors.toMap(User::getId, User::getDisplayName));
+    }
+
+    private Map<Long, String> organisationNamesById(Collection<Long> organisationIds) {
+        Set<Long> ids = organisationIds.stream()
+                .filter(id -> id != null)
+                .collect(Collectors.toSet());
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return toList(organisationRepository.findAllById(ids)).stream()
+                .collect(Collectors.toMap(Organisation::getId, Organisation::getName));
+    }
+
+    private String organisationDisplayName(AthleteProfile profile, Map<Long, String> organisationNames) {
+        if (profile.getOrganisationId() == null) {
+            return profile.getSchoolOrClub();
+        }
+        return organisationNames.getOrDefault(profile.getOrganisationId(), profile.getSchoolOrClub());
+    }
+
+    private Map<Long, String> organisationNamesByIdForProfile(AthleteProfile profile) {
+        if (profile.getOrganisationId() == null) {
+            return Map.of();
+        }
+        return organisationNamesById(List.of(profile.getOrganisationId()));
     }
 
     private <T> List<T> toList(Iterable<T> iterable) {

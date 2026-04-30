@@ -23,8 +23,18 @@ public record AthleteDiscoveryProfileResponse(
                                                        List<EvidenceDiscoveryCardResponse> evidence,
                                                        LevelPlayScoreSummaryResponse levelPlayScore,
                                                        VerificationSummaryResponse verificationSummary) {
+        return from(profile, displayName, profile.getSchoolOrClub(), achievements, evidence, levelPlayScore,
+                verificationSummary);
+    }
+
+    public static AthleteDiscoveryProfileResponse from(AthleteProfile profile, String displayName,
+                                                       String organisationName,
+                                                       List<AchievementSummaryResponse> achievements,
+                                                       List<EvidenceDiscoveryCardResponse> evidence,
+                                                       LevelPlayScoreSummaryResponse levelPlayScore,
+                                                       VerificationSummaryResponse verificationSummary) {
         return new AthleteDiscoveryProfileResponse(profile.getId(), displayName, profile.getSport(),
-                profile.getPosition(), profile.getLocation(), profile.getSchoolOrClub(), profile.getBio(),
+                profile.getPosition(), profile.getLocation(), organisationName, profile.getBio(),
                 achievements, evidence, levelPlayScore, verificationSummary, profile.getUpdatedAt());
     }
 }

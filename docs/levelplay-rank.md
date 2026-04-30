@@ -34,6 +34,8 @@ The current score is deliberately simple and explainable:
 - Profile completeness contribution: profile completeness scaled to a maximum of 20 points
 - Final credibility score: component sum clamped between 0 and 100
 
+Coach verification count is still weighted the same in this MVP slice. Verification records now store coach profile and organisation context so future formula versions can decide whether same-organisation or externally verified evidence should be interpreted differently after fairness review.
+
 Current profile completeness is deterministic and uses nine factors:
 
 - Linked user display name

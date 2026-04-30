@@ -88,6 +88,12 @@ public class AthleteProfile extends BaseEntity {
         this.profileCompletenessScore = profileCompletenessScore;
     }
 
+    public void linkOrganisation(Long organisationId, String schoolOrClub) {
+        this.organisationId = organisationId;
+        this.schoolOrClub = schoolOrClub;
+        this.profileCompletenessScore = calculateProfileCompleteness();
+    }
+
     public void markVerified() {
         verificationStatus = VerificationStatus.VERIFIED;
     }
@@ -100,7 +106,7 @@ public class AthleteProfile extends BaseEntity {
         completed += hasText(position) ? 1 : 0;
         completed += age != null ? 1 : 0;
         completed += hasText(location) ? 1 : 0;
-        completed += hasText(schoolOrClub) ? 1 : 0;
+        completed += organisationId != null || hasText(schoolOrClub) ? 1 : 0;
         completed += hasText(bio) ? 1 : 0;
         return Math.round((completed * 100f) / total);
     }

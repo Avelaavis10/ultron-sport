@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,20 +22,25 @@ import za.co.ultronsport.domain.AdminActionType;
 import za.co.ultronsport.domain.AdminTargetType;
 import za.co.ultronsport.domain.AiAnalysisStatus;
 import za.co.ultronsport.domain.AthleteProfile;
+import za.co.ultronsport.domain.CoachProfile;
 import za.co.ultronsport.domain.EvidenceContext;
 import za.co.ultronsport.domain.EvidenceUpload;
 import za.co.ultronsport.domain.MediaAsset;
 import za.co.ultronsport.domain.MediaStorageProvider;
+import za.co.ultronsport.domain.Organisation;
 import za.co.ultronsport.domain.VerificationRequest;
 import za.co.ultronsport.domain.VerificationStatus;
 import za.co.ultronsport.repository.AthleteProfileRepository;
+import za.co.ultronsport.repository.CoachProfileRepository;
 import za.co.ultronsport.repository.EvidenceUploadRepository;
+import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.repository.VerificationRequestRepository;
 import za.co.ultronsport.service.impl.EvidenceServiceImpl;
 import za.co.ultronsport.web.dto.CreateEvidenceRequest;
 import za.co.ultronsport.web.dto.FlagEvidenceRequest;
 import za.co.ultronsport.web.dto.RejectEvidenceRequest;
 import za.co.ultronsport.web.dto.UpdateEvidenceRequest;
+import za.co.ultronsport.web.dto.VerificationContextResponse;
 
 @ExtendWith(MockitoExtension.class)
 class EvidenceServiceImplTest {
@@ -44,6 +50,12 @@ class EvidenceServiceImplTest {
 
     @Mock
     private AthleteProfileRepository athleteProfileRepository;
+
+    @Mock
+    private CoachProfileRepository coachProfileRepository;
+
+    @Mock
+    private OrganisationRepository organisationRepository;
 
     @Mock
     private VerificationRequestRepository verificationRequestRepository;
@@ -101,6 +113,8 @@ class EvidenceServiceImplTest {
     void coachCanVerifyPendingVerificationEvidence() {
         EvidenceUpload evidence = pendingEvidence(1L, 11L);
         when(evidenceUploadRepository.findById(7L)).thenReturn(Optional.of(evidence));
+        when(coachProfileRepository.findByUserId(2L)).thenReturn(Optional.of(coachProfile(2L, 20L)));
+        when(athleteProfileRepository.findById(11L)).thenReturn(Optional.of(athleteProfile(1L, 20L)));
         when(evidenceUploadRepository.save(evidence)).thenReturn(evidence);
         when(verificationRequestRepository.save(any(VerificationRequest.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -110,6 +124,79 @@ class EvidenceServiceImplTest {
         assertThat(verified.getVerificationStatus()).isEqualTo(VerificationStatus.VERIFIED);
         verify(verificationRequestRepository).save(any(VerificationRequest.class));
         verify(levelPlayScoreService).recalculateForAthlete(11L);
+    }
+
+    @Test
+    void coachWithoutProfileCannotVerifyEvidence() {
+        EvidenceUpload evidence = pendingEvidence(1L, 11L);
+        when(evidenceUploadRepository.findById(7L)).thenReturn(Optional.of(evidence));
+        when(coachProfileRepository.findByUserId(2L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> evidenceService.verifyEvidence(2L, 7L))
+                .isInstanceOf(InvalidStateException.class)
+                .hasMessage("Coach profile is required before verifying evidence.");
+    }
+
+    @Test
+    void verificationRecordsCoachOrganisationContext() {
+        EvidenceUpload evidence = pendingEvidence(1L, 11L);
+        when(evidenceUploadRepository.findById(7L)).thenReturn(Optional.of(evidence));
+        when(coachProfileRepository.findByUserId(2L)).thenReturn(Optional.of(coachProfile(2L, 20L)));
+        when(athleteProfileRepository.findById(11L)).thenReturn(Optional.of(athleteProfile(1L, 20L)));
+        when(evidenceUploadRepository.save(evidence)).thenReturn(evidence);
+        when(verificationRequestRepository.save(any(VerificationRequest.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        evidenceService.verifyEvidence(2L, 7L);
+
+        ArgumentCaptor<VerificationRequest> captor = ArgumentCaptor.forClass(VerificationRequest.class);
+        verify(verificationRequestRepository).save(captor.capture());
+        assertThat(captor.getValue().getAthleteProfileId()).isEqualTo(11L);
+        assertThat(captor.getValue().getCoachProfileId()).isEqualTo(21L);
+        assertThat(captor.getValue().getOrganisationId()).isEqualTo(20L);
+        assertThat(captor.getValue().getSharedOrganisationContext()).isTrue();
+    }
+
+    @Test
+    void differentOrganisationContextIsRecorded() {
+        EvidenceUpload evidence = pendingEvidence(1L, 11L);
+        when(evidenceUploadRepository.findById(7L)).thenReturn(Optional.of(evidence));
+        when(coachProfileRepository.findByUserId(2L)).thenReturn(Optional.of(coachProfile(2L, 20L)));
+        when(athleteProfileRepository.findById(11L)).thenReturn(Optional.of(athleteProfile(1L, 30L)));
+        when(evidenceUploadRepository.save(evidence)).thenReturn(evidence);
+        when(verificationRequestRepository.save(any(VerificationRequest.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        evidenceService.verifyEvidence(2L, 7L);
+
+        ArgumentCaptor<VerificationRequest> captor = ArgumentCaptor.forClass(VerificationRequest.class);
+        verify(verificationRequestRepository).save(captor.capture());
+        assertThat(captor.getValue().getSharedOrganisationContext()).isFalse();
+    }
+
+    @Test
+    void adminCanViewVerificationContext() {
+        EvidenceUpload evidence = pendingEvidence(1L, 11L);
+        setId(evidence, 7L);
+        AthleteProfile athlete = athleteProfile(1L, 20L);
+        VerificationRequest request = VerificationRequest.create(7L, 1L, 2L);
+        request.attachContext(11L, 21L, 20L, true);
+        CoachProfile coachProfile = coachProfile(2L, 20L);
+        Organisation organisation = Organisation.create("CPUT FC", "Club", "Cape Town", null, 1L);
+        setId(organisation, 20L);
+        when(evidenceUploadRepository.findById(7L)).thenReturn(Optional.of(evidence));
+        when(athleteProfileRepository.findById(11L)).thenReturn(Optional.of(athlete));
+        when(verificationRequestRepository.findFirstByEvidenceUploadIdOrderByCreatedAtDesc(7L))
+                .thenReturn(Optional.of(request));
+        when(coachProfileRepository.findById(21L)).thenReturn(Optional.of(coachProfile));
+        when(organisationRepository.findById(20L)).thenReturn(Optional.of(organisation));
+
+        VerificationContextResponse response = evidenceService.getVerificationContext(99L,
+                za.co.ultronsport.domain.UserRole.ADMIN, 7L);
+
+        assertThat(response.coachProfileId()).isEqualTo(21L);
+        assertThat(response.athleteOrganisationName()).isEqualTo("CPUT FC");
+        assertThat(response.sharedOrganisationContext()).isTrue();
     }
 
     @Test
@@ -167,6 +254,8 @@ class EvidenceServiceImplTest {
     void coachCanRejectEvidenceWithReason() {
         EvidenceUpload evidence = pendingEvidence(1L, 11L);
         when(evidenceUploadRepository.findById(7L)).thenReturn(Optional.of(evidence));
+        when(coachProfileRepository.findByUserId(2L)).thenReturn(Optional.of(coachProfile(2L, 20L)));
+        when(athleteProfileRepository.findById(11L)).thenReturn(Optional.of(athleteProfile(1L, 20L)));
         when(evidenceUploadRepository.save(evidence)).thenReturn(evidence);
         when(verificationRequestRepository.save(any(VerificationRequest.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -249,6 +338,18 @@ class EvidenceServiceImplTest {
     private AthleteProfile athleteProfile(Long userId) {
         return AthleteProfile.create(userId, "Football", "Striker", 18, "Male", "Cape Town",
                 "CPUT FC", "Bio");
+    }
+
+    private AthleteProfile athleteProfile(Long userId, Long organisationId) {
+        return AthleteProfile.create(userId, "Football", "Striker", 18, "Male", "Cape Town",
+                "CPUT FC", organisationId, "Bio");
+    }
+
+    private CoachProfile coachProfile(Long userId, Long organisationId) {
+        CoachProfile profile = CoachProfile.create(userId, "SAFA-123", organisationId, "CPUT FC",
+                "Football", "Qualified coach", 5);
+        setId(profile, 21L);
+        return profile;
     }
 
     private MediaAsset mediaAsset(Long ownerUserId, Long athleteProfileId) {

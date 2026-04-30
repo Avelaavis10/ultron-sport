@@ -1,11 +1,14 @@
 package za.co.ultronsport.web.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public record CreateOrganisationRequest(
-        @NotBlank String name,
-        @NotBlank String type,
-        String location,
+        @NotBlank @Size(max = 160) String name,
+        @NotBlank @Size(max = 60) String type,
+        @NotBlank @Size(max = 160) String location,
+        @Email String contactEmail,
         Long primaryAdminUserId
 ) {
 }

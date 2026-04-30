@@ -16,8 +16,14 @@ public class CoachProfile extends BaseEntity {
     @Column(nullable = false)
     private String certificationReference;
 
+    private Long organisationId;
     private String organisationName;
     private String sport;
+
+    @Column(length = 1200)
+    private String qualificationSummary;
+
+    private Integer yearsExperience;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -26,16 +32,37 @@ public class CoachProfile extends BaseEntity {
     protected CoachProfile() {
     }
 
-    private CoachProfile(Long userId, String certificationReference, String organisationName, String sport) {
+    private CoachProfile(Long userId, String certificationReference, Long organisationId, String organisationName,
+                         String sport, String qualificationSummary, Integer yearsExperience) {
         this.userId = userId;
         this.certificationReference = certificationReference;
+        this.organisationId = organisationId;
         this.organisationName = organisationName;
         this.sport = sport;
+        this.qualificationSummary = qualificationSummary;
+        this.yearsExperience = yearsExperience;
         this.verificationStatus = VerificationStatus.PENDING_VERIFICATION;
     }
 
     public static CoachProfile create(Long userId, String certificationReference, String organisationName, String sport) {
-        return new CoachProfile(userId, certificationReference, organisationName, sport);
+        return create(userId, certificationReference, null, organisationName, sport, null, null);
+    }
+
+    public static CoachProfile create(Long userId, String certificationReference, Long organisationId,
+                                      String organisationName, String sport, String qualificationSummary,
+                                      Integer yearsExperience) {
+        return new CoachProfile(userId, certificationReference, organisationId, organisationName, sport,
+                qualificationSummary, yearsExperience);
+    }
+
+    public void updateDetails(String certificationReference, Long organisationId, String organisationName,
+                              String sport, String qualificationSummary, Integer yearsExperience) {
+        this.certificationReference = certificationReference;
+        this.organisationId = organisationId;
+        this.organisationName = organisationName;
+        this.sport = sport;
+        this.qualificationSummary = qualificationSummary;
+        this.yearsExperience = yearsExperience;
     }
 
     public void approveVerifierStatus() {
@@ -50,12 +77,24 @@ public class CoachProfile extends BaseEntity {
         return certificationReference;
     }
 
+    public Long getOrganisationId() {
+        return organisationId;
+    }
+
     public String getOrganisationName() {
         return organisationName;
     }
 
     public String getSport() {
         return sport;
+    }
+
+    public String getQualificationSummary() {
+        return qualificationSummary;
+    }
+
+    public Integer getYearsExperience() {
+        return yearsExperience;
     }
 
     public VerificationStatus getVerificationStatus() {

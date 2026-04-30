@@ -6,4 +6,6 @@ import za.co.ultronsport.domain.CoachProfile;
 
 public interface CoachProfileRepository extends JpaRepository<CoachProfile, Long> {
     Optional<CoachProfile> findByUserId(Long userId);
+
+    boolean existsByUserId(Long userId);
 }

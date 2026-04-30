@@ -8,6 +8,7 @@ import za.co.ultronsport.web.dto.CreateEvidenceRequest;
 import za.co.ultronsport.web.dto.FlagEvidenceRequest;
 import za.co.ultronsport.web.dto.RejectEvidenceRequest;
 import za.co.ultronsport.web.dto.UpdateEvidenceRequest;
+import za.co.ultronsport.web.dto.VerificationContextResponse;
 
 public interface EvidenceService {
     EvidenceUpload createDraftEvidence(Long currentUserId, CreateEvidenceRequest request);
@@ -33,4 +34,6 @@ public interface EvidenceService {
     EvidenceUpload archiveEvidence(Long adminUserId, Long evidenceId);
 
     List<VerificationRequest> getVerificationHistory(Long evidenceId);
+
+    VerificationContextResponse getVerificationContext(Long currentUserId, UserRole currentUserRole, Long evidenceId);
 }
