@@ -58,6 +58,18 @@ Build the prototype:
 npm run build
 ```
 
+Run frontend smoke tests:
+
+```powershell
+npm run test:run
+```
+
+For watch mode while editing:
+
+```powershell
+npm run test
+```
+
 ## Implemented Screens
 
 - `/health` checks health, readiness, and version endpoints.
@@ -82,6 +94,17 @@ The prototype includes a lightweight usability pass for manual testers:
 - Reusable status pills for workflow states and LevelPlay tiers.
 - Collapsible debug JSON blocks for inspecting backend responses without crowding the main workflow.
 - Responsive layout improvements for laptop, tablet-width, and basic mobile browser testing.
+
+## Automated Smoke Tests
+
+The prototype uses a lightweight Vite-compatible test setup:
+
+- Vitest
+- React Testing Library
+- `@testing-library/jest-dom`
+- jsdom
+
+The tests mock API responses and focus on confidence that public pages, auth pages, role dashboards, route guards, API error rendering, and notifications still render. They do not call the real backend and are not a replacement for end-to-end workflow testing.
 
 ## Token Handling
 
@@ -120,7 +143,7 @@ Production mobile/web clients should use framework-appropriate secure storage an
 
 ## Next Frontend Tasks
 
-- Create a frontend MVP smoke-test checklist and optional lightweight automated frontend tests for auth/dashboard rendering.
+- Use `docs/frontend-smoke-test-checklist.md` before frontend handoff or demos.
 - Add deeper field-level validation hints only after the backend contract stabilises further.
 - Decide which frontend patterns should graduate from prototype utilities to production components.
 - Decide whether the first production client should be React web, React Native, or another mobile framework after MVP validation.

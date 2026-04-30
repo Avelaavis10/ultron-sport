@@ -89,8 +89,9 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 - Completed: expand organisation happy path for organisation search/detail and verified discovery workflows.
 - Completed: expand admin happy path for organisation management, moderation summary/actions, audit logs, LevelPlay recalculation, and notifications.
 - Completed: run frontend MVP usability pass with clearer navigation, workflow hints, labelled forms, status pills, collapsible debug details, and responsive CSS improvements.
+- Completed: add frontend MVP smoke-test checklist and lightweight Vitest/React Testing Library smoke tests for public/auth routes, role dashboards, route guards, API errors, and notifications.
 - Improve deeper field-level frontend validation without replacing backend validation.
-- Add lightweight frontend tests after the prototype stabilises.
+- Expand frontend tests only where they protect stable workflow contracts.
 - Decide whether the next production-facing client should be React web, React Native, or another mobile framework.
 
 ## Guardrails

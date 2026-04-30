@@ -38,6 +38,27 @@ The prototype now includes a focused manual-testing usability pass:
 7. Raw backend responses are still available through collapsible debug blocks, but the main screen prioritises readable cards and summaries.
 8. CSS now handles tablet-width and basic mobile-width browser testing more gracefully.
 
+## Automated Smoke Tests
+
+The frontend now has a lightweight smoke-test setup using Vitest, React Testing Library, `@testing-library/jest-dom`, and jsdom.
+
+Run from `frontend/`:
+
+```powershell
+npm run test:run
+```
+
+The smoke tests cover:
+
+- Public health, login, and register routes.
+- Authenticated dashboard shell.
+- ATHLETE, COACH, SCOUT_AGENT, ORGANISATION, and ADMIN workspace rendering.
+- Protected-route and wrong-role redirect behaviour.
+- Standard API error rendering.
+- Notification section rendering with mocked API data.
+
+The tests use mocked API responses. They do not call the real backend and do not replace manual full-flow testing.
+
 ## Athlete Happy Path
 
 The athlete workspace now supports the main MVP validation path:
@@ -178,8 +199,8 @@ The recommended sequence remains:
 
 1. Validate backend workflows with this React web prototype.
 2. Stabilise API contracts and frontend data types.
-3. Create a frontend MVP smoke-test checklist and optional lightweight automated frontend tests for auth/dashboard rendering.
-4. Refine reusable form primitives only where tester feedback shows repeated friction.
+3. Refine reusable form primitives only where tester feedback shows repeated friction.
+4. Add deeper frontend validation tests once the UI contract stabilises.
 5. Start React Native or another mobile client once the API consumption model is proven.
 
 The API modules and DTO reference types in this prototype can inform the future mobile client, but should be reviewed before production use.

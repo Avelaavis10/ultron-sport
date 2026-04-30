@@ -2,6 +2,8 @@
 
 Use this checklist after a frontend prototype exists. It follows the current backend contract and complements `docs/http/ultron-sport-mvp.http`.
 
+For a shorter pre-demo pass, use `docs/frontend-smoke-test-checklist.md` first.
+
 ## Setup
 
 - [ ] Backend is running at `http://localhost:8080`.
@@ -135,6 +137,13 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 - [ ] Workflow hints make the next manual testing step clear.
 - [ ] Role-restricted navigation items are hidden.
 - [ ] A backend `403` still shows a clear permission message if reached by direct URL.
+
+## Automated Frontend Smoke Tests
+
+- [ ] `npm run test:run` passes from `frontend/`.
+- [ ] Public route smoke tests pass.
+- [ ] Role dashboard smoke tests pass for all five roles.
+- [ ] Notification and API error component smoke tests pass.
 
 ## Handover Notes
 
