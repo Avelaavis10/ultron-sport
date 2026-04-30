@@ -38,7 +38,15 @@ class DocumentationCoverageTest {
                 Path.of("docs", "health-checks.md"),
                 Path.of("docs", "role-endpoint-access-matrix.md"),
                 Path.of("docs", "manual-testing-seed-data.md"),
-                Path.of("docs", "http", "ultron-sport-mvp.http")
+                Path.of("docs", "http", "ultron-sport-mvp.http"),
+                Path.of("docs", "frontend-mobile-integration-plan.md"),
+                Path.of("docs", "mvp-screen-map.md"),
+                Path.of("docs", "api-to-screen-mapping.md"),
+                Path.of("docs", "frontend-api-client-strategy.md"),
+                Path.of("docs", "role-based-navigation-plan.md"),
+                Path.of("docs", "form-validation-mapping.md"),
+                Path.of("docs", "frontend-manual-testing-checklist.md"),
+                Path.of("docs", "frontend-types", "ultron-sport-api-types.ts")
         );
 
         requiredDocs.forEach(path -> assertThat(Files.exists(path))
@@ -105,5 +113,44 @@ class DocumentationCoverageTest {
                 .contains("/api/notifications")
                 .contains("/api/health")
                 .contains("Legacy compatibility");
+    }
+
+    @Test
+    void frontendPlanningDocsMentionKeyIntegrationConcepts() throws Exception {
+        String integrationPlan = Files.readString(Path.of("docs", "frontend-mobile-integration-plan.md"));
+        String screenMap = Files.readString(Path.of("docs", "mvp-screen-map.md"));
+        String apiClient = Files.readString(Path.of("docs", "frontend-api-client-strategy.md"));
+        String checklist = Files.readString(Path.of("docs", "frontend-manual-testing-checklist.md"));
+        String types = Files.readString(Path.of("docs", "frontend-types", "ultron-sport-api-types.ts"));
+
+        assertThat(integrationPlan)
+                .contains("React web prototype first")
+                .contains("React Native")
+                .contains("Auth And Token Strategy")
+                .contains("Role-Based Navigation Strategy")
+                .contains("Media Upload Strategy");
+
+        assertThat(screenMap)
+                .contains("Athlete Dashboard")
+                .contains("Coach Dashboard")
+                .contains("Scout Dashboard")
+                .contains("Admin Dashboard");
+
+        assertThat(apiClient)
+                .contains("Bearer Token Injection")
+                .contains("Handling 401")
+                .contains("Handling 403")
+                .contains("Handling Pagination");
+
+        assertThat(checklist)
+                .contains("Health check")
+                .contains("Athlete Flow")
+                .contains("Coach Flow")
+                .contains("Negative Tests");
+
+        assertThat(types)
+                .contains("export interface AuthResponse")
+                .contains("export interface EvidenceResponse")
+                .contains("export interface ApiError");
     }
 }

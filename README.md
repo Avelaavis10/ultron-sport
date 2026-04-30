@@ -43,6 +43,13 @@ The platform helps athletes upload sporting evidence, coaches and institutions v
 - [Role Endpoint Access Matrix](docs/role-endpoint-access-matrix.md)
 - [Manual Testing Seed Data](docs/manual-testing-seed-data.md)
 - [Manual HTTP Request Collection](docs/http/ultron-sport-mvp.http)
+- [Frontend and Mobile Integration Plan](docs/frontend-mobile-integration-plan.md)
+- [MVP Screen Map](docs/mvp-screen-map.md)
+- [API to Screen Mapping](docs/api-to-screen-mapping.md)
+- [Frontend API Client Strategy](docs/frontend-api-client-strategy.md)
+- [Role-Based Navigation Plan](docs/role-based-navigation-plan.md)
+- [Form Validation Mapping](docs/form-validation-mapping.md)
+- [Frontend Manual Testing Checklist](docs/frontend-manual-testing-checklist.md)
 - [UI and Prototype Notes](docs/ui-and-prototype-notes.md)
 
 ## Source Materials
@@ -209,5 +216,7 @@ In-app notifications are now database-backed and append-only. Users can list not
 MVP operational hardening now includes custom public health, readiness, and version endpoints plus a consistent API error response for validation, authentication, authorisation, not-found, malformed request, method, and media-type failures. Error responses include a `code` and `traceId` without exposing stack traces, JWT internals, passwords, or filesystem paths.
 
 Manual testing readiness now includes a role-based endpoint matrix, seed-data guide, and `.http` request collection for the full MVP flow from registration through evidence verification, discovery, notifications, and admin moderation.
+
+Frontend/mobile integration readiness now includes a recommended React web prototype first approach, screen map, API-to-screen mapping, API client strategy, role-based navigation plan, form validation mapping, manual QA checklist, and reference TypeScript DTOs. This is planning only; no production frontend or mobile app has been added yet.
 
 The MVP backend is intentionally a modular monolith. It separates domain, repositories, services, controllers, DTOs, security configuration, and error handling so the codebase can later evolve toward microservices.
