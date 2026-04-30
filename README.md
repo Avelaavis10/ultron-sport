@@ -50,6 +50,8 @@ The platform helps athletes upload sporting evidence, coaches and institutions v
 - [Role-Based Navigation Plan](docs/role-based-navigation-plan.md)
 - [Form Validation Mapping](docs/form-validation-mapping.md)
 - [Frontend Manual Testing Checklist](docs/frontend-manual-testing-checklist.md)
+- [Frontend Prototype](docs/frontend-prototype.md)
+- [React Prototype README](frontend/README.md)
 - [UI and Prototype Notes](docs/ui-and-prototype-notes.md)
 
 ## Source Materials
@@ -112,6 +114,38 @@ Run the automated tests:
 ```powershell
 mvn test
 ```
+
+## Run the React Prototype
+
+The repository now includes a minimal React web prototype in `frontend/` for validating the backend API from a browser. It is not the production frontend or mobile app.
+
+Start the backend first:
+
+```powershell
+mvn spring-boot:run
+```
+
+Then start the frontend:
+
+```powershell
+Set-Location frontend
+npm install
+npm run dev
+```
+
+The frontend uses:
+
+```text
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+The Vite dev server runs at:
+
+```text
+http://localhost:5173
+```
+
+The backend permits that local origin by default through `ULTRON_CORS_ALLOWED_ORIGINS`. The prototype stores the access token in `sessionStorage` for MVP manual testing only.
 
 Run with PostgreSQL:
 
@@ -218,5 +252,7 @@ MVP operational hardening now includes custom public health, readiness, and vers
 Manual testing readiness now includes a role-based endpoint matrix, seed-data guide, and `.http` request collection for the full MVP flow from registration through evidence verification, discovery, notifications, and admin moderation.
 
 Frontend/mobile integration readiness now includes a recommended React web prototype first approach, screen map, API-to-screen mapping, API client strategy, role-based navigation plan, form validation mapping, manual QA checklist, and reference TypeScript DTOs. This is planning only; no production frontend or mobile app has been added yet.
+
+The React web prototype scaffold now exists under `frontend/`. It consumes the documented backend API through small TypeScript API modules and role-based dashboard shells for ATHLETE, COACH, ORGANISATION, SCOUT_AGENT, and ADMIN users.
 
 The MVP backend is intentionally a modular monolith. It separates domain, repositories, services, controllers, DTOs, security configuration, and error handling so the codebase can later evolve toward microservices.

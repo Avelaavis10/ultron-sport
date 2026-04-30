@@ -46,7 +46,10 @@ class DocumentationCoverageTest {
                 Path.of("docs", "role-based-navigation-plan.md"),
                 Path.of("docs", "form-validation-mapping.md"),
                 Path.of("docs", "frontend-manual-testing-checklist.md"),
-                Path.of("docs", "frontend-types", "ultron-sport-api-types.ts")
+                Path.of("docs", "frontend-types", "ultron-sport-api-types.ts"),
+                Path.of("docs", "frontend-prototype.md"),
+                Path.of("frontend", "README.md"),
+                Path.of("frontend", "package.json")
         );
 
         requiredDocs.forEach(path -> assertThat(Files.exists(path))
@@ -152,5 +155,31 @@ class DocumentationCoverageTest {
                 .contains("export interface AuthResponse")
                 .contains("export interface EvidenceResponse")
                 .contains("export interface ApiError");
+    }
+
+    @Test
+    void frontendPrototypeDocsMentionCurrentPrototypeShape() throws Exception {
+        String prototype = Files.readString(Path.of("docs", "frontend-prototype.md"));
+        String frontendReadme = Files.readString(Path.of("frontend", "README.md"));
+        String packageJson = Files.readString(Path.of("frontend", "package.json"));
+
+        assertThat(prototype)
+                .contains("React web prototype")
+                .contains("sessionStorage")
+                .contains("Role-Based Navigation")
+                .contains("VITE_API_BASE_URL")
+                .contains("frontend/");
+
+        assertThat(frontendReadme)
+                .contains("npm install")
+                .contains("npm run dev")
+                .contains("npm run build")
+                .contains("VITE_API_BASE_URL=http://localhost:8080")
+                .contains("sessionStorage");
+
+        assertThat(packageJson)
+                .contains("vite")
+                .contains("react")
+                .contains("typescript");
     }
 }

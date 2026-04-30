@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, consistent error handling, public health/readiness/version endpoints, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, database-backed in-app notifications, API contract/manual testing docs, frontend/mobile integration planning docs, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, consistent error handling, public health/readiness/version endpoints, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, database-backed in-app notifications, API contract/manual testing docs, frontend/mobile integration planning docs, a minimal React web prototype scaffold, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -20,6 +20,7 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 - Completed: add local development, health-check, error-handling, and API testing docs.
 - Completed: add MVP API contract cleanup, role endpoint matrix, manual seed-data guide, and `.http` request collection.
 - Completed: add frontend/mobile integration plan, screen map, API-to-screen mapping, API client strategy, role navigation plan, form validation mapping, manual frontend QA checklist, and reference TypeScript DTOs.
+- Completed: add minimal React + Vite + TypeScript web prototype scaffold for browser-based API validation.
 
 ## Phase 2: Complete Core Workflows
 
@@ -76,6 +77,16 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 - Completed: notify coaches when coach profile data is saved.
 - Add roster-aware coach targeting for submitted evidence.
 - Defer email, SMS, push notifications, background delivery queues, and external notification providers until the in-app model is stable.
+
+## Phase 7: Frontend Prototype
+
+- Completed: scaffold a minimal React web prototype in `frontend/`.
+- Completed: add shared API client, TypeScript DTO references, sessionStorage MVP token handling, and role-guarded routes.
+- Completed: add health, register, login, dashboard, notification, athlete, coach, scout, organisation, and admin workspaces.
+- Expand athlete and coach happy paths into more guided step-by-step screens.
+- Improve field-level frontend validation without replacing backend validation.
+- Add lightweight frontend tests after the prototype stabilises.
+- Decide whether the next production-facing client should be React web, React Native, or another mobile framework.
 
 ## Guardrails
 
