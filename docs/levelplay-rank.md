@@ -36,6 +36,8 @@ The current score is deliberately simple and explainable:
 
 Coach verification count is still weighted the same in this MVP slice. Verification records now store coach profile and organisation context so future formula versions can decide whether same-organisation or externally verified evidence should be interpreted differently after fairness review.
 
+When an existing LevelPlay score or tier changes during recalculation, the athlete receives an in-app notification. Admin recalculate-all avoids notification fan-out in the MVP.
+
 Current profile completeness is deterministic and uses nine factors:
 
 - Linked user display name

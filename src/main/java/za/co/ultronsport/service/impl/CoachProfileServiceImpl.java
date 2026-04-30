@@ -12,6 +12,7 @@ import za.co.ultronsport.domain.UserRole;
 import za.co.ultronsport.repository.CoachProfileRepository;
 import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.service.CoachProfileService;
+import za.co.ultronsport.service.NotificationService;
 import za.co.ultronsport.web.dto.CreateCoachProfileRequest;
 import za.co.ultronsport.web.dto.UpdateCoachProfileRequest;
 
@@ -20,11 +21,14 @@ public class CoachProfileServiceImpl implements CoachProfileService {
 
     private final CoachProfileRepository coachProfileRepository;
     private final OrganisationRepository organisationRepository;
+    private final NotificationService notificationService;
 
     public CoachProfileServiceImpl(CoachProfileRepository coachProfileRepository,
-                                   OrganisationRepository organisationRepository) {
+                                   OrganisationRepository organisationRepository,
+                                   NotificationService notificationService) {
         this.coachProfileRepository = coachProfileRepository;
         this.organisationRepository = organisationRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -38,7 +42,9 @@ public class CoachProfileServiceImpl implements CoachProfileService {
                 requireText(request.certificationReference(), "Certification reference is required."),
                 request.organisationId(), organisationName(request.organisationName(), organisation),
                 clean(request.sport()), clean(request.qualificationSummary()), request.yearsExperience());
-        return coachProfileRepository.save(profile);
+        CoachProfile saved = coachProfileRepository.save(profile);
+        notificationService.notifyCoachProfileUpdated(saved.getUserId(), saved.getId());
+        return saved;
     }
 
     @Override
@@ -68,7 +74,9 @@ public class CoachProfileServiceImpl implements CoachProfileService {
                 : request.yearsExperience();
         profile.updateDetails(certificationReference, organisationId, organisationName, sport, qualificationSummary,
                 yearsExperience);
-        return coachProfileRepository.save(profile);
+        CoachProfile saved = coachProfileRepository.save(profile);
+        notificationService.notifyCoachProfileUpdated(saved.getUserId(), saved.getId());
+        return saved;
     }
 
     @Override

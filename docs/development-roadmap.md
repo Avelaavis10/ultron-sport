@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, database-backed in-app notifications, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -64,10 +64,12 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 
 ## Phase 6: Notification Readiness
 
-- Next: add a simple in-app notification model for key MVP actions.
-- Notify athletes when evidence is submitted, verified, rejected, flagged, or archived.
-- Notify coaches/admins when evidence awaits review where appropriate.
-- Notify athletes when profile, achievement, or LevelPlay changes occur.
+- Completed: add a simple in-app notification model for key MVP actions.
+- Completed: notify athletes when evidence is verified, rejected, flagged, or archived.
+- Completed: notify admins when evidence is submitted as an MVP fallback until coach targeting is roster-aware.
+- Completed: notify athletes when profile, achievement, organisation link, or LevelPlay changes occur.
+- Completed: notify coaches when coach profile data is saved.
+- Add roster-aware coach targeting for submitted evidence.
 - Defer email, SMS, push notifications, background delivery queues, and external notification providers until the in-app model is stable.
 
 ## Guardrails

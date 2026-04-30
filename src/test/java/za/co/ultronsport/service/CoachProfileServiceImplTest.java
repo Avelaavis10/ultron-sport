@@ -3,6 +3,7 @@ package za.co.ultronsport.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -31,6 +32,9 @@ class CoachProfileServiceImplTest {
     @Mock
     private OrganisationRepository organisationRepository;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private CoachProfileServiceImpl coachProfileService;
 
@@ -48,6 +52,7 @@ class CoachProfileServiceImplTest {
         assertThat(profile.getCertificationReference()).isEqualTo("SAFA-123");
         assertThat(profile.getOrganisationId()).isEqualTo(3L);
         assertThat(profile.getOrganisationName()).isEqualTo("CPUT FC");
+        verify(notificationService).notifyCoachProfileUpdated(1L, null);
     }
 
     @Test
@@ -71,6 +76,7 @@ class CoachProfileServiceImplTest {
 
         assertThat(updated.getCertificationReference()).isEqualTo("SAFA-999");
         assertThat(updated.getYearsExperience()).isEqualTo(7);
+        verify(notificationService).notifyCoachProfileUpdated(1L, null);
     }
 
     @Test

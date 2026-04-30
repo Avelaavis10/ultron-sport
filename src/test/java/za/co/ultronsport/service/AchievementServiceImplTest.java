@@ -35,6 +35,9 @@ class AchievementServiceImplTest {
     @Mock
     private LevelPlayScoreService levelPlayScoreService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private AchievementServiceImpl achievementService;
 
@@ -49,6 +52,7 @@ class AchievementServiceImplTest {
 
         assertThat(achievement.getTitle()).isEqualTo("Top Scorer");
         verify(levelPlayScoreService).recalculateForAthlete(1L);
+        verify(notificationService).notifyAchievementCreated(7L, null);
     }
 
     @Test

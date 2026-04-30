@@ -13,6 +13,7 @@ This MVP slice makes coach evidence verification traceable to a coach profile an
 - ATHLETE users can link their athlete profile to an existing organisation or keep a `schoolOrClub` fallback.
 - COACH users must have a CoachProfile before approving or rejecting evidence.
 - Cross-organisation verification is still allowed for MVP, but the relationship is recorded.
+- Athlete organisation-link updates and coach profile saves create simple in-app notifications for the affected user.
 
 ## Verification Context Stored
 

@@ -43,6 +43,7 @@ za.co.ultronsport
 - Achievement creation/update with athlete ownership and LevelPlay recalculation
 - LevelPlay credibility score calculation with transparent MVP score explanation
 - Admin moderation and append-only audit logging foundation
+- In-app notification model for key evidence, moderation, LevelPlay, profile, achievement, organisation, and coach profile events
 - Global validation and API error handling
 - Service unit tests and JPA repository integration test
 - MockMvc security integration tests for JWT and role-protected endpoints
@@ -52,6 +53,7 @@ za.co.ultronsport
 - Media storage service and MockMvc tests for upload, metadata visibility, and evidence attachment
 - Athlete profile and achievement service/MockMvc tests for ownership, duplicate prevention, updates, and LevelPlay integration
 - Coach/organisation relationship tests for organisation creation, coach profile ownership, athlete organisation linking, verification context, and protected access
+- Notification service and MockMvc tests for current-user notification access, read status, workflow notification creation, and protected access
 
 ## Security Flow
 
@@ -124,6 +126,19 @@ LevelPlay is implemented behind `/api/levelplay` as a simple, explainable credib
 - The explanation endpoint returns the stored input counts, component scores, final score, tier, and a fairness note.
 
 The MVP formula uses verified evidence count, achievement count, coach verification count, and profile completeness. Profile completeness is calculated from linked display name, sport, position, location, organisation or school/club, bio, age, at least one achievement, and at least one evidence item. It does not use likes, views, fan votes, popularity, paid boosts, or AI scoring. Future work can add score history, formula versioning, category leaderboards, and AI-assisted analysis after fairness review.
+
+## Notification Workflow
+
+Notifications are implemented behind `/api/notifications` as a database-backed in-app model.
+
+- Users can list their own notifications, list unread notifications, count unread notifications, mark one notification read, or mark all owned notifications read.
+- Notifications are append-only through the service/API surface; no delete or edit endpoints are exposed.
+- Evidence verification, rejection, flagging, and archiving notify the athlete owner.
+- Evidence submission currently notifies admins as an MVP fallback until coach targeting is backed by roster/team relationships.
+- LevelPlay recalculation notifies the athlete only when an existing score or tier changes. Recalculate-all intentionally avoids notification fan-out in the MVP.
+- Profile updates, organisation links, achievement creation, and coach profile saves create simple in-app notifications.
+
+Email, SMS, push notifications, WebSockets, Kafka/RabbitMQ/Redis, notification preferences, and AI-triggered notifications are deliberately deferred.
 
 ## Admin Moderation And Audit Workflow
 

@@ -1,6 +1,8 @@
 package za.co.ultronsport.service.impl;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import za.co.ultronsport.common.error.ResourceNotFoundException;
@@ -8,6 +10,7 @@ import za.co.ultronsport.domain.AdminActionType;
 import za.co.ultronsport.domain.AdminTargetType;
 import za.co.ultronsport.domain.AthleteProfile;
 import za.co.ultronsport.domain.LevelPlayScore;
+import za.co.ultronsport.domain.LevelPlayTier;
 import za.co.ultronsport.domain.User;
 import za.co.ultronsport.domain.VerificationStatus;
 import za.co.ultronsport.repository.AchievementRepository;
@@ -18,6 +21,7 @@ import za.co.ultronsport.repository.UserRepository;
 import za.co.ultronsport.repository.VerificationRequestRepository;
 import za.co.ultronsport.service.AdminActionLogService;
 import za.co.ultronsport.service.LevelPlayScoreService;
+import za.co.ultronsport.service.NotificationService;
 import za.co.ultronsport.web.dto.LevelPlayScoreExplanationResponse;
 
 @Service
@@ -30,6 +34,7 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
     private final VerificationRequestRepository verificationRequestRepository;
     private final UserRepository userRepository;
     private final AdminActionLogService adminActionLogService;
+    private final NotificationService notificationService;
 
     public LevelPlayScoreServiceImpl(LevelPlayScoreRepository levelPlayScoreRepository,
                                      AthleteProfileRepository athleteProfileRepository,
@@ -37,7 +42,8 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
                                      AchievementRepository achievementRepository,
                                      VerificationRequestRepository verificationRequestRepository,
                                      UserRepository userRepository,
-                                     AdminActionLogService adminActionLogService) {
+                                     AdminActionLogService adminActionLogService,
+                                     NotificationService notificationService) {
         this.levelPlayScoreRepository = levelPlayScoreRepository;
         this.athleteProfileRepository = athleteProfileRepository;
         this.evidenceUploadRepository = evidenceUploadRepository;
@@ -45,6 +51,7 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
         this.verificationRequestRepository = verificationRequestRepository;
         this.userRepository = userRepository;
         this.adminActionLogService = adminActionLogService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -56,10 +63,16 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
     @Override
     @Transactional
     public LevelPlayScore recalculateForAthlete(Long athleteProfileId) {
+        return recalculateForAthlete(athleteProfileId, true);
+    }
+
+    private LevelPlayScore recalculateForAthlete(Long athleteProfileId, boolean notifyOnChange) {
         AthleteProfile profile = athleteProfileRepository.findById(athleteProfileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Athlete profile not found: " + athleteProfileId));
-        LevelPlayScore score = levelPlayScoreRepository.findByAthleteProfileId(athleteProfileId)
-                .orElseGet(() -> LevelPlayScore.createPlaceholder(athleteProfileId));
+        Optional<LevelPlayScore> existingScore = levelPlayScoreRepository.findByAthleteProfileId(athleteProfileId);
+        Integer oldFinalScore = existingScore.map(LevelPlayScore::getFinalCredibilityScore).orElse(null);
+        LevelPlayTier oldTier = existingScore.map(LevelPlayScore::getTier).orElse(null);
+        LevelPlayScore score = existingScore.orElseGet(() -> LevelPlayScore.createPlaceholder(athleteProfileId));
         int verifiedEvidenceCount = safeInt(evidenceUploadRepository.countByAthleteProfileIdAndVerificationStatus(
                 athleteProfileId, VerificationStatus.VERIFIED));
         int achievementCount = safeInt(achievementRepository.countByAthleteProfileId(athleteProfileId));
@@ -70,7 +83,12 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
         profile.updateProfileCompletenessScore(profileCompletenessScore);
         athleteProfileRepository.save(profile);
         score.updateMvpScore(verifiedEvidenceCount, coachVerificationCount, achievementCount, profileCompletenessScore);
-        return levelPlayScoreRepository.save(score);
+        LevelPlayScore saved = levelPlayScoreRepository.save(score);
+        if (notifyOnChange && existingScore.isPresent() && scoreChanged(oldFinalScore, oldTier, saved)) {
+            notificationService.notifyLevelPlayScoreChanged(profile.getUserId(), athleteProfileId, oldFinalScore,
+                    saved.getFinalCredibilityScore(), oldTier, saved.getTier());
+        }
+        return saved;
     }
 
     @Override
@@ -105,7 +123,7 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
     @Transactional
     public List<LevelPlayScore> recalculateAllScores() {
         return athleteProfileRepository.findAll().stream()
-                .map(profile -> recalculateForAthlete(profile.getId()))
+                .map(profile -> recalculateForAthlete(profile.getId(), false))
                 .toList();
     }
 
@@ -173,5 +191,10 @@ public class LevelPlayScoreServiceImpl implements LevelPlayScoreService {
 
     private int safeInt(long value) {
         return Math.toIntExact(Math.max(0, value));
+    }
+
+    private boolean scoreChanged(Integer oldFinalScore, LevelPlayTier oldTier, LevelPlayScore saved) {
+        return !Objects.equals(oldFinalScore, saved.getFinalCredibilityScore())
+                || !Objects.equals(oldTier, saved.getTier());
     }
 }

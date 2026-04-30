@@ -42,6 +42,12 @@ Media base path:
 /api/media
 ```
 
+Notifications base path:
+
+```text
+/api/notifications
+```
+
 ## Authentication
 
 | Method | Path | Access | Purpose |
@@ -147,6 +153,24 @@ Legacy `/api/v1/levelplay-scores/...` endpoints remain for compatibility, but ne
 
 Supported MVP upload content types are `video/mp4`, `video/quicktime`, `image/jpeg`, and `image/png`. The default max upload size is 50MB. Media scan status defaults to `SKIPPED_FOR_MVP`; malware scanning, object storage, CDN URLs, thumbnails, transcoding, chunked upload, and AI analysis are future work.
 
+## Notifications
+
+| Method | Path | Access | Purpose |
+| --- | --- | --- | --- |
+| GET | `/api/notifications` | Authenticated | List the current user's notifications with optional status filter, pagination, and sorting |
+| GET | `/api/notifications/unread` | Authenticated | List unread notifications for the current user |
+| GET | `/api/notifications/unread-count` | Authenticated | Return the current user's unread notification count |
+| POST | `/api/notifications/{notificationId}/read` | Owning authenticated user | Mark one owned notification as read |
+| POST | `/api/notifications/read-all` | Authenticated | Mark all current-user notifications as read |
+
+Supported filters:
+
+```text
+status, page, size, sortBy, sortDirection
+```
+
+Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum `size` is `50`. Notification responses do not expose raw internal metadata.
+
 ## Discovery
 
 | Method | Path | Access | Purpose |
@@ -201,3 +225,4 @@ Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum
 - Discovery is relational database search for the MVP. Elasticsearch/OpenSearch, caching, vector search, and recommendation ranking are future work.
 - LevelPlay Rank uses verified evidence, achievements, coach verification count, and profile completeness only. Popularity, fan votes, views, likes, paid boosts, and AI scoring are not part of the MVP formula.
 - Audit logs are append-only through the service/API surface. Delete and edit endpoints are intentionally not provided.
+- Notifications are append-only through the service/API surface. Users can mark notifications as read, but delete/edit endpoints and notification preferences are intentionally not provided yet.

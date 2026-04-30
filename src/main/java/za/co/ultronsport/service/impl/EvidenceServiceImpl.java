@@ -25,6 +25,7 @@ import za.co.ultronsport.service.AdminActionLogService;
 import za.co.ultronsport.service.EvidenceService;
 import za.co.ultronsport.service.LevelPlayScoreService;
 import za.co.ultronsport.service.MediaStorageService;
+import za.co.ultronsport.service.NotificationService;
 import za.co.ultronsport.web.dto.CreateEvidenceRequest;
 import za.co.ultronsport.web.dto.FlagEvidenceRequest;
 import za.co.ultronsport.web.dto.RejectEvidenceRequest;
@@ -42,6 +43,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     private final LevelPlayScoreService levelPlayScoreService;
     private final AdminActionLogService adminActionLogService;
     private final MediaStorageService mediaStorageService;
+    private final NotificationService notificationService;
 
     public EvidenceServiceImpl(EvidenceUploadRepository evidenceUploadRepository,
                                AthleteProfileRepository athleteProfileRepository,
@@ -50,7 +52,8 @@ public class EvidenceServiceImpl implements EvidenceService {
                                VerificationRequestRepository verificationRequestRepository,
                                LevelPlayScoreService levelPlayScoreService,
                                AdminActionLogService adminActionLogService,
-                               MediaStorageService mediaStorageService) {
+                               MediaStorageService mediaStorageService,
+                               NotificationService notificationService) {
         this.evidenceUploadRepository = evidenceUploadRepository;
         this.athleteProfileRepository = athleteProfileRepository;
         this.coachProfileRepository = coachProfileRepository;
@@ -59,6 +62,7 @@ public class EvidenceServiceImpl implements EvidenceService {
         this.levelPlayScoreService = levelPlayScoreService;
         this.adminActionLogService = adminActionLogService;
         this.mediaStorageService = mediaStorageService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -124,7 +128,9 @@ public class EvidenceServiceImpl implements EvidenceService {
         EvidenceUpload evidence = getById(evidenceId);
         assertEvidenceOwner(currentUserId, evidence);
         applyTransition(evidence::submit);
-        return evidenceUploadRepository.save(evidence);
+        EvidenceUpload saved = evidenceUploadRepository.save(evidence);
+        notificationService.notifyEvidenceSubmitted(saved);
+        return saved;
     }
 
     @Override
@@ -146,6 +152,7 @@ public class EvidenceServiceImpl implements EvidenceService {
         EvidenceUpload saved = evidenceUploadRepository.save(evidence);
         recordVerificationAction(saved, coachUserId, VerificationStatus.VERIFIED, "Verified by coach.", context);
         levelPlayScoreService.recalculateForAthlete(saved.getAthleteProfileId());
+        notificationService.notifyEvidenceVerified(saved);
         return saved;
     }
 
@@ -161,6 +168,7 @@ public class EvidenceServiceImpl implements EvidenceService {
         applyTransition(evidence::reject);
         EvidenceUpload saved = evidenceUploadRepository.save(evidence);
         recordVerificationAction(saved, coachUserId, VerificationStatus.REJECTED, reason, context);
+        notificationService.notifyEvidenceRejected(saved, reason);
         return saved;
     }
 
@@ -174,6 +182,7 @@ public class EvidenceServiceImpl implements EvidenceService {
         recordVerificationAction(saved, adminUserId, VerificationStatus.FLAGGED, reason, null);
         adminActionLogService.log(adminUserId, AdminActionType.EVIDENCE_FLAGGED, AdminTargetType.EVIDENCE,
                 saved.getId(), reason, "Evidence flagged for moderation.");
+        notificationService.notifyEvidenceFlagged(saved, reason);
         return saved;
     }
 
@@ -185,6 +194,7 @@ public class EvidenceServiceImpl implements EvidenceService {
         EvidenceUpload saved = evidenceUploadRepository.save(evidence);
         adminActionLogService.log(adminUserId, AdminActionType.EVIDENCE_ARCHIVED, AdminTargetType.EVIDENCE,
                 saved.getId(), null, "Evidence archived by admin.");
+        notificationService.notifyEvidenceArchived(saved);
         return saved;
     }
 

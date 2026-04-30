@@ -179,12 +179,17 @@ Current MVP organisation records use this institution shape for schools, clubs, 
 ### Notification
 
 - notification_id
-- user_id
+- recipient_user_id
 - type
 - title
-- body
-- read_status
+- message
+- status
+- target_type
+- target_id
+- read_at
+- metadata_json
 - created_at
+- updated_at
 
 ### Offer
 
@@ -225,6 +230,7 @@ Current MVP organisation records use this institution shape for schools, clubs, 
 - Institutions can own rosters and assign coaches.
 - Scouts and agents can create shortlists and offers.
 - Notifications belong to users.
+- Notifications can reference evidence, athlete profiles, achievements, LevelPlay scores, organisations, coach profiles, or system events.
 - Audit logs reference sensitive actions across the system.
 
 ## Admin Action Values
@@ -280,6 +286,37 @@ Scan statuses:
 - failed
 - skipped_for_mvp
 
+## Notification Values
+
+Statuses:
+
+- unread
+- read
+
+Types:
+
+- evidence_submitted
+- evidence_verified
+- evidence_rejected
+- evidence_flagged
+- evidence_archived
+- levelplay_score_changed
+- achievement_created
+- athlete_profile_updated
+- organisation_linked
+- coach_profile_updated
+- system
+
+Target types:
+
+- evidence
+- athlete_profile
+- achievement
+- levelplay_score
+- organisation
+- coach_profile
+- system
+
 ## LevelPlay Tier Values
 
 - bronze
@@ -305,6 +342,7 @@ The current LevelPlayScore is one current record per athlete profile. It is inte
 - B-tree indexes on sport, location, age, gender, position_or_event, school_or_club, and tier.
 - MVP discovery indexes include athlete profile sport, position, location, organisation_id, updated_at, and evidence sport, position, verification_status, event_date, athlete_profile_id, created_at, and updated_at.
 - MediaAsset MVP indexes include owner_user_id, athlete_profile_id, evidence_upload_id, and created_at.
+- Notification MVP indexes include recipient_user_id, recipient_user_id plus status, target_type plus target_id, and created_at.
 - LevelPlayScore should keep a unique index on athlete_profile_id for the current score record.
 - Foreign-key indexes on user_id, athlete_user_id, evidence_id, institution_id, and verifier_user_id.
 - Search index for athlete names, bios, achievements, sports, schools, and locations.

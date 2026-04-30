@@ -3,6 +3,7 @@ package za.co.ultronsport.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,6 +56,9 @@ class LevelPlayScoreServiceImplTest {
 
     @Mock
     private AdminActionLogService adminActionLogService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private LevelPlayScoreServiceImpl levelPlayScoreService;
@@ -164,6 +168,8 @@ class LevelPlayScoreServiceImplTest {
         assertThat(score).isSameAs(existing);
         assertThat(score.getFinalCredibilityScore()).isEqualTo(75);
         verify(levelPlayScoreRepository).save(same(existing));
+        verify(notificationService).notifyLevelPlayScoreChanged(1L, 9L, 0, 75,
+                LevelPlayTier.BRONZE, LevelPlayTier.ELITE);
     }
 
     @Test
@@ -175,6 +181,18 @@ class LevelPlayScoreServiceImplTest {
         assertThat(score.getAthleteProfileId()).isEqualTo(9L);
         assertThat(score.getCalculatedAt()).isNotNull();
         verify(levelPlayScoreRepository).save(any(LevelPlayScore.class));
+        verify(notificationService, never()).notifyLevelPlayScoreChanged(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void recalculationWithNoScoreChangeDoesNotCreateDuplicateNotification() {
+        LevelPlayScore existing = LevelPlayScore.createPlaceholder(9L);
+        existing.updateMvpScore(1, 1, 1, 100);
+        givenScoreInputs(9L, completeProfile(), 1, 1, 1, Optional.of(existing));
+
+        levelPlayScoreService.recalculateForAthlete(9L);
+
+        verify(notificationService, never()).notifyLevelPlayScoreChanged(any(), any(), any(), any(), any(), any());
     }
 
     @Test

@@ -18,6 +18,7 @@ import za.co.ultronsport.repository.AthleteProfileRepository;
 import za.co.ultronsport.repository.OrganisationRepository;
 import za.co.ultronsport.service.AthleteProfileService;
 import za.co.ultronsport.service.LevelPlayScoreService;
+import za.co.ultronsport.service.NotificationService;
 import za.co.ultronsport.web.dto.CreateAthleteProfileRequest;
 import za.co.ultronsport.web.dto.LinkAthleteOrganisationRequest;
 import za.co.ultronsport.web.dto.UpdateAthleteProfileRequest;
@@ -28,13 +29,16 @@ public class AthleteProfileServiceImpl implements AthleteProfileService {
     private final AthleteProfileRepository athleteProfileRepository;
     private final OrganisationRepository organisationRepository;
     private final LevelPlayScoreService levelPlayScoreService;
+    private final NotificationService notificationService;
 
     public AthleteProfileServiceImpl(AthleteProfileRepository athleteProfileRepository,
                                      OrganisationRepository organisationRepository,
-                                     LevelPlayScoreService levelPlayScoreService) {
+                                     LevelPlayScoreService levelPlayScoreService,
+                                     NotificationService notificationService) {
         this.athleteProfileRepository = athleteProfileRepository;
         this.organisationRepository = organisationRepository;
         this.levelPlayScoreService = levelPlayScoreService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -68,6 +72,7 @@ public class AthleteProfileServiceImpl implements AthleteProfileService {
                 request.schoolOrClub(), request.organisationId(), request.bio());
         AthleteProfile saved = athleteProfileRepository.save(profile);
         levelPlayScoreService.recalculateForAthlete(saved.getId());
+        notificationService.notifyAthleteProfileUpdated(saved.getUserId(), saved.getId());
         return saved;
     }
 
@@ -82,6 +87,7 @@ public class AthleteProfileServiceImpl implements AthleteProfileService {
         profile.linkOrganisation(request.organisationId(), clean(request.schoolOrClub()));
         AthleteProfile saved = athleteProfileRepository.save(profile);
         levelPlayScoreService.recalculateForAthlete(saved.getId());
+        notificationService.notifyOrganisationLinked(saved.getUserId(), saved.getId(), saved.getOrganisationId());
         return saved;
     }
 

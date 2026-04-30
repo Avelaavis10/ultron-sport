@@ -11,6 +11,7 @@ The MVP admin moderation and audit foundation records important trust and safety
 - ADMIN users can view archived evidence at `/api/admin/moderation/evidence/archived`.
 - ADMIN users can add moderation notes at `/api/admin/moderation/evidence/{evidenceId}/note`.
 - Evidence flag/archive actions create AdminActionLog records.
+- Evidence flag/archive actions also notify the athlete owner through in-app notifications.
 - Admin LevelPlay recalculation actions create AdminActionLog records.
 - Audit logs are append-only through the service/API surface.
 

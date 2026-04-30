@@ -38,6 +38,9 @@ class AthleteProfileServiceImplTest {
     @Mock
     private LevelPlayScoreService levelPlayScoreService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private AthleteProfileServiceImpl athleteProfileService;
 
@@ -76,6 +79,7 @@ class AthleteProfileServiceImplTest {
         assertThat(updated.getPosition()).isEqualTo("Winger");
         assertThat(updated.getLocation()).isEqualTo("Johannesburg");
         verify(levelPlayScoreService).recalculateForAthlete(11L);
+        verify(notificationService).notifyAthleteProfileUpdated(1L, 11L);
     }
 
     @Test
@@ -92,6 +96,7 @@ class AthleteProfileServiceImplTest {
         assertThat(linked.getOrganisationId()).isEqualTo(30L);
         assertThat(linked.getSchoolOrClub()).isEqualTo("CPUT FC");
         verify(levelPlayScoreService).recalculateForAthlete(11L);
+        verify(notificationService).notifyOrganisationLinked(1L, 11L, 30L);
     }
 
     @Test

@@ -69,6 +69,9 @@ class EvidenceServiceImplTest {
     @Mock
     private MediaStorageService mediaStorageService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private EvidenceServiceImpl evidenceService;
 
@@ -97,6 +100,7 @@ class EvidenceServiceImplTest {
         EvidenceUpload submitted = evidenceService.submitEvidence(1L, 7L);
 
         assertThat(submitted.getVerificationStatus()).isEqualTo(VerificationStatus.PENDING_VERIFICATION);
+        verify(notificationService).notifyEvidenceSubmitted(evidence);
     }
 
     @Test
@@ -124,6 +128,7 @@ class EvidenceServiceImplTest {
         assertThat(verified.getVerificationStatus()).isEqualTo(VerificationStatus.VERIFIED);
         verify(verificationRequestRepository).save(any(VerificationRequest.class));
         verify(levelPlayScoreService).recalculateForAthlete(11L);
+        verify(notificationService).notifyEvidenceVerified(evidence);
     }
 
     @Test
@@ -264,6 +269,7 @@ class EvidenceServiceImplTest {
                 new RejectEvidenceRequest("Video quality is unclear."));
 
         assertThat(rejected.getVerificationStatus()).isEqualTo(VerificationStatus.REJECTED);
+        verify(notificationService).notifyEvidenceRejected(evidence, "Video quality is unclear.");
     }
 
     @Test
@@ -287,6 +293,7 @@ class EvidenceServiceImplTest {
         assertThat(flagged.getVerificationStatus()).isEqualTo(VerificationStatus.FLAGGED);
         verify(adminActionLogService).log(eq(99L), eq(AdminActionType.EVIDENCE_FLAGGED),
                 eq(AdminTargetType.EVIDENCE), any(), eq("Possible duplicate evidence."), any());
+        verify(notificationService).notifyEvidenceFlagged(evidence, "Possible duplicate evidence.");
     }
 
     @Test
@@ -300,6 +307,7 @@ class EvidenceServiceImplTest {
         assertThat(archived.getVerificationStatus()).isEqualTo(VerificationStatus.ARCHIVED);
         verify(adminActionLogService).log(eq(99L), eq(AdminActionType.EVIDENCE_ARCHIVED),
                 eq(AdminTargetType.EVIDENCE), any(), any(), any());
+        verify(notificationService).notifyEvidenceArchived(evidence);
     }
 
     @Test
