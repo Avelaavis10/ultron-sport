@@ -127,6 +127,14 @@ export interface CreateOrganisationRequest {
   primaryAdminUserId?: number | null;
 }
 
+export interface UpdateOrganisationRequest {
+  name?: string | null;
+  type?: string | null;
+  location?: string | null;
+  contactEmail?: string | null;
+  verificationStatus?: VerificationStatus | null;
+}
+
 export interface OrganisationResponse {
   id: number;
   name: string;
@@ -364,6 +372,17 @@ export interface AdminActionLogResponse {
   reason?: string | null;
   details?: string | null;
   createdAt: string;
+}
+
+export interface AdminAuditLogQuery extends Record<string, string | number | boolean | null | undefined> {
+  actionType?: string | null;
+  targetType?: string | null;
+  targetId?: number | null;
+  adminUserId?: number | null;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDirection?: string;
 }
 
 export interface ModerationSummaryResponse {

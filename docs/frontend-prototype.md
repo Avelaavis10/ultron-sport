@@ -55,6 +55,47 @@ The coach workspace now supports the main verification path:
 
 The UI shows the coach profile prerequisite before verification. The backend still enforces that requirement.
 
+## Scout Happy Path
+
+The scout workspace now supports discovery review for verified athlete data:
+
+1. Search athlete discovery cards by keyword, sport, position, location, page, and size.
+2. Open an athlete discovery profile from a search result or by athlete profile ID.
+3. Review discovery-safe profile details, verified evidence, achievements, and LevelPlay summary.
+4. Search verified evidence by keyword, sport, position, page, and size.
+5. Look up LevelPlay score and explanation for an athlete profile.
+6. View scout notifications and mark notifications read.
+
+Backend discovery rules still hide draft and pending evidence from SCOUT_AGENT users.
+
+## Organisation Happy Path
+
+The organisation workspace now supports organisation-side discovery validation:
+
+1. Search organisations by name, type, location, verification status, page, and size.
+2. Load organisation details by ID.
+3. Search verified athlete discovery cards.
+4. Search verified evidence.
+5. View organisation notifications and mark notifications read.
+
+Organisation users consume discovery-safe data only. Organisation ownership and roster workflows remain future work.
+
+## Admin Happy Path
+
+The admin workspace now supports the main moderation and audit validation path:
+
+1. Create organisations.
+2. Search and update organisations.
+3. View moderation summary counts.
+4. Flag evidence, archive evidence, and add moderation notes.
+5. View flagged and archived evidence lists.
+6. Search audit logs with action, target, admin, pagination, and sort filters.
+7. Load audit logs for a specific target.
+8. Recalculate LevelPlay for one athlete profile or all athlete profiles.
+9. View admin notifications and mark notifications read.
+
+The admin workspace intentionally remains a prototype surface, not a production moderation console.
+
 ## API Modules
 
 The frontend uses one shared API client plus small endpoint modules:
@@ -112,8 +153,8 @@ This exists only to let the Vite dev server call the Spring Boot API locally. It
 - Screens are workflow validation surfaces rather than polished product UI.
 - JSON response blocks remain visible where they help inspect the API contract.
 - Form validation is intentionally light.
-- The athlete and coach paths are guided enough for MVP manual testing but are not final product screens.
-- Scout, organisation, and admin screens still need the same depth of guided workflow treatment.
+- Role workspaces are guided enough for MVP manual testing but are not final product screens.
+- Scout, organisation, and admin screens still need usability polish, clearer detail views, and stronger field-level guidance.
 - Media upload supports only the MVP multipart endpoint, without progress, thumbnails, video playback, or transcoding.
 - Discovery search uses basic filters only.
 - No AI, production storage, push notifications, WebSockets, analytics, maps, or deployment tooling is included.
@@ -124,7 +165,7 @@ The recommended sequence remains:
 
 1. Validate backend workflows with this React web prototype.
 2. Stabilise API contracts and frontend data types.
-3. Expand scout, organisation, and admin happy paths.
+3. Run a usability pass across athlete, coach, scout, organisation, and admin workspaces.
 4. Add focused frontend tests and reusable form primitives once workflows settle.
 5. Start React Native or another mobile client once the API consumption model is proven.
 

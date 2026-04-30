@@ -1,5 +1,5 @@
 import { apiRequest, type PageResponse } from "./apiClient";
-import type { CreateOrganisationRequest, OrganisationResponse } from "../types/apiTypes";
+import type { CreateOrganisationRequest, OrganisationResponse, UpdateOrganisationRequest } from "../types/apiTypes";
 
 export const organisationApi = {
   create: (request: CreateOrganisationRequest) =>
@@ -7,6 +7,6 @@ export const organisationApi = {
   search: (query: Record<string, string | number | boolean | null | undefined> = {}) =>
     apiRequest<PageResponse<OrganisationResponse>>("/api/organisations", { query }),
   getById: (organisationId: number) => apiRequest<OrganisationResponse>(`/api/organisations/${organisationId}`),
-  update: (organisationId: number, request: Partial<CreateOrganisationRequest> & { verificationStatus?: string }) =>
+  update: (organisationId: number, request: UpdateOrganisationRequest) =>
     apiRequest<OrganisationResponse>(`/api/organisations/${organisationId}`, { method: "PATCH", body: request })
 };

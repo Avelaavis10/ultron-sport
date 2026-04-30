@@ -72,11 +72,19 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 - [ ] SCOUT_AGENT opens athlete discovery profile.
 - [ ] SCOUT_AGENT sees VERIFIED evidence only.
 - [ ] SCOUT_AGENT opens LevelPlay explanation.
+- [ ] SCOUT_AGENT searches verified evidence by keyword/sport/position.
+- [ ] SCOUT_AGENT sees inline notifications and can mark one or all as read.
+- [ ] ORGANISATION searches organisations and loads organisation detail.
+- [ ] ORGANISATION searches verified athlete discovery cards.
 - [ ] ORGANISATION searches verified evidence.
 - [ ] ORGANISATION does not see DRAFT or PENDING_VERIFICATION evidence.
+- [ ] ORGANISATION sees inline notifications and can mark one or all as read.
 
 ## Admin Flow
 
+- [ ] ADMIN creates organisation.
+- [ ] ADMIN searches organisations.
+- [ ] ADMIN updates organisation details or verification status.
 - [ ] ADMIN opens moderation summary.
 - [ ] ADMIN flags evidence with reason.
 - [ ] ATHLETE receives flag notification.
@@ -84,9 +92,11 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 - [ ] ADMIN creates moderation note.
 - [ ] ADMIN archives evidence.
 - [ ] ADMIN views archived evidence.
-- [ ] ADMIN views audit logs.
+- [ ] ADMIN searches audit logs with action/target/admin filters.
 - [ ] ADMIN views audit logs for target `EVIDENCE/{evidenceId}`.
 - [ ] ADMIN recalculates LevelPlay for one athlete.
+- [ ] ADMIN recalculates all LevelPlay scores.
+- [ ] ADMIN sees inline notifications and can mark one or all as read.
 
 ## Notifications Flow
 
