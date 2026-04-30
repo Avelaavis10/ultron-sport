@@ -164,6 +164,24 @@ p {
   grid-column: 1 / -1;
 }
 
+.section-heading {
+  align-items: start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.metric {
+  background: #eef4ff;
+  border: 1px solid #cad9f6;
+  border-radius: 6px;
+  color: #174383;
+  font-weight: 700;
+  padding: 0.35rem 0.55rem;
+  white-space: nowrap;
+}
+
 .form,
 .form.compact,
 .inline-form,
@@ -197,6 +215,10 @@ p {
 .inline-form input,
 .inline-form select {
   max-width: 240px;
+}
+
+.spacer-top {
+  margin-top: 0.75rem;
 }
 
 .alert {
@@ -240,6 +262,109 @@ p {
   gap: 0.75rem;
 }
 
+.card-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.compact-list {
+  gap: 0.55rem;
+}
+
+.evidence-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.workflow-card {
+  align-items: start;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.85rem;
+}
+
+.workflow-card p {
+  margin-bottom: 0.45rem;
+}
+
+.row-title,
+.button-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.button-row.vertical {
+  align-items: stretch;
+  flex-direction: column;
+  min-width: 120px;
+}
+
+.status-pill {
+  background: #edf2f7;
+  border: 1px solid #d8e0ea;
+  border-radius: 999px;
+  color: #35445a;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.18rem 0.5rem;
+}
+
+.status-pill.verified,
+.status-pill.read {
+  background: #eefaf1;
+  border-color: #b6e7bf;
+  color: #17662a;
+}
+
+.status-pill.pending-verification,
+.status-pill.unread {
+  background: #fff8e8;
+  border-color: #efd18a;
+  color: #7a5300;
+}
+
+.status-pill.rejected,
+.status-pill.flagged {
+  background: #fff0f0;
+  border-color: #f5b6b6;
+  color: #8d1c1c;
+}
+
+.status-pill.draft {
+  background: #edf2f7;
+  color: #35445a;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stat-card {
+  background: #f7f9fd;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.8rem;
+}
+
+.stat-card span {
+  color: #657386;
+  font-size: 0.85rem;
+}
+
+.stat-card strong {
+  font-size: 1.45rem;
+}
+
 .row {
   align-items: center;
   border: 1px solid #dfe5ee;
@@ -253,7 +378,9 @@ p {
 @media (max-width: 820px) {
   .topbar,
   .grid.two,
-  .form.compact {
+  .form.compact,
+  .evidence-list,
+  .summary-grid {
     grid-template-columns: 1fr;
   }
 
@@ -268,5 +395,10 @@ p {
   .inline-form input,
   .inline-form select {
     max-width: none;
+  }
+
+  .section-heading,
+  .workflow-card {
+    display: grid;
   }
 }

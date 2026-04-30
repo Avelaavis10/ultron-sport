@@ -64,8 +64,8 @@ npm run build
 - `/register` creates users for ATHLETE, COACH, ORGANISATION, SCOUT_AGENT, or ADMIN.
 - `/login` stores the backend JWT access token for the current browser session.
 - `/dashboard` routes users toward the correct role workspace.
-- `/athlete` covers profile, organisation link, achievements, URL-only evidence, media upload/attach, submit evidence, LevelPlay, and notifications.
-- `/coach` covers coach profile, pending evidence, verify/reject, verification context, and notifications.
+- `/athlete` covers a guided happy path for profile create/update, organisation link, achievements list/create/edit, URL-only evidence, media upload/attach, submit evidence, LevelPlay score/explanation, and inline notifications.
+- `/coach` covers a guided happy path for organisation lookup, coach profile create/update, pending evidence review, verification context, verify/reject decisions, and inline notifications.
 - `/scout` covers discovery search, verified evidence search, discovery profile, and LevelPlay explanation.
 - `/organisation` covers organisation search and verified discovery.
 - `/admin` covers organisation creation, moderation summary, flagged/archived evidence, audit logs, moderation notes, and LevelPlay recalculation.
@@ -88,23 +88,26 @@ Production mobile/web clients should use framework-appropriate secure storage an
 7. Optionally upload and attach media.
 8. Submit evidence.
 9. Login as COACH.
-10. Create a coach profile.
-11. Verify the evidence.
-12. Login as ATHLETE again and check LevelPlay plus notifications.
-13. Login as SCOUT_AGENT and search discovery.
-14. Login as ADMIN and inspect moderation summary plus audit logs.
+10. Search/select an organisation if one exists.
+11. Create a coach profile.
+12. Open pending evidence and verification context.
+13. Verify the evidence, or reject a separate submission with a reason.
+14. Login as ATHLETE again and check LevelPlay plus notifications.
+15. Login as SCOUT_AGENT and search discovery.
+16. Login as ADMIN and inspect moderation summary plus audit logs.
 
 ## Known Limitations
 
 - The UI is intentionally plain and aimed at backend workflow validation.
-- Many responses are shown as JSON blocks so developers can inspect the current API contract.
+- Some responses are still shown as JSON blocks so developers can inspect the current API contract.
 - Form validation is light; the backend remains the source of truth.
 - Media upload has no progress bar, drag-and-drop, thumbnails, transcoding, or playback workflow.
+- Scout, organisation, and admin workspaces are still lighter than the athlete and coach happy paths.
 - No production auth hardening, push notifications, WebSockets, AI, payments, social features, or deployment automation are included.
 
 ## Next Frontend Tasks
 
-- Expand the athlete and coach happy paths into more guided screens.
+- Expand scout, organisation, and admin happy paths into more guided screens.
 - Add clearer success states and field-level validation hints.
 - Add reusable form components once the API workflow is stable.
 - Decide whether the first production client should be React web, React Native, or another mobile framework after MVP validation.

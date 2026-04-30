@@ -24,29 +24,39 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 ## Athlete Flow
 
 - [ ] ATHLETE creates athlete profile.
+- [ ] ATHLETE updates athlete profile and sees a success message.
 - [ ] ATHLETE sees profile completeness.
-- [ ] ATHLETE searches organisations.
-- [ ] ATHLETE links profile to organisation.
+- [ ] ATHLETE enters organisation ID or school/club text.
+- [ ] ATHLETE links profile to organisation or school/club fallback.
 - [ ] ATHLETE creates achievement.
 - [ ] ATHLETE sees achievement in list.
+- [ ] ATHLETE edits an existing achievement.
 - [ ] ATHLETE creates URL-only evidence.
 - [ ] ATHLETE sees DRAFT evidence in evidence list.
 - [ ] ATHLETE uploads supported media if a local file is available.
+- [ ] ATHLETE sees returned media ID and public URL.
 - [ ] ATHLETE attaches media to editable evidence if upload was tested.
 - [ ] ATHLETE submits evidence.
 - [ ] ATHLETE sees evidence move to PENDING_VERIFICATION.
+- [ ] ATHLETE sees LevelPlay score and explanation panel after profile or achievement changes.
+- [ ] ATHLETE sees inline notifications and can mark one or all as read.
 
 ## Coach Flow
 
 - [ ] COACH creates coach profile.
+- [ ] COACH searches organisations.
+- [ ] COACH copies organisation into coach profile form.
+- [ ] COACH updates coach profile.
 - [ ] COACH sees coach dashboard.
 - [ ] COACH sees pending evidence list.
 - [ ] COACH opens evidence verification detail.
 - [ ] COACH sees verification context.
 - [ ] COACH verifies evidence.
+- [ ] COACH sees pending list refresh after verification.
 - [ ] ATHLETE receives verification notification.
 - [ ] Alternate path: COACH rejects a separate pending evidence item with a reason.
 - [ ] ATHLETE receives rejection notification.
+- [ ] COACH sees inline notifications and can mark one or all as read.
 
 ## LevelPlay Flow
 

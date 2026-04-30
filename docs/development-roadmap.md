@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, consistent error handling, public health/readiness/version endpoints, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, database-backed in-app notifications, API contract/manual testing docs, frontend/mobile integration planning docs, a minimal React web prototype scaffold, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, consistent error handling, public health/readiness/version endpoints, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, database-backed in-app notifications, API contract/manual testing docs, frontend/mobile integration planning docs, a minimal React web prototype scaffold, expanded athlete/coach happy-path screens, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -83,7 +83,9 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 - Completed: scaffold a minimal React web prototype in `frontend/`.
 - Completed: add shared API client, TypeScript DTO references, sessionStorage MVP token handling, and role-guarded routes.
 - Completed: add health, register, login, dashboard, notification, athlete, coach, scout, organisation, and admin workspaces.
-- Expand athlete and coach happy paths into more guided step-by-step screens.
+- Completed: expand athlete happy path for profile, achievements, evidence, media, LevelPlay, and notifications.
+- Completed: expand coach happy path for profile, organisation lookup, pending evidence, context, decisions, and notifications.
+- Expand scout, organisation, and admin happy paths into more guided step-by-step screens.
 - Improve field-level frontend validation without replacing backend validation.
 - Add lightweight frontend tests after the prototype stabilises.
 - Decide whether the next production-facing client should be React web, React Native, or another mobile framework.
