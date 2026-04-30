@@ -1,6 +1,8 @@
 import { FormEvent, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ApiErrorMessage } from "../components/ApiErrorMessage";
+import { FormField } from "../components/FormField";
+import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../auth/AuthContext";
 import type { UserRole } from "../types/apiTypes";
 
@@ -34,17 +36,17 @@ export function LoginPage() {
 
   return (
     <div className="page narrow">
-      <h1>Login</h1>
-      <p className="muted">Uses the existing backend JWT access token. Stored in sessionStorage for MVP testing only.</p>
+      <PageHeader
+        title="Login"
+        description="Use a test account to validate role-specific MVP workflows. The access token is stored in sessionStorage for this prototype only."
+      />
       <form className="form" onSubmit={submit}>
-        <label>
-          Email
+        <FormField label="Email" required hint="Use one of the seeded/manual test users, for example athlete@ultronsport.test.">
           <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
-        </label>
-        <label>
-          Password
+        </FormField>
+        <FormField label="Password" required hint="Default manual testing password is usually password123.">
           <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required />
-        </label>
+        </FormField>
         <button type="submit" disabled={isLoading}>
           {isLoading ? "Logging in..." : "Login"}
         </button>

@@ -11,6 +11,14 @@ const roleRoutes: Record<UserRole, string> = {
   ADMIN: "/admin"
 };
 
+const roleLabels: Record<UserRole, string> = {
+  ATHLETE: "Athlete workspace",
+  COACH: "Coach workspace",
+  ORGANISATION: "Organisation workspace",
+  SCOUT_AGENT: "Scout workspace",
+  ADMIN: "Admin workspace"
+};
+
 export function NavBar() {
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -19,17 +27,17 @@ export function NavBar() {
       <NavLink className="brand" to="/health">
         Ultron Sport MVP
       </NavLink>
-      <nav>
+      <nav aria-label="Primary navigation">
         <NavLink to="/health">Health</NavLink>
         {!isAuthenticated && <NavLink to="/login">Login</NavLink>}
         {!isAuthenticated && <NavLink to="/register">Register</NavLink>}
         {isAuthenticated && <NavLink to="/dashboard">Dashboard</NavLink>}
-        {user && <NavLink to={roleRoutes[user.role]}>Role workspace</NavLink>}
+        {user && <NavLink to={roleRoutes[user.role]}>{roleLabels[user.role]}</NavLink>}
         {isAuthenticated && <NavLink to="/notifications">Notifications</NavLink>}
       </nav>
       {user && (
         <div className="session">
-          <span>{user.displayName}</span>
+          <span title={user.email}>{user.displayName}</span>
           <RoleBadge role={user.role} />
           <button type="button" onClick={logout}>
             Logout

@@ -1,12 +1,12 @@
-export function DataBlock({ title, data }: { title: string; data: unknown }) {
+export function DataBlock({ title, data, defaultOpen = false }: { title: string; data: unknown; defaultOpen?: boolean }) {
   if (data === null || data === undefined) {
     return null;
   }
 
   return (
-    <section className="data-block">
-      <h4>{title}</h4>
+    <details className="data-block" open={defaultOpen}>
+      <summary>{title}</summary>
       <pre>{JSON.stringify(data, null, 2)}</pre>
-    </section>
+    </details>
   );
 }

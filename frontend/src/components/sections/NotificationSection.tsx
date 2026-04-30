@@ -3,6 +3,8 @@ import { notificationApi } from "../../api/notificationApi";
 import { ApiErrorMessage } from "../ApiErrorMessage";
 import { EmptyState } from "../EmptyState";
 import { LoadingState } from "../LoadingState";
+import { StatusPill } from "../StatusPill";
+import { SuccessMessage } from "../SuccessMessage";
 import type { NotificationResponse } from "../../types/apiTypes";
 
 type NotificationSectionProps = {
@@ -15,6 +17,7 @@ export function NotificationSection({ title = "Notifications", refreshSignal = 0
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const [message, setMessage] = useState("");
 
   async function load() {
     setLoading(true);
@@ -34,6 +37,7 @@ export function NotificationSection({ title = "Notifications", refreshSignal = 0
     setError(null);
     try {
       await notificationApi.markRead(notificationId);
+      setMessage("Notification marked as read.");
       await load();
     } catch (err) {
       setError(err);
@@ -44,6 +48,7 @@ export function NotificationSection({ title = "Notifications", refreshSignal = 0
     setError(null);
     try {
       await notificationApi.markAllRead();
+      setMessage("All notifications marked as read.");
       await load();
     } catch (err) {
       setError(err);
@@ -72,6 +77,7 @@ export function NotificationSection({ title = "Notifications", refreshSignal = 0
       </div>
 
       {loading && <LoadingState />}
+      <SuccessMessage message={message} />
       <ApiErrorMessage error={error} />
       {!loading && notifications.length === 0 ? (
         <EmptyState title="No notifications" detail="Workflow notifications will appear here." />
@@ -82,7 +88,7 @@ export function NotificationSection({ title = "Notifications", refreshSignal = 0
               <div>
                 <div className="row-title">
                   <strong>{notification.title}</strong>
-                  <span className={`status-pill ${notification.status.toLowerCase()}`}>{notification.status}</span>
+                  <StatusPill value={notification.status} />
                 </div>
                 <p>{notification.message}</p>
                 <small className="muted">

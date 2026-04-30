@@ -1,6 +1,8 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiErrorMessage } from "../components/ApiErrorMessage";
+import { FormField } from "../components/FormField";
+import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../auth/AuthContext";
 import type { UserRole } from "../types/apiTypes";
 
@@ -36,26 +38,21 @@ export function RegisterPage() {
 
   return (
     <div className="page narrow">
-      <h1>Register</h1>
+      <PageHeader title="Register" description="Create a local MVP test user, then the prototype will route to that role workspace." />
       <form className="form" onSubmit={submit}>
-        <label>
-          Display name
+        <FormField label="Display name" required>
           <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} required />
-        </label>
-        <label>
-          Email
+        </FormField>
+        <FormField label="Email" required hint="Use a unique email for each test role.">
           <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
-        </label>
-        <label>
-          Phone
+        </FormField>
+        <FormField label="Phone" hint="Optional for MVP testing.">
           <input value={phone} onChange={(event) => setPhone(event.target.value)} />
-        </label>
-        <label>
-          Password
+        </FormField>
+        <FormField label="Password" required>
           <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required />
-        </label>
-        <label>
-          Role
+        </FormField>
+        <FormField label="Role" required hint="Choose the role whose dashboard you want to test next.">
           <select value={role} onChange={(event) => setRole(event.target.value as UserRole)}>
             {roles.map((option) => (
               <option key={option} value={option}>
@@ -63,7 +60,7 @@ export function RegisterPage() {
               </option>
             ))}
           </select>
-        </label>
+        </FormField>
         <button type="submit" disabled={isLoading}>
           {isLoading ? "Registering..." : "Register"}
         </button>

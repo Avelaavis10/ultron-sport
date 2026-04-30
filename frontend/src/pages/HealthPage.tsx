@@ -3,6 +3,7 @@ import { healthApi, type HealthReadinessResponse, type HealthResponse, type Heal
 import { ApiErrorMessage } from "../components/ApiErrorMessage";
 import { DataBlock } from "../components/DataBlock";
 import { LoadingState } from "../components/LoadingState";
+import { PageHeader } from "../components/PageHeader";
 
 export function HealthPage() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -36,13 +37,11 @@ export function HealthPage() {
 
   return (
     <div className="page">
-      <section className="hero">
-        <h1>Ultron Sport MVP Prototype</h1>
-        <p>Lightweight browser client for validating the Spring Boot MVP API.</p>
-      </section>
-      <button type="button" onClick={load}>
-        Refresh health
-      </button>
+      <PageHeader title="Ultron Sport MVP Prototype" description="Lightweight browser client for validating the Spring Boot MVP API.">
+        <button type="button" onClick={load}>
+          Refresh health
+        </button>
+      </PageHeader>
       {loading && <LoadingState label="Checking backend" />}
       <ApiErrorMessage error={error} />
       <div className="grid three">

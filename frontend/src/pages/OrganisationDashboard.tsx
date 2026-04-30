@@ -4,8 +4,13 @@ import { organisationApi } from "../api/organisationApi";
 import { ApiErrorMessage } from "../components/ApiErrorMessage";
 import { DataBlock } from "../components/DataBlock";
 import { EmptyState } from "../components/EmptyState";
+import { FormField } from "../components/FormField";
 import { LoadingState } from "../components/LoadingState";
+import { PageHeader } from "../components/PageHeader";
 import { NotificationSection } from "../components/sections/NotificationSection";
+import { StatusPill } from "../components/StatusPill";
+import { SuccessMessage } from "../components/SuccessMessage";
+import { WorkflowHint } from "../components/WorkflowHint";
 import type {
   AthleteDiscoveryCardResponse,
   EvidenceDiscoveryCardResponse,
@@ -51,10 +56,6 @@ const discoveryDefaults: DiscoveryFilters = {
 };
 
 const verificationStatuses: Array<"" | VerificationStatus> = ["", "PENDING_VERIFICATION", "VERIFIED", "REJECTED"];
-
-function statusClass(status: string) {
-  return status.toLowerCase().replace(/_/g, "-");
-}
 
 export function OrganisationDashboard() {
   const [organisationFilters, setOrganisationFilters] = useState<OrganisationFilters>(organisationDefaults);
@@ -129,27 +130,46 @@ export function OrganisationDashboard() {
 
   return (
     <div className="page">
-      <h1>Organisation Workspace</h1>
-      <p className="muted">Search organisations and review verified, discovery-safe athlete evidence.</p>
-      {message && <div className="alert success">{message}</div>}
+      <PageHeader title="Organisation Workspace" description="Find organisations and review discovery-safe verified athlete evidence." />
+      <WorkflowHint
+        steps={[
+          "Search or load your organisation record.",
+          "Search verified athlete discovery cards.",
+          "Review verified evidence returned by the backend.",
+          "Use notifications to confirm organisation-side events."
+        ]}
+      />
+      <SuccessMessage message={message} />
       <ApiErrorMessage error={error} />
 
       <div className="grid two">
         <section className="panel">
           <h2>1. Organisation Search</h2>
           <form className="form compact" onSubmit={searchOrganisations}>
-            <input value={organisationFilters.name} onChange={(e) => setOrganisationFilters({ ...organisationFilters, name: e.target.value })} placeholder="Name" />
-            <input value={organisationFilters.type} onChange={(e) => setOrganisationFilters({ ...organisationFilters, type: e.target.value })} placeholder="Type" />
-            <input value={organisationFilters.location} onChange={(e) => setOrganisationFilters({ ...organisationFilters, location: e.target.value })} placeholder="Location" />
-            <select value={organisationFilters.verificationStatus} onChange={(e) => setOrganisationFilters({ ...organisationFilters, verificationStatus: e.target.value as "" | VerificationStatus })}>
-              {verificationStatuses.map((status) => (
-                <option key={status || "ANY"} value={status}>
-                  {status || "Any status"}
-                </option>
-              ))}
-            </select>
-            <input type="number" min="0" value={organisationFilters.page} onChange={(e) => setOrganisationFilters({ ...organisationFilters, page: Number(e.target.value) })} placeholder="Page" />
-            <input type="number" min="1" max="50" value={organisationFilters.size} onChange={(e) => setOrganisationFilters({ ...organisationFilters, size: Number(e.target.value) })} placeholder="Size" />
+            <FormField label="Name">
+              <input value={organisationFilters.name} onChange={(e) => setOrganisationFilters({ ...organisationFilters, name: e.target.value })} placeholder="Ultron Football Academy" />
+            </FormField>
+            <FormField label="Type">
+              <input value={organisationFilters.type} onChange={(e) => setOrganisationFilters({ ...organisationFilters, type: e.target.value })} placeholder="ACADEMY" />
+            </FormField>
+            <FormField label="Location">
+              <input value={organisationFilters.location} onChange={(e) => setOrganisationFilters({ ...organisationFilters, location: e.target.value })} placeholder="Cape Town" />
+            </FormField>
+            <FormField label="Verification status">
+              <select value={organisationFilters.verificationStatus} onChange={(e) => setOrganisationFilters({ ...organisationFilters, verificationStatus: e.target.value as "" | VerificationStatus })}>
+                {verificationStatuses.map((status) => (
+                  <option key={status || "ANY"} value={status}>
+                    {status || "Any status"}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            <FormField label="Page">
+              <input type="number" min="0" value={organisationFilters.page} onChange={(e) => setOrganisationFilters({ ...organisationFilters, page: Number(e.target.value) })} />
+            </FormField>
+            <FormField label="Size" hint="Maximum backend size is 50.">
+              <input type="number" min="1" max="50" value={organisationFilters.size} onChange={(e) => setOrganisationFilters({ ...organisationFilters, size: Number(e.target.value) })} />
+            </FormField>
             <button type="submit" disabled={loading === "organisations"}>
               Search organisations
             </button>
@@ -164,7 +184,7 @@ export function OrganisationDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>#{organisation.id} {organisation.name}</strong>
-                      <span className={`status-pill ${statusClass(organisation.verificationStatus)}`}>{organisation.verificationStatus}</span>
+                      <StatusPill value={organisation.verificationStatus} />
                     </div>
                     <small className="muted">{organisation.type} - {organisation.location}</small>
                   </div>
@@ -180,7 +200,9 @@ export function OrganisationDashboard() {
         <section className="panel">
           <h2>2. Organisation Detail</h2>
           <div className="inline-form">
-            <input value={selectedOrganisationId} onChange={(e) => setSelectedOrganisationId(e.target.value)} placeholder="Organisation ID" />
+            <FormField label="Organisation ID">
+              <input value={selectedOrganisationId} onChange={(e) => setSelectedOrganisationId(e.target.value)} placeholder="Use an ID from search results" />
+            </FormField>
             <button type="button" onClick={() => void loadOrganisation()} disabled={!selectedOrganisationId || loading === "organisation-detail"}>
               Load organisation
             </button>
@@ -196,12 +218,24 @@ export function OrganisationDashboard() {
         <section className="panel">
           <h2>3. Athlete Discovery</h2>
           <form className="form compact" onSubmit={searchAthletes}>
-            <input value={athleteFilters.keyword} onChange={(e) => setAthleteFilters({ ...athleteFilters, keyword: e.target.value })} placeholder="Keyword" />
-            <input value={athleteFilters.sport} onChange={(e) => setAthleteFilters({ ...athleteFilters, sport: e.target.value })} placeholder="Sport" />
-            <input value={athleteFilters.position} onChange={(e) => setAthleteFilters({ ...athleteFilters, position: e.target.value })} placeholder="Position" />
-            <input value={athleteFilters.location} onChange={(e) => setAthleteFilters({ ...athleteFilters, location: e.target.value })} placeholder="Location" />
-            <input type="number" min="0" value={athleteFilters.page} onChange={(e) => setAthleteFilters({ ...athleteFilters, page: Number(e.target.value) })} placeholder="Page" />
-            <input type="number" min="1" max="50" value={athleteFilters.size} onChange={(e) => setAthleteFilters({ ...athleteFilters, size: Number(e.target.value) })} placeholder="Size" />
+            <FormField label="Keyword">
+              <input value={athleteFilters.keyword} onChange={(e) => setAthleteFilters({ ...athleteFilters, keyword: e.target.value })} placeholder="Name, organisation, or evidence term" />
+            </FormField>
+            <FormField label="Sport">
+              <input value={athleteFilters.sport} onChange={(e) => setAthleteFilters({ ...athleteFilters, sport: e.target.value })} placeholder="Football" />
+            </FormField>
+            <FormField label="Position">
+              <input value={athleteFilters.position} onChange={(e) => setAthleteFilters({ ...athleteFilters, position: e.target.value })} placeholder="Forward" />
+            </FormField>
+            <FormField label="Location">
+              <input value={athleteFilters.location} onChange={(e) => setAthleteFilters({ ...athleteFilters, location: e.target.value })} placeholder="Cape Town" />
+            </FormField>
+            <FormField label="Page">
+              <input type="number" min="0" value={athleteFilters.page} onChange={(e) => setAthleteFilters({ ...athleteFilters, page: Number(e.target.value) })} />
+            </FormField>
+            <FormField label="Size" hint="Maximum backend size is 50.">
+              <input type="number" min="1" max="50" value={athleteFilters.size} onChange={(e) => setAthleteFilters({ ...athleteFilters, size: Number(e.target.value) })} />
+            </FormField>
             <button type="submit" disabled={loading === "athletes"}>
               Search verified athletes
             </button>
@@ -216,7 +250,7 @@ export function OrganisationDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>{athlete.displayName}</strong>
-                      {athlete.levelPlayTier && <span className="status-pill verified">{athlete.levelPlayTier}</span>}
+                      <StatusPill value={athlete.levelPlayTier} />
                     </div>
                     <p>{athlete.sport} - {athlete.position} - {athlete.location}</p>
                     <small className="muted">Verified evidence: {athlete.verifiedEvidenceCount}</small>
@@ -230,12 +264,24 @@ export function OrganisationDashboard() {
         <section className="panel">
           <h2>4. Verified Evidence</h2>
           <form className="form compact" onSubmit={searchEvidence}>
-            <input value={evidenceFilters.keyword} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, keyword: e.target.value })} placeholder="Keyword" />
-            <input value={evidenceFilters.sport} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, sport: e.target.value })} placeholder="Sport" />
-            <input value={evidenceFilters.position} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, position: e.target.value })} placeholder="Position" />
-            <input value={evidenceFilters.location} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, location: e.target.value })} placeholder="Location" />
-            <input type="number" min="0" value={evidenceFilters.page} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, page: Number(e.target.value) })} placeholder="Page" />
-            <input type="number" min="1" max="50" value={evidenceFilters.size} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, size: Number(e.target.value) })} placeholder="Size" />
+            <FormField label="Keyword">
+              <input value={evidenceFilters.keyword} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, keyword: e.target.value })} placeholder="Evidence title or description" />
+            </FormField>
+            <FormField label="Sport">
+              <input value={evidenceFilters.sport} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, sport: e.target.value })} placeholder="Football" />
+            </FormField>
+            <FormField label="Position">
+              <input value={evidenceFilters.position} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, position: e.target.value })} placeholder="Forward" />
+            </FormField>
+            <FormField label="Location">
+              <input value={evidenceFilters.location} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, location: e.target.value })} placeholder="Cape Town" />
+            </FormField>
+            <FormField label="Page">
+              <input type="number" min="0" value={evidenceFilters.page} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, page: Number(e.target.value) })} />
+            </FormField>
+            <FormField label="Size" hint="Maximum backend size is 50.">
+              <input type="number" min="1" max="50" value={evidenceFilters.size} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, size: Number(e.target.value) })} />
+            </FormField>
             <button type="submit" disabled={loading === "evidence"}>
               Search verified evidence
             </button>
@@ -250,7 +296,7 @@ export function OrganisationDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>#{item.evidenceId} {item.title}</strong>
-                      <span className={`status-pill ${statusClass(item.verificationStatus)}`}>{item.verificationStatus}</span>
+                      <StatusPill value={item.verificationStatus} />
                     </div>
                     <p>{item.athleteDisplayName} - {item.sport} - {item.position}</p>
                     <small className="muted">{item.eventDate} - {item.eventType}</small>

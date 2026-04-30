@@ -7,8 +7,13 @@ import { mediaApi } from "../api/mediaApi";
 import { ApiErrorMessage } from "../components/ApiErrorMessage";
 import { DataBlock } from "../components/DataBlock";
 import { EmptyState } from "../components/EmptyState";
+import { FormField } from "../components/FormField";
 import { LoadingState } from "../components/LoadingState";
+import { PageHeader } from "../components/PageHeader";
 import { NotificationSection } from "../components/sections/NotificationSection";
+import { StatusPill } from "../components/StatusPill";
+import { SuccessMessage } from "../components/SuccessMessage";
+import { WorkflowHint } from "../components/WorkflowHint";
 import type {
   AchievementResponse,
   AthleteProfileResponse,
@@ -55,10 +60,6 @@ const evidenceDefaults: CreateEvidenceRequest = {
   fileUrl: null,
   externalVideoLink: "https://video.example/evidence/two-goals"
 };
-
-function statusClass(status: string) {
-  return status.toLowerCase().replace(/_/g, "-");
-}
 
 function playableUrl(evidence: EvidenceResponse) {
   return evidence.externalVideoLink || evidence.fileUrl || "";
@@ -302,15 +303,25 @@ export function AthleteDashboard() {
 
   return (
     <div className="page">
-      <h1>Athlete Workspace</h1>
-      <p className="muted">Manual happy path: profile, achievement, evidence, media, submit, LevelPlay, notifications.</p>
-      <div className="actions">
+      <PageHeader
+        title="Athlete Workspace"
+        description="Build the athlete profile, add evidence, submit for coach verification, then check LevelPlay and notifications."
+      >
         <button type="button" onClick={() => void load()}>
           Refresh athlete data
         </button>
-      </div>
+      </PageHeader>
+      <WorkflowHint
+        steps={[
+          "Create or update your profile.",
+          "Add at least one achievement.",
+          "Create URL-only evidence or upload and attach media.",
+          "Submit editable evidence for coach verification.",
+          "Return here after coach action to check LevelPlay and notifications."
+        ]}
+      />
       {loading && <LoadingState />}
-      {message && <div className="alert success">{message}</div>}
+      <SuccessMessage message={message} />
       <ApiErrorMessage error={error} />
 
       <div className="grid two">
@@ -325,14 +336,30 @@ export function AthleteDashboard() {
             )}
           </div>
           <form className="form compact" onSubmit={saveProfile}>
-            <input placeholder="Sport" value={profileForm.sport} onChange={(e) => setProfileForm({ ...profileForm, sport: e.target.value })} required />
-            <input placeholder="Position" value={profileForm.position} onChange={(e) => setProfileForm({ ...profileForm, position: e.target.value })} required />
-            <input placeholder="Age" type="number" min="5" max="80" value={profileForm.age} onChange={(e) => setProfileForm({ ...profileForm, age: Number(e.target.value) })} required />
-            <input placeholder="Gender" value={profileForm.gender ?? ""} onChange={(e) => setProfileForm({ ...profileForm, gender: e.target.value })} />
-            <input placeholder="Location" value={profileForm.location} onChange={(e) => setProfileForm({ ...profileForm, location: e.target.value })} required />
-            <input placeholder="School or club" value={profileForm.schoolOrClub ?? ""} onChange={(e) => setProfileForm({ ...profileForm, schoolOrClub: e.target.value })} />
-            <input placeholder="Organisation ID" type="number" value={profileForm.organisationId ?? ""} onChange={(e) => setProfileForm({ ...profileForm, organisationId: e.target.value ? Number(e.target.value) : null })} />
-            <textarea placeholder="Bio" value={profileForm.bio ?? ""} onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })} />
+            <FormField label="Sport" required>
+              <input placeholder="Football" value={profileForm.sport} onChange={(e) => setProfileForm({ ...profileForm, sport: e.target.value })} required />
+            </FormField>
+            <FormField label="Position" required>
+              <input placeholder="Forward" value={profileForm.position} onChange={(e) => setProfileForm({ ...profileForm, position: e.target.value })} required />
+            </FormField>
+            <FormField label="Age" required>
+              <input type="number" min="5" max="80" value={profileForm.age} onChange={(e) => setProfileForm({ ...profileForm, age: Number(e.target.value) })} required />
+            </FormField>
+            <FormField label="Gender">
+              <input placeholder="Female" value={profileForm.gender ?? ""} onChange={(e) => setProfileForm({ ...profileForm, gender: e.target.value })} />
+            </FormField>
+            <FormField label="Location" required>
+              <input placeholder="Cape Town" value={profileForm.location} onChange={(e) => setProfileForm({ ...profileForm, location: e.target.value })} required />
+            </FormField>
+            <FormField label="School or club" hint="Use text here if you do not have an organisation ID yet.">
+              <input placeholder="Ultron Football Academy" value={profileForm.schoolOrClub ?? ""} onChange={(e) => setProfileForm({ ...profileForm, schoolOrClub: e.target.value })} />
+            </FormField>
+            <FormField label="Organisation ID" hint="Optional. Admin or organisation screens can help find this ID.">
+              <input type="number" value={profileForm.organisationId ?? ""} onChange={(e) => setProfileForm({ ...profileForm, organisationId: e.target.value ? Number(e.target.value) : null })} />
+            </FormField>
+            <FormField label="Bio">
+              <textarea placeholder="Short athlete summary" value={profileForm.bio ?? ""} onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })} />
+            </FormField>
             <button type="submit" disabled={actionLoading === "profile"}>
               {profile ? "Update profile" : "Create profile"}
             </button>
@@ -347,9 +374,15 @@ export function AthleteDashboard() {
         <section className="panel">
           <h2>2. Achievements</h2>
           <form className="form compact" onSubmit={saveAchievement}>
-            <input placeholder="Achievement title" value={achievementForm.title} onChange={(e) => setAchievementForm({ ...achievementForm, title: e.target.value })} required />
-            <input type="date" value={achievementForm.achievedAt} onChange={(e) => setAchievementForm({ ...achievementForm, achievedAt: e.target.value })} />
-            <textarea placeholder="Description" value={achievementForm.description} onChange={(e) => setAchievementForm({ ...achievementForm, description: e.target.value })} />
+            <FormField label="Achievement title" required>
+              <input placeholder="Regional Top Scorer" value={achievementForm.title} onChange={(e) => setAchievementForm({ ...achievementForm, title: e.target.value })} required />
+            </FormField>
+            <FormField label="Achievement date">
+              <input type="date" value={achievementForm.achievedAt} onChange={(e) => setAchievementForm({ ...achievementForm, achievedAt: e.target.value })} />
+            </FormField>
+            <FormField label="Description">
+              <textarea placeholder="What happened and why it matters" value={achievementForm.description} onChange={(e) => setAchievementForm({ ...achievementForm, description: e.target.value })} />
+            </FormField>
             <button type="submit" disabled={!profile || actionLoading === "achievement"}>
               {editingAchievementId ? "Update achievement" : "Create achievement"}
             </button>
@@ -368,7 +401,7 @@ export function AthleteDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>{achievement.title}</strong>
-                      <span className="status-pill">{achievement.verified ? "VERIFIED" : "UNVERIFIED"}</span>
+                      <StatusPill value={achievement.verified ? "VERIFIED" : "UNVERIFIED"} />
                     </div>
                     <p>{achievement.description || "No description"}</p>
                     <small className="muted">Date: {achievement.achievedAt || "not set"}</small>
@@ -385,18 +418,36 @@ export function AthleteDashboard() {
         <section className="panel wide">
           <h2>3. Evidence</h2>
           <form className="form compact" onSubmit={createEvidence}>
-            <input placeholder="Title" value={evidenceForm.title} onChange={(e) => setEvidenceForm({ ...evidenceForm, title: e.target.value })} required />
-            <input placeholder="Sport" value={evidenceForm.sport} onChange={(e) => setEvidenceForm({ ...evidenceForm, sport: e.target.value })} required />
-            <input placeholder="Position" value={evidenceForm.position} onChange={(e) => setEvidenceForm({ ...evidenceForm, position: e.target.value })} required />
-            <input placeholder="Event type" value={evidenceForm.eventType} onChange={(e) => setEvidenceForm({ ...evidenceForm, eventType: e.target.value })} required />
-            <select value={evidenceForm.matchOrTraining} onChange={(e) => setEvidenceForm({ ...evidenceForm, matchOrTraining: e.target.value as "MATCH" | "TRAINING" })}>
-              <option value="MATCH">MATCH</option>
-              <option value="TRAINING">TRAINING</option>
-            </select>
-            <input type="date" value={evidenceForm.eventDate} onChange={(e) => setEvidenceForm({ ...evidenceForm, eventDate: e.target.value })} required />
-            <input placeholder="File URL" value={evidenceForm.fileUrl ?? ""} onChange={(e) => setEvidenceForm({ ...evidenceForm, fileUrl: e.target.value })} />
-            <input placeholder="External video link" value={evidenceForm.externalVideoLink ?? ""} onChange={(e) => setEvidenceForm({ ...evidenceForm, externalVideoLink: e.target.value })} />
-            <textarea placeholder="Description" value={evidenceForm.description ?? ""} onChange={(e) => setEvidenceForm({ ...evidenceForm, description: e.target.value })} />
+            <FormField label="Evidence title" required>
+              <input placeholder="Two goals against City FC" value={evidenceForm.title} onChange={(e) => setEvidenceForm({ ...evidenceForm, title: e.target.value })} required />
+            </FormField>
+            <FormField label="Sport" required>
+              <input placeholder="Football" value={evidenceForm.sport} onChange={(e) => setEvidenceForm({ ...evidenceForm, sport: e.target.value })} required />
+            </FormField>
+            <FormField label="Position" required>
+              <input placeholder="Forward" value={evidenceForm.position} onChange={(e) => setEvidenceForm({ ...evidenceForm, position: e.target.value })} required />
+            </FormField>
+            <FormField label="Event type" required>
+              <input placeholder="League match" value={evidenceForm.eventType} onChange={(e) => setEvidenceForm({ ...evidenceForm, eventType: e.target.value })} required />
+            </FormField>
+            <FormField label="Context" required>
+              <select value={evidenceForm.matchOrTraining} onChange={(e) => setEvidenceForm({ ...evidenceForm, matchOrTraining: e.target.value as "MATCH" | "TRAINING" })}>
+                <option value="MATCH">MATCH</option>
+                <option value="TRAINING">TRAINING</option>
+              </select>
+            </FormField>
+            <FormField label="Event date" required>
+              <input type="date" value={evidenceForm.eventDate} onChange={(e) => setEvidenceForm({ ...evidenceForm, eventDate: e.target.value })} required />
+            </FormField>
+            <FormField label="File URL" hint="Use file URL or external video link. One is required by the backend.">
+              <input placeholder="https://..." value={evidenceForm.fileUrl ?? ""} onChange={(e) => setEvidenceForm({ ...evidenceForm, fileUrl: e.target.value })} />
+            </FormField>
+            <FormField label="External video link" hint="URL-only mode keeps this prototype simple.">
+              <input placeholder="https://video.example/clip" value={evidenceForm.externalVideoLink ?? ""} onChange={(e) => setEvidenceForm({ ...evidenceForm, externalVideoLink: e.target.value })} />
+            </FormField>
+            <FormField label="Description">
+              <textarea placeholder="What should a coach/scout notice?" value={evidenceForm.description ?? ""} onChange={(e) => setEvidenceForm({ ...evidenceForm, description: e.target.value })} />
+            </FormField>
             <button type="submit" disabled={!profile || actionLoading === "evidence"}>
               Create URL-only evidence
             </button>
@@ -411,7 +462,7 @@ export function AthleteDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>#{item.id} {item.title}</strong>
-                      <span className={`status-pill ${statusClass(item.verificationStatus)}`}>{item.verificationStatus}</span>
+                      <StatusPill value={item.verificationStatus} />
                     </div>
                     <p>{item.description || "No description"}</p>
                     <small className="muted">
@@ -450,21 +501,27 @@ export function AthleteDashboard() {
         <section className="panel">
           <h2>4. Media Upload And Attach</h2>
           <form className="form compact" onSubmit={uploadMedia}>
-            <input type="file" accept="video/mp4,video/quicktime,image/jpeg,image/png" onChange={(e) => setMediaFile(e.target.files?.[0] ?? null)} />
+            <FormField label="Media file" hint="Supported MVP types: MP4, QuickTime, JPEG, PNG.">
+              <input type="file" accept="video/mp4,video/quicktime,image/jpeg,image/png" onChange={(e) => setMediaFile(e.target.files?.[0] ?? null)} />
+            </FormField>
             <button type="submit" disabled={!profile || !mediaFile || actionLoading === "media-upload"}>
               Upload media
             </button>
           </form>
           <form className="form compact spacer-top" onSubmit={attachMedia}>
-            <select value={mediaEvidenceId} onChange={(e) => setMediaEvidenceId(e.target.value)}>
-              <option value="">Select editable evidence</option>
-              {editableEvidence.map((item) => (
-                <option key={item.id} value={item.id}>
-                  #{item.id} {item.title}
-                </option>
-              ))}
-            </select>
-            <input placeholder="Media ID" value={mediaId} onChange={(e) => setMediaId(e.target.value)} />
+            <FormField label="Editable evidence" hint="Only DRAFT or REJECTED evidence can receive media.">
+              <select value={mediaEvidenceId} onChange={(e) => setMediaEvidenceId(e.target.value)}>
+                <option value="">Select editable evidence</option>
+                {editableEvidence.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    #{item.id} {item.title}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            <FormField label="Media ID">
+              <input placeholder="Returned media ID" value={mediaId} onChange={(e) => setMediaId(e.target.value)} />
+            </FormField>
             <button type="submit" disabled={!mediaEvidenceId || !mediaId || actionLoading === "media-attach"}>
               Attach media to evidence
             </button>

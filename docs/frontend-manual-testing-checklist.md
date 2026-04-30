@@ -7,7 +7,7 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 - [ ] Backend is running at `http://localhost:8080`.
 - [ ] Health check: `GET /api/health` returns `UP`.
 - [ ] Frontend base URL points to the backend.
-- [ ] Browser devtools network tab is available for debugging.
+- [ ] Prototype navigation shows Health, login/register or dashboard, role workspace, and notifications as appropriate.
 - [ ] Test users and payloads from `docs/manual-testing-seed-data.md` are ready.
 
 ## Auth Flow
@@ -19,11 +19,13 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 - [ ] Register SCOUT_AGENT.
 - [ ] Login each role.
 - [ ] Confirm each role lands on the correct dashboard.
+- [ ] Confirm the top navigation shows the specific role workspace label and current role badge.
 - [ ] Refresh page and confirm token/session behavior matches the chosen MVP token store.
 
 ## Athlete Flow
 
 - [ ] ATHLETE creates athlete profile.
+- [ ] ATHLETE sees visible form labels, required markers, and helper text.
 - [ ] ATHLETE updates athlete profile and sees a success message.
 - [ ] ATHLETE sees profile completeness.
 - [ ] ATHLETE enters organisation ID or school/club text.
@@ -44,6 +46,7 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 ## Coach Flow
 
 - [ ] COACH creates coach profile.
+- [ ] COACH sees the workflow hint before starting verification.
 - [ ] COACH searches organisations.
 - [ ] COACH copies organisation into coach profile form.
 - [ ] COACH updates coach profile.
@@ -68,6 +71,7 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 ## Scout / Organisation Discovery Flow
 
 - [ ] SCOUT_AGENT searches athletes.
+- [ ] SCOUT_AGENT can complete discovery without opening browser dev tools.
 - [ ] SCOUT_AGENT sees verified athlete discovery cards.
 - [ ] SCOUT_AGENT opens athlete discovery profile.
 - [ ] SCOUT_AGENT sees VERIFIED evidence only.
@@ -83,6 +87,7 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 ## Admin Flow
 
 - [ ] ADMIN creates organisation.
+- [ ] ADMIN can understand moderation/audit forms from visible labels and helper text.
 - [ ] ADMIN searches organisations.
 - [ ] ADMIN updates organisation details or verification status.
 - [ ] ADMIN opens moderation summary.
@@ -126,6 +131,8 @@ Use this checklist after a frontend prototype exists. It follows the current bac
 - [ ] Error messages are readable and close to fields.
 - [ ] Buttons show disabled/loading states.
 - [ ] Empty states explain the next useful action.
+- [ ] Debug JSON blocks are collapsible and do not dominate the main workflow.
+- [ ] Workflow hints make the next manual testing step clear.
 - [ ] Role-restricted navigation items are hidden.
 - [ ] A backend `403` still shows a clear permission message if reached by direct URL.
 

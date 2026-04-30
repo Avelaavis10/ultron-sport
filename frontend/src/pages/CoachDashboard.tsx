@@ -6,8 +6,13 @@ import { organisationApi } from "../api/organisationApi";
 import { ApiErrorMessage } from "../components/ApiErrorMessage";
 import { DataBlock } from "../components/DataBlock";
 import { EmptyState } from "../components/EmptyState";
+import { FormField } from "../components/FormField";
 import { LoadingState } from "../components/LoadingState";
+import { PageHeader } from "../components/PageHeader";
 import { NotificationSection } from "../components/sections/NotificationSection";
+import { StatusPill } from "../components/StatusPill";
+import { SuccessMessage } from "../components/SuccessMessage";
+import { WorkflowHint } from "../components/WorkflowHint";
 import type {
   CoachProfileResponse,
   CreateCoachProfileRequest,
@@ -25,10 +30,6 @@ const defaultProfile: CreateCoachProfileRequest = {
   qualificationSummary: "Grassroots coach profile created from the React MVP prototype.",
   yearsExperience: 4
 };
-
-function statusClass(status: string) {
-  return status.toLowerCase().replace(/_/g, "-");
-}
 
 function evidenceLink(evidence: EvidenceResponse) {
   return evidence.externalVideoLink || evidence.fileUrl || "";
@@ -192,15 +193,25 @@ export function CoachDashboard() {
 
   return (
     <div className="page">
-      <h1>Coach Workspace</h1>
-      <p className="muted">Manual happy path: coach profile, pending evidence, context, verify/reject, notifications.</p>
-      <div className="actions">
+      <PageHeader
+        title="Coach Workspace"
+        description="Create a coach profile, inspect pending evidence context, then verify or reject submissions."
+      >
         <button type="button" onClick={() => void load()}>
           Refresh coach data
         </button>
-      </div>
+      </PageHeader>
+      <WorkflowHint
+        steps={[
+          "Create or update your coach profile.",
+          "Link an organisation if available.",
+          "Open pending evidence and inspect verification context.",
+          "Verify or reject evidence with a reason.",
+          "Check notifications and ask the athlete to confirm LevelPlay changes."
+        ]}
+      />
       {loading && <LoadingState />}
-      {message && <div className="alert success">{message}</div>}
+      <SuccessMessage message={message} />
       <ApiErrorMessage error={error} />
 
       <div className="grid two">
@@ -210,15 +221,27 @@ export function CoachDashboard() {
               <h2>1. Coach Profile</h2>
               <p className="muted">{profile ? `Coach profile #${profile.id}` : "A coach profile is required before verification."}</p>
             </div>
-            {profile && <span className={`status-pill ${statusClass(profile.verificationStatus)}`}>{profile.verificationStatus}</span>}
+            {profile && <StatusPill value={profile.verificationStatus} />}
           </div>
           <form className="form compact" onSubmit={saveProfile}>
-            <input value={profileForm.certificationReference} onChange={(e) => setProfileForm({ ...profileForm, certificationReference: e.target.value })} placeholder="Certification reference" required />
-            <input value={profileForm.organisationId ?? ""} onChange={(e) => setProfileForm({ ...profileForm, organisationId: e.target.value ? Number(e.target.value) : null })} placeholder="Organisation ID" type="number" />
-            <input value={profileForm.organisationName ?? ""} onChange={(e) => setProfileForm({ ...profileForm, organisationName: e.target.value })} placeholder="Organisation name" />
-            <input value={profileForm.sport ?? ""} onChange={(e) => setProfileForm({ ...profileForm, sport: e.target.value })} placeholder="Sport" />
-            <input value={profileForm.yearsExperience ?? 0} onChange={(e) => setProfileForm({ ...profileForm, yearsExperience: Number(e.target.value) })} placeholder="Years experience" type="number" min="0" />
-            <textarea value={profileForm.qualificationSummary ?? ""} onChange={(e) => setProfileForm({ ...profileForm, qualificationSummary: e.target.value })} placeholder="Qualification summary" />
+            <FormField label="Certification reference" required>
+              <input value={profileForm.certificationReference} onChange={(e) => setProfileForm({ ...profileForm, certificationReference: e.target.value })} placeholder="MVP-COACH-001" required />
+            </FormField>
+            <FormField label="Organisation ID" hint="Optional, but it strengthens verification context.">
+              <input value={profileForm.organisationId ?? ""} onChange={(e) => setProfileForm({ ...profileForm, organisationId: e.target.value ? Number(e.target.value) : null })} type="number" />
+            </FormField>
+            <FormField label="Organisation name">
+              <input value={profileForm.organisationName ?? ""} onChange={(e) => setProfileForm({ ...profileForm, organisationName: e.target.value })} placeholder="Ultron Football Academy" />
+            </FormField>
+            <FormField label="Sport">
+              <input value={profileForm.sport ?? ""} onChange={(e) => setProfileForm({ ...profileForm, sport: e.target.value })} placeholder="Football" />
+            </FormField>
+            <FormField label="Years experience">
+              <input value={profileForm.yearsExperience ?? 0} onChange={(e) => setProfileForm({ ...profileForm, yearsExperience: Number(e.target.value) })} type="number" min="0" />
+            </FormField>
+            <FormField label="Qualification summary">
+              <textarea value={profileForm.qualificationSummary ?? ""} onChange={(e) => setProfileForm({ ...profileForm, qualificationSummary: e.target.value })} placeholder="Coaching background and qualifications" />
+            </FormField>
             <button type="submit" disabled={actionLoading === "profile"}>
               {profile ? "Update coach profile" : "Create coach profile"}
             </button>
@@ -228,8 +251,12 @@ export function CoachDashboard() {
         <section className="panel">
           <h2>2. Link Organisation</h2>
           <form className="form compact" onSubmit={searchOrganisations}>
-            <input value={organisationName} onChange={(e) => setOrganisationName(e.target.value)} placeholder="Organisation name" />
-            <input value={organisationLocation} onChange={(e) => setOrganisationLocation(e.target.value)} placeholder="Location" />
+            <FormField label="Organisation name">
+              <input value={organisationName} onChange={(e) => setOrganisationName(e.target.value)} placeholder="Ultron Football Academy" />
+            </FormField>
+            <FormField label="Location">
+              <input value={organisationLocation} onChange={(e) => setOrganisationLocation(e.target.value)} placeholder="Cape Town" />
+            </FormField>
             <button type="submit" disabled={actionLoading === "organisations"}>
               Search organisations
             </button>
@@ -241,7 +268,7 @@ export function CoachDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>#{organisation.id} {organisation.name}</strong>
-                      <span className={`status-pill ${statusClass(organisation.verificationStatus)}`}>{organisation.verificationStatus}</span>
+                      <StatusPill value={organisation.verificationStatus} />
                     </div>
                     <small className="muted">{organisation.type} - {organisation.location}</small>
                   </div>
@@ -278,7 +305,7 @@ export function CoachDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>#{item.id} {item.title}</strong>
-                      <span className={`status-pill ${statusClass(item.verificationStatus)}`}>{item.verificationStatus}</span>
+                      <StatusPill value={item.verificationStatus} />
                     </div>
                     <p>{item.description || "No description"}</p>
                     <small className="muted">
@@ -312,7 +339,9 @@ export function CoachDashboard() {
         <section className="panel">
           <h2>4. Verification Context</h2>
           <div className="inline-form">
-            <input value={selectedEvidenceId} onChange={(e) => setSelectedEvidenceId(e.target.value)} placeholder="Evidence ID" />
+            <FormField label="Evidence ID">
+              <input value={selectedEvidenceId} onChange={(e) => setSelectedEvidenceId(e.target.value)} placeholder="Use an ID from the pending list" />
+            </FormField>
             <button type="button" onClick={() => void loadContext()} disabled={!selectedEvidenceId}>
               Load context
             </button>
@@ -323,8 +352,12 @@ export function CoachDashboard() {
         <section className="panel">
           <h2>5. Reject Evidence</h2>
           <form className="form compact" onSubmit={rejectEvidence}>
-            <input value={selectedEvidenceId} onChange={(e) => setSelectedEvidenceId(e.target.value)} placeholder="Evidence ID" required />
-            <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Reject reason" required />
+            <FormField label="Evidence ID" required>
+              <input value={selectedEvidenceId} onChange={(e) => setSelectedEvidenceId(e.target.value)} placeholder="Use an ID from the pending list" required />
+            </FormField>
+            <FormField label="Reject reason" required>
+              <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Explain what needs to be fixed" required />
+            </FormField>
             <button type="submit" disabled={!profile || !selectedEvidenceId || actionLoading === "reject"}>
               Reject evidence
             </button>

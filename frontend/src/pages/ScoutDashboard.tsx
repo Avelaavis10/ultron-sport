@@ -4,8 +4,13 @@ import { levelPlayApi } from "../api/levelPlayApi";
 import { ApiErrorMessage } from "../components/ApiErrorMessage";
 import { DataBlock } from "../components/DataBlock";
 import { EmptyState } from "../components/EmptyState";
+import { FormField } from "../components/FormField";
 import { LoadingState } from "../components/LoadingState";
+import { PageHeader } from "../components/PageHeader";
 import { NotificationSection } from "../components/sections/NotificationSection";
+import { StatusPill } from "../components/StatusPill";
+import { SuccessMessage } from "../components/SuccessMessage";
+import { WorkflowHint } from "../components/WorkflowHint";
 import type {
   AthleteDiscoveryCardResponse,
   AthleteDiscoveryProfileResponse,
@@ -32,10 +37,6 @@ const defaultFilters: DiscoveryFilters = {
   page: 0,
   size: 20
 };
-
-function statusClass(status: string) {
-  return status.toLowerCase().replace(/_/g, "-");
-}
 
 export function ScoutDashboard() {
   const [athleteFilters, setAthleteFilters] = useState<DiscoveryFilters>(defaultFilters);
@@ -103,21 +104,40 @@ export function ScoutDashboard() {
 
   return (
     <div className="page">
-      <h1>Scout Workspace</h1>
-      <p className="muted">Search discovery-safe athlete profiles, verified evidence, and LevelPlay explanations.</p>
-      {message && <div className="alert success">{message}</div>}
+      <PageHeader title="Scout Workspace" description="Search discovery-safe athletes, verified evidence, and transparent LevelPlay explanations." />
+      <WorkflowHint
+        steps={[
+          "Search verified athletes by sport, position, location, or keyword.",
+          "Open a discovery profile from a result.",
+          "Review verified evidence and LevelPlay explanation.",
+          "Use evidence search when you want to browse clips directly."
+        ]}
+      />
+      <SuccessMessage message={message} />
       <ApiErrorMessage error={error} />
 
       <div className="grid two">
         <section className="panel">
           <h2>1. Athlete Discovery Search</h2>
           <form className="form compact" onSubmit={searchAthletes}>
-            <input value={athleteFilters.keyword} onChange={(e) => setAthleteFilters({ ...athleteFilters, keyword: e.target.value })} placeholder="Keyword" />
-            <input value={athleteFilters.sport} onChange={(e) => setAthleteFilters({ ...athleteFilters, sport: e.target.value })} placeholder="Sport" />
-            <input value={athleteFilters.position} onChange={(e) => setAthleteFilters({ ...athleteFilters, position: e.target.value })} placeholder="Position" />
-            <input value={athleteFilters.location} onChange={(e) => setAthleteFilters({ ...athleteFilters, location: e.target.value })} placeholder="Location" />
-            <input type="number" min="0" value={athleteFilters.page} onChange={(e) => setAthleteFilters({ ...athleteFilters, page: Number(e.target.value) })} placeholder="Page" />
-            <input type="number" min="1" max="50" value={athleteFilters.size} onChange={(e) => setAthleteFilters({ ...athleteFilters, size: Number(e.target.value) })} placeholder="Size" />
+            <FormField label="Keyword">
+              <input value={athleteFilters.keyword} onChange={(e) => setAthleteFilters({ ...athleteFilters, keyword: e.target.value })} placeholder="Name, organisation, or evidence term" />
+            </FormField>
+            <FormField label="Sport">
+              <input value={athleteFilters.sport} onChange={(e) => setAthleteFilters({ ...athleteFilters, sport: e.target.value })} placeholder="Football" />
+            </FormField>
+            <FormField label="Position">
+              <input value={athleteFilters.position} onChange={(e) => setAthleteFilters({ ...athleteFilters, position: e.target.value })} placeholder="Forward" />
+            </FormField>
+            <FormField label="Location">
+              <input value={athleteFilters.location} onChange={(e) => setAthleteFilters({ ...athleteFilters, location: e.target.value })} placeholder="Cape Town" />
+            </FormField>
+            <FormField label="Page">
+              <input type="number" min="0" value={athleteFilters.page} onChange={(e) => setAthleteFilters({ ...athleteFilters, page: Number(e.target.value) })} />
+            </FormField>
+            <FormField label="Size" hint="Maximum backend size is 50.">
+              <input type="number" min="1" max="50" value={athleteFilters.size} onChange={(e) => setAthleteFilters({ ...athleteFilters, size: Number(e.target.value) })} />
+            </FormField>
             <button type="submit" disabled={loading === "athletes"}>
               Search athletes
             </button>
@@ -132,7 +152,7 @@ export function ScoutDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>{athlete.displayName}</strong>
-                      {athlete.levelPlayTier && <span className="status-pill verified">{athlete.levelPlayTier}</span>}
+                      <StatusPill value={athlete.levelPlayTier} />
                     </div>
                     <p>{athlete.sport} - {athlete.position} - {athlete.location}</p>
                     <small className="muted">
@@ -152,12 +172,24 @@ export function ScoutDashboard() {
         <section className="panel">
           <h2>2. Verified Evidence Search</h2>
           <form className="form compact" onSubmit={searchEvidence}>
-            <input value={evidenceFilters.keyword} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, keyword: e.target.value })} placeholder="Keyword" />
-            <input value={evidenceFilters.sport} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, sport: e.target.value })} placeholder="Sport" />
-            <input value={evidenceFilters.position} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, position: e.target.value })} placeholder="Position" />
-            <input value={evidenceFilters.location} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, location: e.target.value })} placeholder="Location" />
-            <input type="number" min="0" value={evidenceFilters.page} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, page: Number(e.target.value) })} placeholder="Page" />
-            <input type="number" min="1" max="50" value={evidenceFilters.size} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, size: Number(e.target.value) })} placeholder="Size" />
+            <FormField label="Keyword">
+              <input value={evidenceFilters.keyword} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, keyword: e.target.value })} placeholder="Evidence title or description" />
+            </FormField>
+            <FormField label="Sport">
+              <input value={evidenceFilters.sport} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, sport: e.target.value })} placeholder="Football" />
+            </FormField>
+            <FormField label="Position">
+              <input value={evidenceFilters.position} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, position: e.target.value })} placeholder="Forward" />
+            </FormField>
+            <FormField label="Location">
+              <input value={evidenceFilters.location} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, location: e.target.value })} placeholder="Cape Town" />
+            </FormField>
+            <FormField label="Page">
+              <input type="number" min="0" value={evidenceFilters.page} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, page: Number(e.target.value) })} />
+            </FormField>
+            <FormField label="Size" hint="Maximum backend size is 50.">
+              <input type="number" min="1" max="50" value={evidenceFilters.size} onChange={(e) => setEvidenceFilters({ ...evidenceFilters, size: Number(e.target.value) })} />
+            </FormField>
             <button type="submit" disabled={loading === "evidence"}>
               Search verified evidence
             </button>
@@ -172,7 +204,7 @@ export function ScoutDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>#{item.evidenceId} {item.title}</strong>
-                      <span className={`status-pill ${statusClass(item.verificationStatus)}`}>{item.verificationStatus}</span>
+                      <StatusPill value={item.verificationStatus} />
                     </div>
                     <p>{item.athleteDisplayName} - {item.sport} - {item.position}</p>
                     <small className="muted">{item.eventType} - {item.matchOrTraining} - {item.eventDate}</small>
@@ -196,7 +228,9 @@ export function ScoutDashboard() {
         <section className="panel">
           <h2>3. Athlete Discovery Profile</h2>
           <div className="inline-form">
-            <input value={athleteProfileId} onChange={(e) => setAthleteProfileId(e.target.value)} placeholder="Athlete profile ID" />
+            <FormField label="Athlete profile ID">
+              <input value={athleteProfileId} onChange={(e) => setAthleteProfileId(e.target.value)} placeholder="Use an ID from search results" />
+            </FormField>
             <button type="button" onClick={() => void loadProfile()} disabled={!athleteProfileId || loading === "profile"}>
               Load profile
             </button>

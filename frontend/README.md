@@ -71,6 +71,18 @@ npm run build
 - `/admin` covers organisation creation/search/update, moderation summary, flagged/archived evidence review, flag/archive/note actions, audit log search, audit logs by target, LevelPlay recalculation for one/all athletes, and inline notifications.
 - `/notifications` covers list, unread count, mark one read, and mark all read.
 
+## Usability Polish
+
+The prototype includes a lightweight usability pass for manual testers:
+
+- Role-specific navigation labels and visible current role.
+- Guided workflow hints on the dashboard and every role workspace.
+- Visible form labels, required markers, and helper text on the main forms.
+- Consistent success, loading, empty, and API error messages.
+- Reusable status pills for workflow states and LevelPlay tiers.
+- Collapsible debug JSON blocks for inspecting backend responses without crowding the main workflow.
+- Responsive layout improvements for laptop, tablet-width, and basic mobile browser testing.
+
 ## Token Handling
 
 For this prototype only, the access token and current user are stored in `sessionStorage`. This is convenient for manual API validation but is not the final production security strategy.
@@ -100,15 +112,15 @@ Production mobile/web clients should use framework-appropriate secure storage an
 ## Known Limitations
 
 - The UI is intentionally plain and aimed at backend workflow validation.
-- Some responses are still shown as JSON blocks so developers can inspect the current API contract.
+- Some responses are still available as collapsible debug blocks so developers can inspect the current API contract.
 - Form validation is light; the backend remains the source of truth.
 - Media upload has no progress bar, drag-and-drop, thumbnails, transcoding, or playback workflow.
-- Scout, organisation, and admin workspaces are guided enough for MVP validation but still need product usability polish.
+- Screens are now easier for manual testing, but they are still prototype-level rather than product-ready.
 - No production auth hardening, push notifications, WebSockets, AI, payments, social features, or deployment automation are included.
 
 ## Next Frontend Tasks
 
-- Run a usability pass across all role workspaces.
-- Add clearer success states and field-level validation hints.
-- Add reusable form components once the API workflow is stable.
+- Create a frontend MVP smoke-test checklist and optional lightweight automated frontend tests for auth/dashboard rendering.
+- Add deeper field-level validation hints only after the backend contract stabilises further.
+- Decide which frontend patterns should graduate from prototype utilities to production components.
 - Decide whether the first production client should be React web, React Native, or another mobile framework after MVP validation.

@@ -1,5 +1,7 @@
 import { Link, Navigate } from "react-router-dom";
+import { PageHeader } from "../components/PageHeader";
 import { RoleBadge } from "../components/RoleBadge";
+import { WorkflowHint } from "../components/WorkflowHint";
 import { useAuth } from "../auth/AuthContext";
 import type { UserRole } from "../types/apiTypes";
 
@@ -20,9 +22,11 @@ export function DashboardPage() {
 
   return (
     <div className="page">
-      <h1>Dashboard</h1>
+      <PageHeader title="Dashboard" description="Choose the role workspace or check notifications while testing the MVP.">
+        <RoleBadge role={user.role} />
+      </PageHeader>
       <p>
-        Signed in as <strong>{user.displayName}</strong> <RoleBadge role={user.role} />
+        Signed in as <strong>{user.displayName}</strong>.
       </p>
       <div className="actions">
         <Link className="button-link" to={roleRoute[user.role]}>
@@ -32,6 +36,14 @@ export function DashboardPage() {
           Notifications
         </Link>
       </div>
+      <WorkflowHint
+        title="Manual testing rhythm"
+        steps={[
+          "Open the role workspace for the current test user.",
+          "Complete the numbered sections from top to bottom.",
+          "Use notifications and LevelPlay panels to confirm backend side effects."
+        ]}
+      />
       <section className="panel">
         <h2>MVP Prototype Boundary</h2>
         <p>

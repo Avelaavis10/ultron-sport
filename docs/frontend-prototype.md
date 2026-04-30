@@ -25,6 +25,19 @@ frontend/
 - Admin workspace: `/admin`
 - Notifications: `/notifications`
 
+## Usability Polish
+
+The prototype now includes a focused manual-testing usability pass:
+
+1. Navigation names the current role workspace instead of using a generic label.
+2. Role, session, active route, and logout controls are easier to identify.
+3. Each role workspace includes a workflow hint with the recommended test sequence.
+4. Main forms use visible labels, helper text, and required markers.
+5. Success, loading, empty, and backend error states are more consistent.
+6. Statuses such as `VERIFIED`, `PENDING_VERIFICATION`, `FLAGGED`, `READ`, `UNREAD`, and LevelPlay tiers use a shared status pill.
+7. Raw backend responses are still available through collapsible debug blocks, but the main screen prioritises readable cards and summaries.
+8. CSS now handles tablet-width and basic mobile-width browser testing more gracefully.
+
 ## Athlete Happy Path
 
 The athlete workspace now supports the main MVP validation path:
@@ -151,10 +164,10 @@ This exists only to let the Vite dev server call the Spring Boot API locally. It
 ## Known Limitations
 
 - Screens are workflow validation surfaces rather than polished product UI.
-- JSON response blocks remain visible where they help inspect the API contract.
-- Form validation is intentionally light.
+- Collapsible JSON response blocks remain where they help inspect the API contract.
+- Form validation is intentionally light; backend validation remains authoritative.
 - Role workspaces are guided enough for MVP manual testing but are not final product screens.
-- Scout, organisation, and admin screens still need usability polish, clearer detail views, and stronger field-level guidance.
+- Detail views and field-level guidance can still be deepened once testers give feedback.
 - Media upload supports only the MVP multipart endpoint, without progress, thumbnails, video playback, or transcoding.
 - Discovery search uses basic filters only.
 - No AI, production storage, push notifications, WebSockets, analytics, maps, or deployment tooling is included.
@@ -165,8 +178,8 @@ The recommended sequence remains:
 
 1. Validate backend workflows with this React web prototype.
 2. Stabilise API contracts and frontend data types.
-3. Run a usability pass across athlete, coach, scout, organisation, and admin workspaces.
-4. Add focused frontend tests and reusable form primitives once workflows settle.
+3. Create a frontend MVP smoke-test checklist and optional lightweight automated frontend tests for auth/dashboard rendering.
+4. Refine reusable form primitives only where tester feedback shows repeated friction.
 5. Start React Native or another mobile client once the API consumption model is proven.
 
 The API modules and DTO reference types in this prototype can inform the future mobile client, but should be reviewed before production use.

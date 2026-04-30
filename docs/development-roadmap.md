@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, consistent error handling, public health/readiness/version endpoints, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, database-backed in-app notifications, API contract/manual testing docs, frontend/mobile integration planning docs, a minimal React web prototype scaffold, expanded athlete/coach/scout/organisation/admin happy-path screens, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, consistent error handling, public health/readiness/version endpoints, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, database-backed in-app notifications, API contract/manual testing docs, frontend/mobile integration planning docs, a minimal React web prototype scaffold, expanded athlete/coach/scout/organisation/admin happy-path screens, a frontend usability polish pass, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -88,8 +88,8 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 - Completed: expand scout happy path for discovery search, verified evidence review, discovery profile, LevelPlay lookup, and notifications.
 - Completed: expand organisation happy path for organisation search/detail and verified discovery workflows.
 - Completed: expand admin happy path for organisation management, moderation summary/actions, audit logs, LevelPlay recalculation, and notifications.
-- Run frontend MVP usability pass and workflow polish.
-- Improve field-level frontend validation without replacing backend validation.
+- Completed: run frontend MVP usability pass with clearer navigation, workflow hints, labelled forms, status pills, collapsible debug details, and responsive CSS improvements.
+- Improve deeper field-level frontend validation without replacing backend validation.
 - Add lightweight frontend tests after the prototype stabilises.
 - Decide whether the next production-facing client should be React web, React Native, or another mobile framework.
 

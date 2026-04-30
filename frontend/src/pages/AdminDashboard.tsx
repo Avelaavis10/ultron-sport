@@ -6,8 +6,13 @@ import { organisationApi } from "../api/organisationApi";
 import { ApiErrorMessage } from "../components/ApiErrorMessage";
 import { DataBlock } from "../components/DataBlock";
 import { EmptyState } from "../components/EmptyState";
+import { FormField } from "../components/FormField";
 import { LoadingState } from "../components/LoadingState";
+import { PageHeader } from "../components/PageHeader";
 import { NotificationSection } from "../components/sections/NotificationSection";
+import { StatusPill } from "../components/StatusPill";
+import { SuccessMessage } from "../components/SuccessMessage";
+import { WorkflowHint } from "../components/WorkflowHint";
 import type {
   AdminActionLogResponse,
   AdminAuditLogQuery,
@@ -78,10 +83,6 @@ const defaultAuditFilters: AuditFilters = {
 };
 
 const verificationStatuses: Array<"" | VerificationStatus> = ["", "PENDING_VERIFICATION", "VERIFIED", "REJECTED"];
-
-function statusClass(status: string) {
-  return status.toLowerCase().replace(/_/g, "-");
-}
 
 function optionalNumber(value: string): number | null {
   return value.trim() ? Number(value) : null;
@@ -346,25 +347,43 @@ export function AdminDashboard() {
 
   return (
     <div className="page">
-      <h1>Admin Workspace</h1>
-      <p className="muted">Validate organisation management, moderation, audit logs, and LevelPlay recalculation.</p>
-      <div className="actions">
+      <PageHeader
+        title="Admin Workspace"
+        description="Manage organisations, inspect moderation state, review audit logs, and recalculate LevelPlay scores."
+      >
         <button type="button" onClick={() => void loadModerationData()} disabled={loading === "admin-data"}>
           Refresh admin data
         </button>
-      </div>
+      </PageHeader>
+      <WorkflowHint
+        steps={[
+          "Create or search organisations before athletes/coaches link to them.",
+          "Use moderation summary to inspect evidence status counts.",
+          "Flag, archive, or note evidence with the evidence ID.",
+          "Search audit logs or target logs after admin actions.",
+          "Recalculate LevelPlay only when validating score side effects."
+        ]}
+      />
       {loading === "admin-data" && <LoadingState />}
-      {message && <div className="alert success">{message}</div>}
+      <SuccessMessage message={message} />
       <ApiErrorMessage error={error} />
 
       <div className="grid two">
         <section className="panel">
           <h2>1. Create Organisation</h2>
           <form className="form compact" onSubmit={createOrganisation}>
-            <input value={organisationForm.name} onChange={(e) => setOrganisationForm({ ...organisationForm, name: e.target.value })} placeholder="Name" required />
-            <input value={organisationForm.type} onChange={(e) => setOrganisationForm({ ...organisationForm, type: e.target.value })} placeholder="Type" required />
-            <input value={organisationForm.location} onChange={(e) => setOrganisationForm({ ...organisationForm, location: e.target.value })} placeholder="Location" required />
-            <input value={organisationForm.contactEmail ?? ""} onChange={(e) => setOrganisationForm({ ...organisationForm, contactEmail: e.target.value })} placeholder="Contact email" type="email" />
+            <FormField label="Name" required>
+              <input value={organisationForm.name} onChange={(e) => setOrganisationForm({ ...organisationForm, name: e.target.value })} placeholder="Ultron Football Academy" required />
+            </FormField>
+            <FormField label="Type" required hint="Examples: SCHOOL, CLUB, ACADEMY, UNIVERSITY, TEAM.">
+              <input value={organisationForm.type} onChange={(e) => setOrganisationForm({ ...organisationForm, type: e.target.value })} placeholder="ACADEMY" required />
+            </FormField>
+            <FormField label="Location" required>
+              <input value={organisationForm.location} onChange={(e) => setOrganisationForm({ ...organisationForm, location: e.target.value })} placeholder="Cape Town" required />
+            </FormField>
+            <FormField label="Contact email">
+              <input value={organisationForm.contactEmail ?? ""} onChange={(e) => setOrganisationForm({ ...organisationForm, contactEmail: e.target.value })} placeholder="admin@ultronsport.test" type="email" />
+            </FormField>
             <button type="submit" disabled={loading === "create-organisation"}>
               Create organisation
             </button>
@@ -374,18 +393,30 @@ export function AdminDashboard() {
         <section className="panel">
           <h2>2. Organisation Search / Update</h2>
           <form className="form compact" onSubmit={searchOrganisations}>
-            <input value={organisationFilters.name} onChange={(e) => setOrganisationFilters({ ...organisationFilters, name: e.target.value })} placeholder="Name" />
-            <input value={organisationFilters.type} onChange={(e) => setOrganisationFilters({ ...organisationFilters, type: e.target.value })} placeholder="Type" />
-            <input value={organisationFilters.location} onChange={(e) => setOrganisationFilters({ ...organisationFilters, location: e.target.value })} placeholder="Location" />
-            <select value={organisationFilters.verificationStatus} onChange={(e) => setOrganisationFilters({ ...organisationFilters, verificationStatus: e.target.value as "" | VerificationStatus })}>
-              {verificationStatuses.map((status) => (
-                <option key={status || "ANY"} value={status}>
-                  {status || "Any status"}
-                </option>
-              ))}
-            </select>
-            <input type="number" min="0" value={organisationFilters.page} onChange={(e) => setOrganisationFilters({ ...organisationFilters, page: Number(e.target.value) })} placeholder="Page" />
-            <input type="number" min="1" max="50" value={organisationFilters.size} onChange={(e) => setOrganisationFilters({ ...organisationFilters, size: Number(e.target.value) })} placeholder="Size" />
+            <FormField label="Name">
+              <input value={organisationFilters.name} onChange={(e) => setOrganisationFilters({ ...organisationFilters, name: e.target.value })} placeholder="Ultron" />
+            </FormField>
+            <FormField label="Type">
+              <input value={organisationFilters.type} onChange={(e) => setOrganisationFilters({ ...organisationFilters, type: e.target.value })} placeholder="ACADEMY" />
+            </FormField>
+            <FormField label="Location">
+              <input value={organisationFilters.location} onChange={(e) => setOrganisationFilters({ ...organisationFilters, location: e.target.value })} placeholder="Cape Town" />
+            </FormField>
+            <FormField label="Verification status">
+              <select value={organisationFilters.verificationStatus} onChange={(e) => setOrganisationFilters({ ...organisationFilters, verificationStatus: e.target.value as "" | VerificationStatus })}>
+                {verificationStatuses.map((status) => (
+                  <option key={status || "ANY"} value={status}>
+                    {status || "Any status"}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            <FormField label="Page">
+              <input type="number" min="0" value={organisationFilters.page} onChange={(e) => setOrganisationFilters({ ...organisationFilters, page: Number(e.target.value) })} />
+            </FormField>
+            <FormField label="Size" hint="Maximum backend size is 50.">
+              <input type="number" min="1" max="50" value={organisationFilters.size} onChange={(e) => setOrganisationFilters({ ...organisationFilters, size: Number(e.target.value) })} />
+            </FormField>
             <button type="submit" disabled={loading === "organisations"}>
               Search organisations
             </button>
@@ -400,7 +431,7 @@ export function AdminDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>#{organisation.id} {organisation.name}</strong>
-                      <span className={`status-pill ${statusClass(organisation.verificationStatus)}`}>{organisation.verificationStatus}</span>
+                      <StatusPill value={organisation.verificationStatus} />
                     </div>
                     <small className="muted">{organisation.type} - {organisation.location}</small>
                   </div>
@@ -413,21 +444,33 @@ export function AdminDashboard() {
           )}
 
           <form className="form compact spacer-top" onSubmit={updateOrganisation}>
-            <input value={selectedOrganisationId} onChange={(e) => setSelectedOrganisationId(e.target.value)} placeholder="Organisation ID" />
+            <FormField label="Organisation ID" hint="Use an ID from search results or a freshly created organisation.">
+              <input value={selectedOrganisationId} onChange={(e) => setSelectedOrganisationId(e.target.value)} placeholder="Organisation ID" />
+            </FormField>
             <button type="button" className="secondary" onClick={() => void loadOrganisationForUpdate()} disabled={!selectedOrganisationId || loading === "organisation-detail"}>
               Load
             </button>
-            <input value={updateOrganisationForm.name ?? ""} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, name: e.target.value })} placeholder="Updated name" />
-            <input value={updateOrganisationForm.type ?? ""} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, type: e.target.value })} placeholder="Updated type" />
-            <input value={updateOrganisationForm.location ?? ""} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, location: e.target.value })} placeholder="Updated location" />
-            <input value={updateOrganisationForm.contactEmail ?? ""} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, contactEmail: e.target.value })} placeholder="Updated email" />
-            <select value={updateOrganisationForm.verificationStatus ?? "PENDING_VERIFICATION"} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, verificationStatus: e.target.value as VerificationStatus })}>
-              {verificationStatuses.filter(Boolean).map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
+            <FormField label="Updated name">
+              <input value={updateOrganisationForm.name ?? ""} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, name: e.target.value })} placeholder="Updated name" />
+            </FormField>
+            <FormField label="Updated type">
+              <input value={updateOrganisationForm.type ?? ""} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, type: e.target.value })} placeholder="Updated type" />
+            </FormField>
+            <FormField label="Updated location">
+              <input value={updateOrganisationForm.location ?? ""} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, location: e.target.value })} placeholder="Updated location" />
+            </FormField>
+            <FormField label="Updated email">
+              <input value={updateOrganisationForm.contactEmail ?? ""} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, contactEmail: e.target.value })} placeholder="Updated email" />
+            </FormField>
+            <FormField label="Updated verification status">
+              <select value={updateOrganisationForm.verificationStatus ?? "PENDING_VERIFICATION"} onChange={(e) => setUpdateOrganisationForm({ ...updateOrganisationForm, verificationStatus: e.target.value as VerificationStatus })}>
+                {verificationStatuses.filter(Boolean).map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </FormField>
             <button type="submit" disabled={!selectedOrganisationId || loading === "update-organisation"}>
               Update organisation
             </button>
@@ -453,22 +496,34 @@ export function AdminDashboard() {
         <section className="panel">
           <h2>4. Moderation Actions</h2>
           <form className="form compact" onSubmit={flagEvidence}>
-            <input value={evidenceId} onChange={(e) => setEvidenceId(e.target.value)} placeholder="Evidence ID" required />
-            <textarea value={flagReason} onChange={(e) => setFlagReason(e.target.value)} placeholder="Flag reason" required />
+            <FormField label="Evidence ID" required>
+              <input value={evidenceId} onChange={(e) => setEvidenceId(e.target.value)} placeholder="Evidence ID" required />
+            </FormField>
+            <FormField label="Flag reason" required>
+              <textarea value={flagReason} onChange={(e) => setFlagReason(e.target.value)} placeholder="Why is this evidence flagged?" required />
+            </FormField>
             <button type="submit" disabled={!evidenceId || loading === "flag-evidence"}>
               Flag evidence
             </button>
           </form>
           <form className="form compact spacer-top" onSubmit={archiveEvidence}>
-            <input value={archiveEvidenceId} onChange={(e) => setArchiveEvidenceId(e.target.value)} placeholder="Evidence ID to archive" required />
+            <FormField label="Evidence ID to archive" required>
+              <input value={archiveEvidenceId} onChange={(e) => setArchiveEvidenceId(e.target.value)} placeholder="Evidence ID" required />
+            </FormField>
             <button type="submit" disabled={!archiveEvidenceId || loading === "archive-evidence"}>
               Archive evidence
             </button>
           </form>
           <form className="form compact spacer-top" onSubmit={createModerationNote}>
-            <input value={evidenceId} onChange={(e) => setEvidenceId(e.target.value)} placeholder="Evidence ID" required />
-            <input value={noteReason} onChange={(e) => setNoteReason(e.target.value)} placeholder="Optional note reason" />
-            <textarea value={noteDetails} onChange={(e) => setNoteDetails(e.target.value)} placeholder="Moderation note" required />
+            <FormField label="Evidence ID" required>
+              <input value={evidenceId} onChange={(e) => setEvidenceId(e.target.value)} placeholder="Evidence ID" required />
+            </FormField>
+            <FormField label="Note reason">
+              <input value={noteReason} onChange={(e) => setNoteReason(e.target.value)} placeholder="Manual moderation review" />
+            </FormField>
+            <FormField label="Moderation note" required>
+              <textarea value={noteDetails} onChange={(e) => setNoteDetails(e.target.value)} placeholder="Internal note for audit history" required />
+            </FormField>
             <button type="submit" disabled={!evidenceId || loading === "moderation-note"}>
               Add moderation note
             </button>
@@ -486,7 +541,7 @@ export function AdminDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>#{item.id} {item.title}</strong>
-                      <span className={`status-pill ${statusClass(item.verificationStatus)}`}>{item.verificationStatus}</span>
+                      <StatusPill value={item.verificationStatus} />
                     </div>
                     <p>{item.sport} - {item.position} - athlete #{item.athleteProfileId}</p>
                     <small className="muted">{item.eventDate} - {item.eventType}</small>
@@ -508,7 +563,7 @@ export function AdminDashboard() {
                   <div>
                     <div className="row-title">
                       <strong>#{item.id} {item.title}</strong>
-                      <span className={`status-pill ${statusClass(item.verificationStatus)}`}>{item.verificationStatus}</span>
+                      <StatusPill value={item.verificationStatus} />
                     </div>
                     <p>{item.sport} - {item.position} - athlete #{item.athleteProfileId}</p>
                     <small className="muted">{item.updatedAt}</small>
@@ -522,16 +577,30 @@ export function AdminDashboard() {
         <section className="panel">
           <h2>7. Audit Log Search</h2>
           <form className="form compact" onSubmit={searchAuditLogs}>
-            <input value={auditFilters.actionType} onChange={(e) => setAuditFilters({ ...auditFilters, actionType: e.target.value })} placeholder="Action type" />
-            <input value={auditFilters.targetType} onChange={(e) => setAuditFilters({ ...auditFilters, targetType: e.target.value })} placeholder="Target type" />
-            <input value={auditFilters.targetId} onChange={(e) => setAuditFilters({ ...auditFilters, targetId: e.target.value })} placeholder="Target ID" />
-            <input value={auditFilters.adminUserId} onChange={(e) => setAuditFilters({ ...auditFilters, adminUserId: e.target.value })} placeholder="Admin user ID" />
-            <input type="number" min="0" value={auditFilters.page} onChange={(e) => setAuditFilters({ ...auditFilters, page: Number(e.target.value) })} placeholder="Page" />
-            <input type="number" min="1" max="50" value={auditFilters.size} onChange={(e) => setAuditFilters({ ...auditFilters, size: Number(e.target.value) })} placeholder="Size" />
-            <select value={auditFilters.sortDirection} onChange={(e) => setAuditFilters({ ...auditFilters, sortDirection: e.target.value })}>
-              <option value="DESC">Newest first</option>
-              <option value="ASC">Oldest first</option>
-            </select>
+            <FormField label="Action type" hint="Example: EVIDENCE_FLAGGED">
+              <input value={auditFilters.actionType} onChange={(e) => setAuditFilters({ ...auditFilters, actionType: e.target.value })} placeholder="Action type" />
+            </FormField>
+            <FormField label="Target type" hint="Example: EVIDENCE">
+              <input value={auditFilters.targetType} onChange={(e) => setAuditFilters({ ...auditFilters, targetType: e.target.value })} placeholder="Target type" />
+            </FormField>
+            <FormField label="Target ID">
+              <input value={auditFilters.targetId} onChange={(e) => setAuditFilters({ ...auditFilters, targetId: e.target.value })} placeholder="Target ID" />
+            </FormField>
+            <FormField label="Admin user ID">
+              <input value={auditFilters.adminUserId} onChange={(e) => setAuditFilters({ ...auditFilters, adminUserId: e.target.value })} placeholder="Admin user ID" />
+            </FormField>
+            <FormField label="Page">
+              <input type="number" min="0" value={auditFilters.page} onChange={(e) => setAuditFilters({ ...auditFilters, page: Number(e.target.value) })} />
+            </FormField>
+            <FormField label="Size" hint="Maximum backend size is 50.">
+              <input type="number" min="1" max="50" value={auditFilters.size} onChange={(e) => setAuditFilters({ ...auditFilters, size: Number(e.target.value) })} />
+            </FormField>
+            <FormField label="Sort direction">
+              <select value={auditFilters.sortDirection} onChange={(e) => setAuditFilters({ ...auditFilters, sortDirection: e.target.value })}>
+                <option value="DESC">Newest first</option>
+                <option value="ASC">Oldest first</option>
+              </select>
+            </FormField>
             <button type="submit" disabled={loading === "audit-logs"}>
               Search audit logs
             </button>
@@ -560,8 +629,12 @@ export function AdminDashboard() {
         <section className="panel">
           <h2>8. Audit Logs By Target</h2>
           <form className="form compact" onSubmit={loadTargetLogs}>
-            <input value={targetType} onChange={(e) => setTargetType(e.target.value)} placeholder="Target type, e.g. EVIDENCE" required />
-            <input value={targetId} onChange={(e) => setTargetId(e.target.value)} placeholder="Target ID" required />
+            <FormField label="Target type" required>
+              <input value={targetType} onChange={(e) => setTargetType(e.target.value)} placeholder="EVIDENCE" required />
+            </FormField>
+            <FormField label="Target ID" required>
+              <input value={targetId} onChange={(e) => setTargetId(e.target.value)} placeholder="Evidence ID" required />
+            </FormField>
             <button type="submit" disabled={!targetType || !targetId || loading === "target-logs"}>
               Load target logs
             </button>
@@ -587,7 +660,9 @@ export function AdminDashboard() {
         <section className="panel">
           <h2>9. LevelPlay Admin</h2>
           <div className="inline-form">
-            <input value={recalculateAthleteProfileId} onChange={(e) => setRecalculateAthleteProfileId(e.target.value)} placeholder="Athlete profile ID" />
+            <FormField label="Athlete profile ID">
+              <input value={recalculateAthleteProfileId} onChange={(e) => setRecalculateAthleteProfileId(e.target.value)} placeholder="Athlete profile ID" />
+            </FormField>
             <button type="button" onClick={() => void recalculateScore()} disabled={!recalculateAthleteProfileId || loading === "recalculate-one"}>
               Recalculate one
             </button>
