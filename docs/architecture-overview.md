@@ -21,6 +21,7 @@ za.co.ultronsport
   common/error        Shared API error handling
   config/security    JWT config, token service, request filter, user details service, RBAC rules
   config/storage     Media storage mode, local path, public URL, and size/type settings
+  config             Application metadata configuration
   domain             Entities, enums, and domain state transitions
   repository         Spring Data repository interfaces
   service            Service interfaces
@@ -44,6 +45,7 @@ za.co.ultronsport
 - LevelPlay credibility score calculation with transparent MVP score explanation
 - Admin moderation and append-only audit logging foundation
 - In-app notification model for key evidence, moderation, LevelPlay, profile, achievement, organisation, and coach profile events
+- MVP operational hardening with public health/readiness/version endpoints and consistent error JSON
 - Global validation and API error handling
 - Service unit tests and JPA repository integration test
 - MockMvc security integration tests for JWT and role-protected endpoints
@@ -54,6 +56,7 @@ za.co.ultronsport
 - Athlete profile and achievement service/MockMvc tests for ownership, duplicate prevention, updates, and LevelPlay integration
 - Coach/organisation relationship tests for organisation creation, coach profile ownership, athlete organisation linking, verification context, and protected access
 - Notification service and MockMvc tests for current-user notification access, read status, workflow notification creation, and protected access
+- Health and error-handling integration tests for operational readiness and developer handover
 
 ## Security Flow
 
@@ -62,6 +65,7 @@ za.co.ultronsport
 3. Successful authentication returns a short-lived JWT bearer token.
 4. `JwtAuthenticationFilter` validates bearer tokens before protected requests reach controllers.
 5. `SecurityConfig` applies role rules for ATHLETE, COACH, ORGANISATION, SCOUT_AGENT, and ADMIN endpoints.
+6. Authentication and authorisation failures are written as the standard API error JSON shape.
 
 JWT settings are read from `security.jwt.*` configuration. Local defaults exist for development, but deployed environments must override `ULTRON_JWT_SECRET`.
 
@@ -74,6 +78,18 @@ JWT settings are read from `security.jwt.*` configuration. Local defaults exist 
 - Repositories are persistence adapters.
 - Security is enforced at the HTTP boundary, while services remain the place for use-case and workflow rules.
 - Future security work includes refresh tokens, password reset, account lockout, rate limiting, MFA, OAuth/social login, and POPIA privacy controls.
+
+## Operational Hardening
+
+Public MVP health endpoints live under `/api/health`.
+
+- `/api/health` returns application status, configured app name, environment, and timestamp.
+- `/api/health/readiness` performs a small database connectivity check and returns READY when the database is reachable.
+- `/api/health/version` returns configured app name, version, environment, and timestamp.
+
+The API uses one error response structure for validation, authentication, authorisation, missing resources, malformed requests, unsupported media types, method errors, and fallback failures. Responses include `code` and `traceId` for developer support but do not expose stack traces, JWT internals, passwords, or filesystem paths.
+
+This deliberately avoids Prometheus, Grafana, ELK, OpenTelemetry, distributed tracing, SIEM, alerting, Kafka, Redis, Kubernetes, Docker Compose, and external monitoring platforms.
 
 ## Evidence Workflow
 

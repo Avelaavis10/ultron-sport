@@ -1,4 +1,8 @@
 package za.co.ultronsport.web.dto;
 
-public record VerificationDecisionRequest(String comments) {
+import jakarta.validation.constraints.Size;
+
+public record VerificationDecisionRequest(
+        @Size(max = 1000) String comments
+) {
 }

@@ -36,6 +36,10 @@ The platform helps athletes upload sporting evidence, coaches and institutions v
 - [Athlete Profiles and Achievements](docs/athlete-profile-and-achievements.md)
 - [Coach Organisation Verification Context](docs/coach-organisation-verification-context.md)
 - [Notifications and Events](docs/notifications-and-events.md)
+- [Health Checks](docs/health-checks.md)
+- [Error Handling](docs/error-handling.md)
+- [Local Development Guide](docs/local-development-guide.md)
+- [API Testing Guide](docs/api-testing-guide.md)
 - [UI and Prototype Notes](docs/ui-and-prototype-notes.md)
 
 ## Source Materials
@@ -171,6 +175,12 @@ In-app notification endpoints are exposed at:
 http://localhost:8080/api/notifications
 ```
 
+Health endpoints are public and exposed at:
+
+```text
+http://localhost:8080/api/health
+```
+
 Use `POST /api/auth/register` or `POST /api/auth/login` to receive a bearer token, then call protected endpoints with:
 
 ```text
@@ -190,5 +200,7 @@ Coach verification now requires a coach profile before evidence can be approved 
 Admin moderation now records append-only audit logs for evidence flag/archive actions, moderation notes, and admin LevelPlay recalculations. The MVP intentionally avoids enterprise SIEM, Kafka, Redis, external logging platforms, automated fraud detection, and AI moderation.
 
 In-app notifications are now database-backed and append-only. Users can list notifications, see unread notifications, count unread items, and mark one or all notifications as read. Evidence decisions, moderation outcomes, profile/achievement changes, organisation links, coach profile saves, and LevelPlay score changes create notifications where appropriate. Email, SMS, push, WebSockets, external queues, and notification preferences are intentionally deferred.
+
+MVP operational hardening now includes custom public health, readiness, and version endpoints plus a consistent API error response for validation, authentication, authorisation, not-found, malformed request, method, and media-type failures. Error responses include a `code` and `traceId` without exposing stack traces, JWT internals, passwords, or filesystem paths.
 
 The MVP backend is intentionally a modular monolith. It separates domain, repositories, services, controllers, DTOs, security configuration, and error handling so the codebase can later evolve toward microservices.

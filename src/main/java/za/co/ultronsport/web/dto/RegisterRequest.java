@@ -7,10 +7,11 @@ import jakarta.validation.constraints.Size;
 import za.co.ultronsport.domain.UserRole;
 
 public record RegisterRequest(
-        @NotBlank String displayName,
-        @Email @NotBlank String email,
-        String phone,
-        @NotBlank @Size(min = 8, message = "Password must be at least 8 characters") String password,
+        @NotBlank @Size(max = 120) String displayName,
+        @Email @NotBlank @Size(max = 254) String email,
+        @Size(max = 40) String phone,
+        @NotBlank @Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters")
+        String password,
         @NotNull UserRole role
 ) {
 }

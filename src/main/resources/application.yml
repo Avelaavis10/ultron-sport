@@ -47,6 +47,12 @@ storage:
   local:
     base-path: ${ULTRON_STORAGE_LOCAL_BASE_PATH:./uploads/ultron-sport}
 
+ultron:
+  app:
+    name: ${ULTRON_APP_NAME:Ultron Sport API}
+    version: ${ULTRON_APP_VERSION:0.1.0-mvp}
+    environment: ${ULTRON_APP_ENVIRONMENT:local}
+
 ---
 spring:
   config:

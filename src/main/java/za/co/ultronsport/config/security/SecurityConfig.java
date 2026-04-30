@@ -1,10 +1,10 @@
 package za.co.ultronsport.config.security;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -24,10 +24,14 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UltronUserDetailsService userDetailsService;
+    private final SecurityErrorResponseWriter securityErrorResponseWriter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, UltronUserDetailsService userDetailsService) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          UltronUserDetailsService userDetailsService,
+                          SecurityErrorResponseWriter securityErrorResponseWriter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userDetailsService = userDetailsService;
+        this.securityErrorResponseWriter = securityErrorResponseWriter;
     }
 
     @Bean
@@ -36,13 +40,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint((request, response, ex) ->
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required."))
-                        .accessDeniedHandler((request, response, ex) ->
-                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.")))
+                        .authenticationEntryPoint((request, response, ex) -> securityErrorResponseWriter.write(
+                                request, response, HttpStatus.UNAUTHORIZED, "Authentication required.",
+                                "AUTHENTICATION_REQUIRED"))
+                        .accessDeniedHandler((request, response, ex) -> securityErrorResponseWriter.write(
+                                request, response, HttpStatus.FORBIDDEN, "Access denied.", "ACCESS_DENIED")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info", "/h2-console/**").permitAll()
+                        .requestMatchers("/api/health", "/api/health/**").permitAll()
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/admin", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/notifications", "/api/notifications/**").authenticated()

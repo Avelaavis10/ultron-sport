@@ -2,7 +2,7 @@
 
 ## Current Foundation
 
-The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, error handling, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, database-backed in-app notifications, and tests.
+The project now has a Spring Boot backend starter with domain entities, repositories, service interfaces, service implementations, controller skeletons, DTOs, validation, consistent error handling, public health/readiness/version endpoints, JWT authentication, role-based access control, secured evidence workflow, authenticated discovery search, basic LevelPlay scoring, admin moderation/audit logging, local/mock media storage abstraction, athlete profile completion, achievement ownership/update workflows, coach-to-athlete organisation verification context, database-backed in-app notifications, and tests.
 
 ## Phase 1: Harden MVP Foundation
 
@@ -15,6 +15,9 @@ The project now has a Spring Boot backend starter with domain entities, reposito
 - Add OpenAPI/Swagger documentation.
 - Add Docker Compose for PostgreSQL.
 - Add CI workflow for `mvn test`.
+- Completed: add MVP health/readiness/version endpoints.
+- Completed: standardise API error responses for validation, auth, access, not-found, malformed request, method, and media-type failures.
+- Completed: add local development, health-check, error-handling, and API testing docs.
 
 ## Phase 2: Complete Core Workflows
 

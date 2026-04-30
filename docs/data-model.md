@@ -357,4 +357,5 @@ The current LevelPlayScore is one current record per athlete profile. It is inte
 - Record model versions for AI metrics.
 - Preserve audit trails for verification, ranking, moderation, and account changes.
 - Treat audit logs as append-only records through the application service/API surface.
+- API error responses include a support `traceId` but do not persist request payloads, JWT internals, passwords, stack traces, or filesystem paths.
 - Support user data export and deletion workflows.

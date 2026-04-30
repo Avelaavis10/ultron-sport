@@ -48,6 +48,12 @@ Notifications base path:
 /api/notifications
 ```
 
+Health base path:
+
+```text
+/api/health
+```
+
 ## Authentication
 
 | Method | Path | Access | Purpose |
@@ -55,6 +61,27 @@ Notifications base path:
 | POST | `/register` | Public | Register a user and return a JWT bearer token |
 | POST | `/login` | Public | Authenticate with email/password and return a JWT bearer token |
 | GET | `/me` | Authenticated | Return the current authenticated user |
+
+Example register request:
+
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "displayName": "Test Athlete",
+  "email": "athlete@example.com",
+  "phone": null,
+  "password": "password123",
+  "role": "ATHLETE"
+}
+```
+
+Use the returned token on protected requests:
+
+```http
+Authorization: Bearer <accessToken>
+```
 
 ## Users
 
@@ -171,6 +198,25 @@ status, page, size, sortBy, sortDirection
 
 Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum `size` is `50`. Notification responses do not expose raw internal metadata.
 
+## Health
+
+| Method | Path | Access | Purpose |
+| --- | --- | --- | --- |
+| GET | `/api/health` | Public | Return simple application health |
+| GET | `/api/health/readiness` | Public | Return MVP readiness with database status |
+| GET | `/api/health/version` | Public | Return configured application name, version, and environment |
+
+Example health response:
+
+```json
+{
+  "status": "UP",
+  "application": "Ultron Sport API",
+  "environment": "local",
+  "timestamp": "2026-04-30T00:00:00Z"
+}
+```
+
 ## Discovery
 
 | Method | Path | Access | Purpose |
@@ -214,6 +260,7 @@ Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum
 
 - Request DTOs use validation annotations.
 - Response DTOs avoid exposing password hashes.
+- Error responses use a consistent shape: `timestamp`, `status`, `error`, `message`, `path`, `code`, `traceId`, and optional `validationErrors`.
 - Protected endpoints require `Authorization: Bearer <accessToken>`.
 - Evidence accepts URL-only mode through `fileUrl` or `externalVideoLink`, and can attach an uploaded `MediaAsset` while evidence is editable.
 - Media upload responses expose `mediaId` and `publicUrl`, not local filesystem paths or storage internals.
