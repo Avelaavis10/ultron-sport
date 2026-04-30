@@ -40,4 +40,18 @@ $env:ULTRON_STORAGE_LOCAL_BASE_PATH="./uploads/ultron-sport"
 mvn test
 ```
 
+## Manual API Testing
+
+After the app starts, use the developer request collection:
+
+```text
+docs/http/ultron-sport-mvp.http
+```
+
+Recommended supporting docs:
+
+- `docs/api-endpoints-draft.md` for the MVP API contract.
+- `docs/role-endpoint-access-matrix.md` for role access rules.
+- `docs/manual-testing-seed-data.md` for sample users and payloads.
+
 The default test database is H2 in memory. PostgreSQL remains the production target, but Docker Compose and deployment infrastructure are intentionally deferred from this MVP hardening slice.

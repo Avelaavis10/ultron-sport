@@ -40,6 +40,9 @@ The platform helps athletes upload sporting evidence, coaches and institutions v
 - [Error Handling](docs/error-handling.md)
 - [Local Development Guide](docs/local-development-guide.md)
 - [API Testing Guide](docs/api-testing-guide.md)
+- [Role Endpoint Access Matrix](docs/role-endpoint-access-matrix.md)
+- [Manual Testing Seed Data](docs/manual-testing-seed-data.md)
+- [Manual HTTP Request Collection](docs/http/ultron-sport-mvp.http)
 - [UI and Prototype Notes](docs/ui-and-prototype-notes.md)
 
 ## Source Materials
@@ -113,11 +116,13 @@ $env:DATABASE_PASSWORD="ultron"
 mvn spring-boot:run
 ```
 
-The initial API base path is:
+The primary MVP API base path is:
 
 ```text
-http://localhost:8080/api/v1
+http://localhost:8080/api
 ```
+
+Some `/api/v1/...` endpoints remain as legacy compatibility routes from earlier MVP foundation work. New clients should use the `/api/...` contract documented in `docs/api-endpoints-draft.md`.
 
 Authentication endpoints are exposed at:
 
@@ -202,5 +207,7 @@ Admin moderation now records append-only audit logs for evidence flag/archive ac
 In-app notifications are now database-backed and append-only. Users can list notifications, see unread notifications, count unread items, and mark one or all notifications as read. Evidence decisions, moderation outcomes, profile/achievement changes, organisation links, coach profile saves, and LevelPlay score changes create notifications where appropriate. Email, SMS, push, WebSockets, external queues, and notification preferences are intentionally deferred.
 
 MVP operational hardening now includes custom public health, readiness, and version endpoints plus a consistent API error response for validation, authentication, authorisation, not-found, malformed request, method, and media-type failures. Error responses include a `code` and `traceId` without exposing stack traces, JWT internals, passwords, or filesystem paths.
+
+Manual testing readiness now includes a role-based endpoint matrix, seed-data guide, and `.http` request collection for the full MVP flow from registration through evidence verification, discovery, notifications, and admin moderation.
 
 The MVP backend is intentionally a modular monolith. It separates domain, repositories, services, controllers, DTOs, security configuration, and error handling so the codebase can later evolve toward microservices.

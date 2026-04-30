@@ -1,68 +1,30 @@
-# API Endpoints Draft
+# Ultron Sport MVP API Contract
 
-MVP API base path:
+This document is the developer-facing MVP API contract. It reflects the current Spring Boot backend and is intended for manual testing, frontend/mobile planning, and handover.
 
-```text
-/api/v1
-```
-
-Authentication base path:
+Base URL:
 
 ```text
-/api/auth
+http://localhost:8080
 ```
 
-Evidence workflow base path:
+Primary API base path:
 
 ```text
-/api/evidence
+/api
 ```
 
-Discovery base path:
+Legacy compatibility note: some controllers still expose `/api/v1/...` paths from earlier foundation work. New clients should use the `/api/...` paths documented below unless a legacy endpoint is explicitly called out.
 
-```text
-/api/discovery
+## Authentication Pattern
+
+Public endpoints are explicitly marked. Protected endpoints require:
+
+```http
+Authorization: Bearer <accessToken>
 ```
 
-LevelPlay base path:
-
-```text
-/api/levelplay
-```
-
-Admin base path:
-
-```text
-/api/admin
-```
-
-Media base path:
-
-```text
-/api/media
-```
-
-Notifications base path:
-
-```text
-/api/notifications
-```
-
-Health base path:
-
-```text
-/api/health
-```
-
-## Authentication
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| POST | `/register` | Public | Register a user and return a JWT bearer token |
-| POST | `/login` | Public | Authenticate with email/password and return a JWT bearer token |
-| GET | `/me` | Authenticated | Return the current authenticated user |
-
-Example register request:
+Register:
 
 ```http
 POST /api/auth/register
@@ -77,136 +39,76 @@ Content-Type: application/json
 }
 ```
 
-Use the returned token on protected requests:
+Login:
 
 ```http
-Authorization: Bearer <accessToken>
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "athlete@example.com",
+  "password": "password123"
+}
 ```
 
-## Users
+Auth response:
 
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| GET | `/users` | ADMIN | List users |
-| GET | `/users/{id}` | ADMIN | Get one user |
-
-## Athlete Profiles
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| POST | `/api/athlete-profiles` | ATHLETE | Create the current user's athlete profile |
-| GET | `/api/athlete-profiles/me` | ATHLETE | Get the current athlete's full profile |
-| PATCH | `/api/athlete-profiles/me` | ATHLETE | Update the current athlete's profile and recalculate LevelPlay |
-| PATCH | `/api/athlete-profiles/me/organisation` | ATHLETE | Link current athlete profile to an existing organisation or update school/club fallback text |
-| GET | `/api/athlete-profiles/{athleteProfileId}` | ADMIN, COACH, owning ATHLETE | Get full internal profile view |
-| GET | `/api/athlete-profiles` | ADMIN | Paginated list of athlete profiles |
-| GET | `/api/v1/athlete-profiles?sport=&location=&position=` | Legacy authenticated roles | Legacy profile search/filter path |
-
-## Coach Profiles
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| POST | `/api/coach-profiles` | COACH | Create current coach user's profile; duplicate coach profiles are rejected |
-| GET | `/api/coach-profiles/me` | COACH | Get current coach profile |
-| PATCH | `/api/coach-profiles/me` | COACH | Update current coach profile and organisation link |
-| GET | `/api/coach-profiles/{id}` | Owning COACH, ADMIN | Get coach profile |
-
-## Organisations
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| POST | `/api/organisations` | ORGANISATION, ADMIN | Create school, club, academy, university, team, or organisation record |
-| GET | `/api/organisations` | Authenticated | Search organisations by name, type, location, or verification status |
-| GET | `/api/organisations/{id}` | Authenticated | Get organisation record |
-| PATCH | `/api/organisations/{id}` | ADMIN | Update organisation details or verification status |
-
-## Evidence
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| POST | `/` | ATHLETE | Create DRAFT evidence metadata with `fileUrl` or `externalVideoLink` |
-| GET | `/{id}` | Owner ATHLETE, COACH for pending, ADMIN, SCOUT_AGENT/ORGANISATION for VERIFIED | Get evidence by visibility rules |
-| GET | `/my` | ATHLETE | List evidence owned by the current athlete |
-| PATCH | `/{id}` | ATHLETE | Update own evidence only while DRAFT or REJECTED |
-| POST | `/{id}/media/{mediaId}` | ATHLETE | Attach own uploaded media to own DRAFT or REJECTED evidence |
-| POST | `/{id}/submit` | ATHLETE | Move DRAFT or REJECTED evidence to PENDING_VERIFICATION |
-| GET | `/pending-verification` | COACH, ADMIN | List evidence awaiting verification |
-| POST | `/{id}/verify` | COACH | Mark pending evidence as VERIFIED |
-| POST | `/{id}/reject` | COACH | Reject pending evidence with a required reason |
-| POST | `/{id}/flag` | ADMIN | Flag evidence with a required reason |
-| POST | `/{id}/archive` | ADMIN | Archive evidence |
-| GET | `/{id}/verification-history` | ADMIN | View simple verification history |
-| GET | `/{id}/verification-context` | COACH, ADMIN | View athlete, coach, organisation, and shared-context details for an evidence item |
-
-## Verification Requests
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| POST | `/verification-requests` | ATHLETE | Request coach or organisation verification |
-| GET | `/verification-requests/{id}` | COACH, ADMIN | Get verification request |
-| POST | `/verification-requests/{id}/approve` | COACH, ADMIN | Approve evidence |
-| POST | `/verification-requests/{id}/reject` | COACH, ADMIN | Reject evidence |
-| POST | `/verification-requests/{id}/flag` | COACH, ADMIN | Flag evidence for moderation |
-
-## Achievements
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| POST | `/api/achievements` | ATHLETE | Add achievement for own athlete profile and recalculate LevelPlay |
-| GET | `/api/achievements/my` | ATHLETE | List current athlete's achievements |
-| PATCH | `/api/achievements/{achievementId}` | Owning ATHLETE | Update own unverified achievement and recalculate LevelPlay |
-| GET | `/api/achievements` | ADMIN | Paginated list of achievements |
-| GET | `/api/athlete-profiles/{athleteProfileId}/achievements` | ADMIN, COACH, owning ATHLETE | List achievements for a profile |
-| GET | `/api/v1/achievements/athlete/{athleteProfileId}` | Legacy authenticated roles | Legacy achievement list path |
-
-## LevelPlay Scores
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| GET | `/me` | ATHLETE | Get the current athlete's LevelPlay score |
-| GET | `/athletes/{athleteProfileId}` | Authenticated | Get an athlete's current LevelPlay score |
-| GET | `/athletes/{athleteProfileId}/explain` | Authenticated | Get a transparent score breakdown |
-| POST | `/athletes/{athleteProfileId}/recalculate` | ADMIN | Recalculate one athlete's score |
-| POST | `/recalculate-all` | ADMIN | Recalculate all athlete scores with a simple MVP loop |
-
-Legacy `/api/v1/levelplay-scores/...` endpoints remain for compatibility, but new clients should use `/api/levelplay`.
-
-## Media
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| POST | `/upload` | ATHLETE | Upload supported media to local/mock storage and return `mediaId` plus `publicUrl` |
-| GET | `/{mediaId}` | Owner ATHLETE, ADMIN | Return media metadata without exposing internal storage paths |
-
-Supported MVP upload content types are `video/mp4`, `video/quicktime`, `image/jpeg`, and `image/png`. The default max upload size is 50MB. Media scan status defaults to `SKIPPED_FOR_MVP`; malware scanning, object storage, CDN URLs, thumbnails, transcoding, chunked upload, and AI analysis are future work.
-
-## Notifications
-
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| GET | `/api/notifications` | Authenticated | List the current user's notifications with optional status filter, pagination, and sorting |
-| GET | `/api/notifications/unread` | Authenticated | List unread notifications for the current user |
-| GET | `/api/notifications/unread-count` | Authenticated | Return the current user's unread notification count |
-| POST | `/api/notifications/{notificationId}/read` | Owning authenticated user | Mark one owned notification as read |
-| POST | `/api/notifications/read-all` | Authenticated | Mark all current-user notifications as read |
-
-Supported filters:
-
-```text
-status, page, size, sortBy, sortDirection
+```json
+{
+  "tokenType": "Bearer",
+  "accessToken": "...",
+  "userId": 2,
+  "displayName": "Test Athlete",
+  "email": "athlete@example.com",
+  "role": "ATHLETE"
+}
 ```
 
-Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum `size` is `50`. Notification responses do not expose raw internal metadata.
+## Standard Errors
+
+All API errors use the same JSON shape:
+
+```json
+{
+  "timestamp": "2026-04-30T00:00:00Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Validation failed.",
+  "path": "/api/auth/register",
+  "code": "VALIDATION_FAILED",
+  "traceId": "uuid",
+  "validationErrors": {
+    "email": "must be a well-formed email address"
+  }
+}
+```
+
+Common responses:
+
+| Status | Meaning |
+| --- | --- |
+| 400 | Validation failed, malformed JSON, invalid enum, invalid request, or invalid workflow transition |
+| 401 | Missing, invalid, or expired bearer token |
+| 403 | Authenticated user does not have the required role or ownership |
+| 404 | Requested resource was not found or is not visible to the caller |
+| 405 | HTTP method is not allowed |
+| 409 | Duplicate resource |
+| 415 | Unsupported media type |
+| 500 | Unexpected server error |
 
 ## Health
 
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| GET | `/api/health` | Public | Return simple application health |
-| GET | `/api/health/readiness` | Public | Return MVP readiness with database status |
-| GET | `/api/health/version` | Public | Return configured application name, version, and environment |
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| GET | `/api/health` | No | PUBLIC | Simple application health |
+| GET | `/api/health/readiness` | No | PUBLIC | MVP readiness with database status |
+| GET | `/api/health/version` | No | PUBLIC | Application name, version, and environment |
 
-Example health response:
+Example:
+
+```http
+GET /api/health
+```
 
 ```json
 {
@@ -217,59 +119,340 @@ Example health response:
 }
 ```
 
+Common errors: readiness may return `503` if the database connectivity check fails.
+
+## Auth
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| POST | `/api/auth/register` | No | PUBLIC | Register a user and return a bearer token |
+| POST | `/api/auth/login` | No | PUBLIC | Login with email/password and return a bearer token |
+| GET | `/api/auth/me` | Yes | Any authenticated user | Return current user details |
+
+Allowed MVP roles for normal testing: `ATHLETE`, `COACH`, `ORGANISATION`, `SCOUT_AGENT`, `ADMIN`.
+
+Common errors: `400` validation, `401` bad credentials or missing token, `409` duplicate email.
+
+## Athlete Profiles
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| POST | `/api/athlete-profiles` | Yes | ATHLETE | Create the current user's athlete profile |
+| GET | `/api/athlete-profiles/me` | Yes | ATHLETE | Get the current athlete's full profile |
+| PATCH | `/api/athlete-profiles/me` | Yes | ATHLETE | Update own profile and recalculate LevelPlay |
+| PATCH | `/api/athlete-profiles/me/organisation` | Yes | ATHLETE | Link own profile to an organisation or school/club fallback |
+| GET | `/api/athlete-profiles/{athleteProfileId}` | Yes | ADMIN, COACH, owning ATHLETE | Get internal athlete profile view |
+| GET | `/api/athlete-profiles/{athleteProfileId}/achievements` | Yes | ADMIN, COACH, owning ATHLETE | List achievements for an athlete profile |
+| GET | `/api/athlete-profiles` | Yes | ADMIN | Paginated athlete profile list |
+
+Create profile:
+
+```http
+POST /api/athlete-profiles
+Authorization: Bearer <athleteToken>
+Content-Type: application/json
+
+{
+  "sport": "Football",
+  "position": "Forward",
+  "age": 19,
+  "gender": "Female",
+  "location": "Cape Town",
+  "schoolOrClub": "Ultron Academy",
+  "organisationId": null,
+  "bio": "Fast winger with verified match evidence."
+}
+```
+
+Common errors: `400` validation, `401` missing token, `403` wrong role or ownership failure, `409` duplicate athlete profile.
+
+Legacy compatibility: `/api/v1/athlete-profiles` maps to the same controller and remains for older MVP tests.
+
+## Achievements
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| POST | `/api/achievements` | Yes | ATHLETE | Create an achievement for own athlete profile |
+| GET | `/api/achievements/my` | Yes | ATHLETE | List current athlete's achievements |
+| PATCH | `/api/achievements/{achievementId}` | Yes | Owning ATHLETE | Update own achievement |
+| GET | `/api/achievements` | Yes | ADMIN | Paginated achievement list |
+| GET | `/api/achievements/athlete/{athleteProfileId}` | Yes | ADMIN, COACH, owning ATHLETE | Legacy-style achievement list path |
+
+Create achievement:
+
+```http
+POST /api/achievements
+Authorization: Bearer <athleteToken>
+Content-Type: application/json
+
+{
+  "athleteProfileId": 1,
+  "title": "Regional Top Scorer",
+  "description": "Top scorer in the under-19 regional tournament.",
+  "achievedAt": "2024-09-14"
+}
+```
+
+Common errors: `400` validation, `403` wrong role or ownership failure, `404` athlete profile or achievement not found.
+
+Legacy compatibility: `/api/v1/achievements` maps to the same controller and remains for older MVP tests.
+
+## Organisations
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| POST | `/api/organisations` | Yes | ADMIN, ORGANISATION | Create an organisation record |
+| GET | `/api/organisations` | Yes | Any authenticated user | Search organisations |
+| GET | `/api/organisations/{organisationId}` | Yes | Any authenticated user | Get one organisation |
+| PATCH | `/api/organisations/{organisationId}` | Yes | ADMIN | Update organisation details or verification status |
+
+Create organisation:
+
+```http
+POST /api/organisations
+Authorization: Bearer <adminToken>
+Content-Type: application/json
+
+{
+  "name": "Ultron Football Academy",
+  "type": "ACADEMY",
+  "location": "Cape Town",
+  "contactEmail": "admin@ultronacademy.example",
+  "primaryAdminUserId": null
+}
+```
+
+Search filters: `name`, `type`, `location`, `verificationStatus`, `page`, `size`, `sortBy`, `sortDirection`.
+
+Common errors: `400` validation or invalid enum, `403` wrong role for create/update, `404` organisation not found.
+
+Legacy compatibility: `/api/v1/organisations` maps to the same controller and remains for older MVP tests.
+
+## Coach Profiles
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| POST | `/api/coach-profiles` | Yes | COACH | Create current coach profile |
+| GET | `/api/coach-profiles/me` | Yes | COACH | Get current coach profile |
+| PATCH | `/api/coach-profiles/me` | Yes | COACH | Update current coach profile |
+| GET | `/api/coach-profiles/{coachProfileId}` | Yes | ADMIN, owning COACH | Get coach profile |
+
+Create coach profile:
+
+```http
+POST /api/coach-profiles
+Authorization: Bearer <coachToken>
+Content-Type: application/json
+
+{
+  "certificationReference": "SAFA-D-12345",
+  "organisationId": 1,
+  "organisationName": "Ultron Football Academy",
+  "sport": "Football",
+  "qualificationSummary": "Youth development coach.",
+  "yearsExperience": 6
+}
+```
+
+Important MVP rule: a COACH must have a CoachProfile before verifying or rejecting evidence.
+
+Common errors: `400` validation, `403` wrong role or ownership failure, `409` duplicate coach profile.
+
+Legacy compatibility: `/api/v1/coach-profiles` maps to the same controller and remains for older MVP tests.
+
+## Evidence
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| POST | `/api/evidence` | Yes | ATHLETE | Create DRAFT evidence metadata |
+| GET | `/api/evidence/{evidenceId}` | Yes | Owner ATHLETE, COACH for pending, ADMIN, SCOUT_AGENT/ORGANISATION for VERIFIED | Get evidence by role visibility |
+| GET | `/api/evidence/my` | Yes | ATHLETE | List current athlete's evidence |
+| PATCH | `/api/evidence/{evidenceId}` | Yes | Owning ATHLETE | Update own DRAFT or REJECTED evidence |
+| POST | `/api/evidence/{evidenceId}/media/{mediaId}` | Yes | Owning ATHLETE | Attach own media to editable evidence |
+| POST | `/api/evidence/{evidenceId}/submit` | Yes | Owning ATHLETE | Submit evidence for verification |
+| GET | `/api/evidence/pending-verification` | Yes | COACH, ADMIN | List evidence awaiting verification |
+| POST | `/api/evidence/{evidenceId}/verify` | Yes | COACH | Verify pending evidence |
+| POST | `/api/evidence/{evidenceId}/reject` | Yes | COACH | Reject pending evidence with a reason |
+| POST | `/api/evidence/{evidenceId}/flag` | Yes | ADMIN | Flag evidence with a reason |
+| POST | `/api/evidence/{evidenceId}/archive` | Yes | ADMIN | Archive evidence |
+| GET | `/api/evidence/{evidenceId}/verification-history` | Yes | ADMIN | View verification history |
+| GET | `/api/evidence/{evidenceId}/verification-context` | Yes | COACH, ADMIN | View coach, athlete, and organisation context |
+
+Create URL-only evidence:
+
+```http
+POST /api/evidence
+Authorization: Bearer <athleteToken>
+Content-Type: application/json
+
+{
+  "athleteProfileId": 1,
+  "title": "Two goals against City FC",
+  "description": "Match clip with goals and pressing actions.",
+  "sport": "Football",
+  "position": "Forward",
+  "eventType": "League match",
+  "matchOrTraining": "MATCH",
+  "eventDate": "2024-09-21",
+  "fileUrl": null,
+  "externalVideoLink": "https://video.example/evidence/two-goals"
+}
+```
+
+Reject evidence:
+
+```http
+POST /api/evidence/1/reject
+Authorization: Bearer <coachToken>
+Content-Type: application/json
+
+{
+  "reason": "Clip does not show the claimed event clearly."
+}
+```
+
+Common errors: `400` validation or invalid transition, `403` wrong role or ownership failure, `404` evidence not found or not visible.
+
+MVP notes: evidence uses URL-only mode or attached local/mock media. Direct production object storage, CDN, scanning, thumbnails, transcoding, chunked upload, and AI analysis are deferred.
+
+## Media
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| POST | `/api/media/upload?athleteProfileId={id}` | Yes | ATHLETE | Upload supported media to local/mock storage |
+| GET | `/api/media/{mediaId}` | Yes | Owner ATHLETE, ADMIN | Get media metadata without internal paths |
+
+Supported content types: `video/mp4`, `video/quicktime`, `image/jpeg`, `image/png`.
+
+Default max size: 50MB.
+
+Multipart curl example:
+
+```bash
+curl -X POST "http://localhost:8080/api/media/upload?athleteProfileId=1" \
+  -H "Authorization: Bearer <athleteToken>" \
+  -F "file=@/path/to/sample.mp4;type=video/mp4"
+```
+
+Common errors: `400` empty file or unsupported file, `403` wrong role or ownership failure, `404` media not found, `415` unsupported request media type.
+
 ## Discovery
 
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| GET | `/athletes` | Authenticated | Search athlete discovery cards with role-aware evidence visibility |
-| GET | `/athletes/{athleteProfileId}` | Authenticated | View an athlete discovery profile with visible evidence and summaries |
-| GET | `/evidence` | Authenticated | Search evidence discovery cards with pagination and filters |
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| GET | `/api/discovery/athletes` | Yes | ATHLETE, COACH, ORGANISATION, SCOUT_AGENT, ADMIN | Search athlete discovery cards |
+| GET | `/api/discovery/athletes/{athleteProfileId}` | Yes | ATHLETE, COACH, ORGANISATION, SCOUT_AGENT, ADMIN | View discovery-safe athlete profile |
+| GET | `/api/discovery/evidence` | Yes | ATHLETE, COACH, ORGANISATION, SCOUT_AGENT, ADMIN | Search visible evidence cards |
 
-Supported discovery filters:
+Filters: `sport`, `position`, `location`, `organisationId`, `verificationStatus`, `minLevelPlayScore`, `maxLevelPlayScore`, `tier`, `hasVerifiedEvidence`, `keyword`, `page`, `size`, `sortBy`, `sortDirection`.
 
-```text
-sport, position, location, organisationId, verificationStatus,
-minLevelPlayScore, maxLevelPlayScore, tier, hasVerifiedEvidence,
-keyword, page, size, sortBy, sortDirection
+Example:
+
+```http
+GET /api/discovery/athletes?sport=Football&position=Forward&hasVerifiedEvidence=true&page=0&size=20
+Authorization: Bearer <scoutToken>
 ```
 
-Defaults: `page=0`, `size=20`, `sortBy=updatedAt`, `sortDirection=DESC`. Maximum `size` is `50`.
+Visibility rules: SCOUT_AGENT and ORGANISATION users see VERIFIED evidence only. ADMIN can filter all statuses. ATHLETE users can view own full profile through profile endpoints and discovery-safe public/verified data for other athletes.
 
-## Admin Moderation
+Common errors: `400` invalid filter, invalid sort, or size above 50; `401` missing token; `403` role restriction if added later.
 
-| Method | Path | Access | Purpose |
-| --- | --- | --- | --- |
-| GET | `/audit-logs` | ADMIN | Search paginated audit logs with filters |
-| GET | `/audit-logs/{id}` | ADMIN | Get one audit log |
-| GET | `/audit-logs/target/{targetType}/{targetId}` | ADMIN | List logs for a specific target |
-| GET | `/moderation/evidence/flagged` | ADMIN | List flagged evidence |
-| GET | `/moderation/evidence/archived` | ADMIN | List archived evidence |
-| POST | `/moderation/evidence/{evidenceId}/note` | ADMIN | Add an append-only moderation note |
-| GET | `/moderation/summary` | ADMIN | Return MVP moderation counts |
+## LevelPlay
 
-Supported audit log filters:
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| GET | `/api/levelplay/me` | Yes | ATHLETE | Get current athlete score |
+| GET | `/api/levelplay/athletes/{athleteProfileId}` | Yes | ATHLETE, COACH, ORGANISATION, SCOUT_AGENT, ADMIN | Get athlete score |
+| GET | `/api/levelplay/athletes/{athleteProfileId}/explain` | Yes | ATHLETE, COACH, ORGANISATION, SCOUT_AGENT, ADMIN | Get transparent score breakdown |
+| POST | `/api/levelplay/athletes/{athleteProfileId}/recalculate` | Yes | ADMIN | Recalculate one athlete score |
+| POST | `/api/levelplay/recalculate-all` | Yes | ADMIN | Recalculate all athlete scores |
 
-```text
-actionType, targetType, targetId, adminUserId, fromDate, toDate,
-page, size, sortBy, sortDirection
+Example:
+
+```http
+GET /api/levelplay/athletes/1/explain
+Authorization: Bearer <scoutToken>
 ```
 
-Defaults: `page=0`, `size=20`, `sortBy=createdAt`, `sortDirection=DESC`. Maximum `size` is `50`.
+MVP scoring uses verified evidence count, achievement count, coach verification count, and profile completeness only. Popularity, likes, views, fan votes, paid boosts, and AI scoring are not used.
+
+Common errors: `403` non-admin recalculation, `404` score or athlete not found.
+
+Legacy compatibility: `/api/v1/levelplay-scores/...` remains for earlier tests. New clients should use `/api/levelplay`.
+
+## Admin Moderation And Audit
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| GET | `/api/admin/audit-logs` | Yes | ADMIN | Search paginated audit logs |
+| GET | `/api/admin/audit-logs/{id}` | Yes | ADMIN | Get one audit log |
+| GET | `/api/admin/audit-logs/target/{targetType}/{targetId}` | Yes | ADMIN | List logs for a target |
+| GET | `/api/admin/moderation/evidence/flagged` | Yes | ADMIN | List flagged evidence |
+| GET | `/api/admin/moderation/evidence/archived` | Yes | ADMIN | List archived evidence |
+| POST | `/api/admin/moderation/evidence/{evidenceId}/note` | Yes | ADMIN | Add append-only moderation note |
+| GET | `/api/admin/moderation/summary` | Yes | ADMIN | Return moderation counts |
+
+Audit filters: `actionType`, `targetType`, `targetId`, `adminUserId`, `fromDate`, `toDate`, `page`, `size`, `sortBy`, `sortDirection`.
+
+Create moderation note:
+
+```http
+POST /api/admin/moderation/evidence/1/note
+Authorization: Bearer <adminToken>
+Content-Type: application/json
+
+{
+  "reason": "Manual review",
+  "details": "Evidence reviewed during MVP manual testing."
+}
+```
+
+Common errors: `400` invalid enum/filter or size above 50, `403` non-admin access, `404` audit log/evidence not found.
+
+## Notifications
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| GET | `/api/notifications` | Yes | Any authenticated user | List current user's notifications |
+| GET | `/api/notifications/unread` | Yes | Any authenticated user | List current user's unread notifications |
+| GET | `/api/notifications/unread-count` | Yes | Any authenticated user | Count unread notifications |
+| POST | `/api/notifications/{notificationId}/read` | Yes | Owning authenticated user | Mark one notification read |
+| POST | `/api/notifications/read-all` | Yes | Any authenticated user | Mark all owned notifications read |
+
+Filters: `status`, `page`, `size`, `sortBy`, `sortDirection`.
+
+Example:
+
+```http
+GET /api/notifications?status=UNREAD&page=0&size=20
+Authorization: Bearer <athleteToken>
+```
+
+Common errors: `400` invalid status/sort/size, `403` ownership failure, `404` notification not found.
+
+MVP notes: notifications are in-app and database-backed only. Email, SMS, push, WebSockets, external queues, and preferences are deferred.
+
+## Legacy Admin/User/Verification Request Endpoints
+
+These endpoints remain for compatibility with earlier MVP foundation slices and tests. New feature work should prefer the current `/api/...` modules above.
+
+| Method | Path | Auth | Roles | Purpose |
+| --- | --- | --- | --- | --- |
+| GET | `/api/v1/users` | Yes | ADMIN | List users |
+| GET | `/api/v1/users/{id}` | Yes | ADMIN | Get one user |
+| POST | `/api/v1/verification-requests` | Yes | ATHLETE | Create legacy verification request |
+| GET | `/api/v1/verification-requests/{id}` | Yes | COACH, ADMIN | Get legacy verification request |
+| POST | `/api/v1/verification-requests/{id}/approve` | Yes | COACH, ADMIN | Approve legacy verification request |
+| POST | `/api/v1/verification-requests/{id}/reject` | Yes | COACH, ADMIN | Reject legacy verification request |
+| POST | `/api/v1/verification-requests/{id}/flag` | Yes | COACH, ADMIN | Flag legacy verification request |
 
 ## API Contract Notes
 
-- Request DTOs use validation annotations.
-- Response DTOs avoid exposing password hashes.
-- Error responses use a consistent shape: `timestamp`, `status`, `error`, `message`, `path`, `code`, `traceId`, and optional `validationErrors`.
-- Protected endpoints require `Authorization: Bearer <accessToken>`.
-- Evidence accepts URL-only mode through `fileUrl` or `externalVideoLink`, and can attach an uploaded `MediaAsset` while evidence is editable.
-- Media upload responses expose `mediaId` and `publicUrl`, not local filesystem paths or storage internals.
-- Evidence AI status defaults to `NOT_STARTED`; no AI service is called in the MVP workflow.
-- Profile completeness uses linked display name, sport, position, location, organisation or school/club, bio, age, at least one achievement, and at least one evidence item.
-- Coach evidence verification requires a CoachProfile and records coach profile, coach organisation, athlete profile, and shared-organisation context where available.
-- Organisation names in discovery resolve from `organisationId` first and fall back to `schoolOrClub` text.
-- Achievement delete/archive is deferred because the MVP model does not yet include a soft-delete or achievement moderation status.
-- Discovery is relational database search for the MVP. Elasticsearch/OpenSearch, caching, vector search, and recommendation ranking are future work.
-- LevelPlay Rank uses verified evidence, achievements, coach verification count, and profile completeness only. Popularity, fan votes, views, likes, paid boosts, and AI scoring are not part of the MVP formula.
-- Audit logs are append-only through the service/API surface. Delete and edit endpoints are intentionally not provided.
-- Notifications are append-only through the service/API surface. Users can mark notifications as read, but delete/edit endpoints and notification preferences are intentionally not provided yet.
+- Current user endpoints use `/me`.
+- Admin-only routes sit under `/api/admin/**`.
+- Collection routes use plural nouns where practical.
+- Pagination responses use `content`, `page`, `size`, `totalElements`, `totalPages`, `sortBy`, and `sortDirection`.
+- DTOs do not expose password hashes, JWT internals, raw local filesystem paths, or sensitive security data.
+- Discovery responses are role-aware and do not expose unverified evidence to scouts or organisations.
+- Audit logs and notifications are append-only through the public API surface.
+- The MVP does not implement AI, production object storage, enterprise observability, email/SMS/push, frontend/mobile UI, Docker/Kubernetes, or CI/CD in this slice.

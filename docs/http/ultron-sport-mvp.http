@@ -1,0 +1,436 @@
+### Ultron Sport MVP Manual API Collection
+### Run from IntelliJ HTTP Client or VS Code REST Client.
+### If your client does not support response handlers, copy accessToken and returned IDs into the variables below.
+
+@baseUrl = http://localhost:8080
+@adminToken =
+@athleteToken =
+@coachToken =
+@organisationToken =
+@scoutToken =
+@organisationId = 1
+@athleteProfileId = 1
+@coachProfileId = 1
+@achievementId = 1
+@evidenceId = 1
+@mediaId = 1
+@notificationId = 1
+
+### 1. Health check
+GET {{baseUrl}}/api/health
+
+### Readiness check
+GET {{baseUrl}}/api/health/readiness
+
+### Version check
+GET {{baseUrl}}/api/health/version
+
+### 2. Register ADMIN
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "displayName": "Admin User",
+  "email": "admin@ultronsport.test",
+  "phone": null,
+  "password": "password123",
+  "role": "ADMIN"
+}
+
+### 3. Register ATHLETE
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "displayName": "Athlete User",
+  "email": "athlete@ultronsport.test",
+  "phone": null,
+  "password": "password123",
+  "role": "ATHLETE"
+}
+
+### 4. Register COACH
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "displayName": "Coach User",
+  "email": "coach@ultronsport.test",
+  "phone": null,
+  "password": "password123",
+  "role": "COACH"
+}
+
+### 5. Register ORGANISATION
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "displayName": "Organisation User",
+  "email": "organisation@ultronsport.test",
+  "phone": null,
+  "password": "password123",
+  "role": "ORGANISATION"
+}
+
+### 6. Register SCOUT_AGENT
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "displayName": "Scout User",
+  "email": "scout@ultronsport.test",
+  "phone": null,
+  "password": "password123",
+  "role": "SCOUT_AGENT"
+}
+
+### 7. Login ADMIN and store token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ultronsport.test",
+  "password": "password123"
+}
+
+> {% client.global.set("adminToken", response.body.accessToken); %}
+
+### 8. Login ATHLETE and store token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "athlete@ultronsport.test",
+  "password": "password123"
+}
+
+> {% client.global.set("athleteToken", response.body.accessToken); %}
+
+### 9. Login COACH and store token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "coach@ultronsport.test",
+  "password": "password123"
+}
+
+> {% client.global.set("coachToken", response.body.accessToken); %}
+
+### 10. Login ORGANISATION and store token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "organisation@ultronsport.test",
+  "password": "password123"
+}
+
+> {% client.global.set("organisationToken", response.body.accessToken); %}
+
+### 11. Login SCOUT_AGENT and store token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "scout@ultronsport.test",
+  "password": "password123"
+}
+
+> {% client.global.set("scoutToken", response.body.accessToken); %}
+
+### Current user sanity check
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{athleteToken}}
+
+### 12. Create organisation as ADMIN
+### Copy the returned id into @organisationId if your client does not capture it automatically.
+POST {{baseUrl}}/api/organisations
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Ultron Football Academy",
+  "type": "ACADEMY",
+  "location": "Cape Town",
+  "contactEmail": "admin@ultronacademy.example",
+  "primaryAdminUserId": null
+}
+
+> {% client.global.set("organisationId", response.body.id); %}
+
+### 13. Create athlete profile
+### Copy the returned id into @athleteProfileId if needed.
+POST {{baseUrl}}/api/athlete-profiles
+Authorization: Bearer {{athleteToken}}
+Content-Type: application/json
+
+{
+  "sport": "Football",
+  "position": "Forward",
+  "age": 19,
+  "gender": "Female",
+  "location": "Cape Town",
+  "schoolOrClub": "Ultron Football Academy",
+  "organisationId": null,
+  "bio": "Fast winger with verified match evidence."
+}
+
+> {% client.global.set("athleteProfileId", response.body.id); %}
+
+### 14. Link athlete profile to organisation
+PATCH {{baseUrl}}/api/athlete-profiles/me/organisation
+Authorization: Bearer {{athleteToken}}
+Content-Type: application/json
+
+{
+  "organisationId": {{organisationId}},
+  "schoolOrClub": "Ultron Football Academy"
+}
+
+### 15. Create coach profile linked to organisation
+### Copy the returned id into @coachProfileId if needed.
+POST {{baseUrl}}/api/coach-profiles
+Authorization: Bearer {{coachToken}}
+Content-Type: application/json
+
+{
+  "certificationReference": "SAFA-D-12345",
+  "organisationId": {{organisationId}},
+  "organisationName": "Ultron Football Academy",
+  "sport": "Football",
+  "qualificationSummary": "Youth development coach.",
+  "yearsExperience": 6
+}
+
+> {% client.global.set("coachProfileId", response.body.id); %}
+
+### Get coach profile
+GET {{baseUrl}}/api/coach-profiles/me
+Authorization: Bearer {{coachToken}}
+
+### 16. Create achievement
+### Copy the returned id into @achievementId if needed.
+POST {{baseUrl}}/api/achievements
+Authorization: Bearer {{athleteToken}}
+Content-Type: application/json
+
+{
+  "athleteProfileId": {{athleteProfileId}},
+  "title": "Regional Top Scorer",
+  "description": "Top scorer in the under-19 regional tournament.",
+  "achievedAt": "2024-09-14"
+}
+
+> {% client.global.set("achievementId", response.body.id); %}
+
+### List my achievements
+GET {{baseUrl}}/api/achievements/my
+Authorization: Bearer {{athleteToken}}
+
+### 17. Create URL-only evidence
+### Copy the returned id into @evidenceId if needed.
+POST {{baseUrl}}/api/evidence
+Authorization: Bearer {{athleteToken}}
+Content-Type: application/json
+
+{
+  "athleteProfileId": {{athleteProfileId}},
+  "title": "Two goals against City FC",
+  "description": "Match clip with goals and pressing actions.",
+  "sport": "Football",
+  "position": "Forward",
+  "eventType": "League match",
+  "matchOrTraining": "MATCH",
+  "eventDate": "2024-09-21",
+  "fileUrl": null,
+  "externalVideoLink": "https://video.example/evidence/two-goals"
+}
+
+> {% client.global.set("evidenceId", response.body.id); %}
+
+### 18. Upload media manually if desired
+### Multipart upload requires a real local file. Curl example:
+### curl -X POST "http://localhost:8080/api/media/upload?athleteProfileId=1" -H "Authorization: Bearer <athleteToken>" -F "file=@C:\path\to\sample.mp4;type=video/mp4"
+
+### Get media metadata after upload
+GET {{baseUrl}}/api/media/{{mediaId}}
+Authorization: Bearer {{athleteToken}}
+
+### 19. Attach media to evidence after upload
+POST {{baseUrl}}/api/evidence/{{evidenceId}}/media/{{mediaId}}
+Authorization: Bearer {{athleteToken}}
+
+### 20. Submit evidence
+POST {{baseUrl}}/api/evidence/{{evidenceId}}/submit
+Authorization: Bearer {{athleteToken}}
+
+### Coach views pending verification
+GET {{baseUrl}}/api/evidence/pending-verification
+Authorization: Bearer {{coachToken}}
+
+### 21. Coach verifies evidence
+POST {{baseUrl}}/api/evidence/{{evidenceId}}/verify
+Authorization: Bearer {{coachToken}}
+
+### Optional alternate path: Coach rejects evidence with reason
+### Run this only with a separate evidence item that is PENDING_VERIFICATION.
+### Do not run it after the happy-path verify request above.
+POST {{baseUrl}}/api/evidence/{{evidenceId}}/reject
+Authorization: Bearer {{coachToken}}
+Content-Type: application/json
+
+{
+  "reason": "Clip does not show the claimed event clearly."
+}
+
+### 22. Get verification context
+GET {{baseUrl}}/api/evidence/{{evidenceId}}/verification-context
+Authorization: Bearer {{coachToken}}
+
+### Admin also views verification context
+GET {{baseUrl}}/api/evidence/{{evidenceId}}/verification-context
+Authorization: Bearer {{adminToken}}
+
+### 23. Get LevelPlay score
+GET {{baseUrl}}/api/levelplay/athletes/{{athleteProfileId}}
+Authorization: Bearer {{scoutToken}}
+
+### 24. Get LevelPlay explanation
+GET {{baseUrl}}/api/levelplay/athletes/{{athleteProfileId}}/explain
+Authorization: Bearer {{scoutToken}}
+
+### Athlete gets own LevelPlay score
+GET {{baseUrl}}/api/levelplay/me
+Authorization: Bearer {{athleteToken}}
+
+### 25. Search discovery athletes as SCOUT_AGENT
+GET {{baseUrl}}/api/discovery/athletes?sport=Football&position=Forward&hasVerifiedEvidence=true&page=0&size=20
+Authorization: Bearer {{scoutToken}}
+
+### 26. Search discovery evidence as SCOUT_AGENT
+GET {{baseUrl}}/api/discovery/evidence?sport=Football&verificationStatus=VERIFIED&page=0&size=20
+Authorization: Bearer {{scoutToken}}
+
+### Organisation searches verified evidence
+GET {{baseUrl}}/api/discovery/evidence?sport=Football&page=0&size=20
+Authorization: Bearer {{organisationToken}}
+
+### 27. View notifications as ATHLETE
+GET {{baseUrl}}/api/notifications
+Authorization: Bearer {{athleteToken}}
+
+### Unread notifications
+GET {{baseUrl}}/api/notifications/unread
+Authorization: Bearer {{athleteToken}}
+
+### Unread count
+GET {{baseUrl}}/api/notifications/unread-count
+Authorization: Bearer {{athleteToken}}
+
+### 28. Mark notification as read
+POST {{baseUrl}}/api/notifications/{{notificationId}}/read
+Authorization: Bearer {{athleteToken}}
+
+### Mark all notifications as read
+POST {{baseUrl}}/api/notifications/read-all
+Authorization: Bearer {{athleteToken}}
+
+### 29. Flag evidence as ADMIN
+POST {{baseUrl}}/api/evidence/{{evidenceId}}/flag
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Manual moderation test."
+}
+
+### Archive evidence as ADMIN
+POST {{baseUrl}}/api/evidence/{{evidenceId}}/archive
+Authorization: Bearer {{adminToken}}
+
+### 30. View admin audit logs
+GET {{baseUrl}}/api/admin/audit-logs?page=0&size=20&sortBy=createdAt&sortDirection=DESC
+Authorization: Bearer {{adminToken}}
+
+### View audit logs for evidence target
+GET {{baseUrl}}/api/admin/audit-logs/target/EVIDENCE/{{evidenceId}}
+Authorization: Bearer {{adminToken}}
+
+### View flagged evidence
+GET {{baseUrl}}/api/admin/moderation/evidence/flagged
+Authorization: Bearer {{adminToken}}
+
+### View archived evidence
+GET {{baseUrl}}/api/admin/moderation/evidence/archived
+Authorization: Bearer {{adminToken}}
+
+### Create moderation note
+POST {{baseUrl}}/api/admin/moderation/evidence/{{evidenceId}}/note
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Manual review",
+  "details": "Evidence reviewed during MVP manual testing."
+}
+
+### 31. View moderation summary
+GET {{baseUrl}}/api/admin/moderation/summary
+Authorization: Bearer {{adminToken}}
+
+### Negative 1. Invalid login validation error
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": ""
+}
+
+### Negative 2. Missing token 401
+GET {{baseUrl}}/api/auth/me
+
+### Negative 3. Wrong role 403
+GET {{baseUrl}}/api/admin/audit-logs
+Authorization: Bearer {{athleteToken}}
+
+### Negative 4. Not found 404
+GET {{baseUrl}}/api/evidence/999999
+Authorization: Bearer {{adminToken}}
+
+### Negative 5. Invalid enum or invalid status transition 400
+POST {{baseUrl}}/api/evidence
+Authorization: Bearer {{athleteToken}}
+Content-Type: application/json
+
+{
+  "athleteProfileId": {{athleteProfileId}},
+  "title": "Invalid enum evidence",
+  "description": "Used to test malformed enum handling.",
+  "sport": "Football",
+  "position": "Forward",
+  "eventType": "League match",
+  "matchOrTraining": "SCRIMMAGE",
+  "eventDate": "2024-09-21",
+  "fileUrl": null,
+  "externalVideoLink": "https://video.example/evidence/invalid-enum"
+}
+
+### Negative 6. Page size above 50 validation error
+GET {{baseUrl}}/api/discovery/athletes?size=51
+Authorization: Bearer {{scoutToken}}
+
+### Negative 7. Athlete trying to verify evidence 403
+POST {{baseUrl}}/api/evidence/{{evidenceId}}/verify
+Authorization: Bearer {{athleteToken}}
+
+### Negative 8. Scout trying to view non-verified evidence
+### Create a fresh draft evidence as ATHLETE first, then copy its id here.
+GET {{baseUrl}}/api/evidence/{{evidenceId}}
+Authorization: Bearer {{scoutToken}}
+
+### Negative 9. Invalid notification status filter
+GET {{baseUrl}}/api/notifications?status=NEW
+Authorization: Bearer {{athleteToken}}
